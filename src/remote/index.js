@@ -4,11 +4,15 @@ import cron from "cron"
 // import pushBrands from "./pushBrands.js"
 // import pushGroups from "./pushGroups.js"
 // import pushImages from "./pushImages.js"
+import checkRecipts from "./checkRecipts.js"
+import printTickets from "./printTickets.js"
 let jobs = [
     // pushProducts,
     // pushBrands,
     // pushGroups,
-    // pushImages
+    // pushImages,
+    checkRecipts,
+    printTickets
 ]  
 
 let running = {}

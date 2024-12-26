@@ -31,6 +31,22 @@ function task (){
         db.run("CREATE table images (ItemCode TEXT, hash TEXT, lastUpdate INT DEFAULT -1)")
         db.run("CREATE table config (code INT,imageUpdate INT DEFAULT 0)")
         db.prepare("INSERT INTO config VALUES (?,?)").run(1,0).finalize()
+
+        //Facturas
+        db.run("CREATE table facturas (Code TEXT, Total INT DEFAULT 0, Date TEXT, Checked INT DEFAULT 0)");
+
+        //Configuracion
+        db.run("CREATE TABLE sysconfig (name TEXT, value INT DEFAULT 0)");
+        const sysconfig = db.prepare("INSERT INTO sysconfig VALUES (?, ?)");
+        sysconfig.run("CentsPerTicket", 5000);
+        sysconfig.finalize();
+
+        //Tickets
+        db.run("create table tickets (Number INTEGER PRIMARY KEY,FactCode TEXT, Date TEXT )")
+
+
+
+
     });
     
     db.close();
