@@ -11,7 +11,7 @@ async function task (){
         const day = date.getDate()
         const text = year+"-"+(month<10?"0":"")+month.toString()+"-"+(day<10?"0":"")+day.toString()
 
-        db.all(`select Code, Checked, Date from facturas where date = '${ text }'`, async (err,data)=>{
+        db.all(`select Code, Checked, Canceled, Date from facturas where date = '${ text }'`, async (err,data)=>{
             if (err){
                 console.log("Pisisng and shitting myself rn", err)
             
@@ -25,10 +25,10 @@ async function task (){
             const dbresult = await SAP_DB.query(sql)
             const items = dbresult.recordset
             console.log("items", items)
-            const admin = db.prepare("INSERT INTO facturas VALUES (?,?,?,?)")
+            const admin = db.prepare("INSERT INTO facturas VALUES (?,?,?,?,?)")
     
             for ( const item of items){
-                admin.run(item.Code, item.Items*100, text, 0)
+                admin.run(item.Code, item.Items*100, text, 0, 0)
             }
             admin.finalize()
         })
@@ -46,7 +46,7 @@ async function task (){
 async function time (){
     return "0/3 * * * * *"
 }
-const name = "push-brands"
+const name = "check-recipts"
 export default {
     task,
     time,

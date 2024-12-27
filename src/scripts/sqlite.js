@@ -33,7 +33,7 @@ function task (){
         db.prepare("INSERT INTO config VALUES (?,?)").run(1,0).finalize()
 
         //Facturas
-        db.run("CREATE table facturas (Code TEXT, Total INT DEFAULT 0, Date TEXT, Checked INT DEFAULT 0)");
+        db.run("CREATE table facturas (Code TEXT, Total INT DEFAULT 0, Date TEXT, Checked INT DEFAULT 0, Canceled INT DEFAULT 0)");
 
         //Configuracion
         db.run("CREATE TABLE sysconfig (name TEXT, value INT DEFAULT 0)");

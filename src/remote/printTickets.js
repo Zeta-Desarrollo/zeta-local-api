@@ -21,7 +21,6 @@ function generateTicket(ticket){
     doc.save(fileName)
     return fileName
 }
-
 async function task (){
     try{
         const db = new sqlite3.Database("sqlite.db")
@@ -43,6 +42,7 @@ async function task (){
                 const data = await sqlPromise(db, "get", `select Code, Total, Date, Checked from facturas where date = '${ text }' and Checked==0`)
                 console.log("data", data)
                 if (!data) return
+
                 //build tickets
                 const amount = Math.floor(data.Total / sysconfig.value)
                 const ticketSQL = db.prepare("insert into tickets (FactCode, Date) values (?,?)")
@@ -51,6 +51,7 @@ async function task (){
                     console.log("running", data, i)
                     ticketSQL.run(data.Code, text)
                 }
+
                 console.log("done")
                 await new Promise((resolve,reject)=>{
                     ticketSQL.finalize((err)=>{
@@ -103,7 +104,7 @@ async function task (){
 async function time (){
     return "0/3 * * * * *"
 }
-const name = "push-brands"
+const name = "print-tickets"
 export default {
     task,
     time,

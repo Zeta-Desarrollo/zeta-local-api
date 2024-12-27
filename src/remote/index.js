@@ -6,13 +6,15 @@ import cron from "cron"
 // import pushImages from "./pushImages.js"
 import checkRecipts from "./checkRecipts.js"
 import printTickets from "./printTickets.js"
+import cleanDocs from "./cleanDocs.js"
 let jobs = [
     // pushProducts,
     // pushBrands,
     // pushGroups,
     // pushImages,
-    checkRecipts,
-    printTickets
+    // checkRecipts,
+    // printTickets,
+    cleanDocs
 ]  
 
 let running = {}

@@ -4,6 +4,7 @@ import { callController, isAuth, checkRole, checkPermissions } from "../../utils
 
 const ticketsRouter = Router()
 
-ticketsRouter.get("/facturas", callController(controller.facturas))
-ticketsRouter.post("/facturas", callController(controller.procesar))
+ticketsRouter.post("/getFacturas", isAuth, callController(controller.getFacturas))
+ticketsRouter.post("/cancelFacturas", isAuth, callController(controller.cancelFacturas))
+ticketsRouter.post("/centsPerTicket", isAuth, callController(controller.centsPerTicket))
 export default ticketsRouter

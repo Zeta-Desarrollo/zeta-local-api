@@ -1,50 +1,77 @@
 
 
 import sqlite3 from "sqlite3"
+import { sqlPromise } from "../../utils/sqlite.js"
 const sqlite = new sqlite3.Database("sqlite.db")
 
-let facturasData=[]
-function generateFacturas(x){
-    const f = []
-    for (let i=0; i<x; i++){
-        f.push({
-            id:i,
-            monto:i*100,
-            fecha:new Date(),
-            processed:false
-        })
-    }
-    return f
-}
-
-facturasData = generateFacturas(50)
-
 const controller = {
-    facturas:async (body,params)=>{
+    centsPerTicket: async(body, params)=>{
         let error
+        let price
         try{
-        }catch(err){
-            error = err
+            const data = await sqlPromise(sqlite, "get", "select * from sysconfig where name='CentsPerTicket'")
+            price = data.value
+        }catch(e){
+            error = e
         }
         return {
             error,
-            facturas:facturasData
-        }  
+            price
+        }
     },
-    procesar:async (body,params)=>{
+    getFacturas:async (body,params)=>{
         let error
+        let facturas = []
         try{
-            for (const fact of facturasData){
-                if (fact.id==body.id){
-                    fact.processed = true
+            const data = await sqlPromise(sqlite,"all", "select * from facturas join tickets on facturas.Code = tickets.FactCode")
+            const parsed = {}
+            for (const ticket of data){
+                if(!parsed[ticket.Code]){
+                    parsed[ticket.Code]={
+                        Code:ticket.Code,
+                        Total:ticket.Total,
+                        Date:ticket.Date,
+                        Checked:ticket.Checked,
+                        Canceled:ticket.Canceled,
+                        tickets:[]
+                    }
                 }
+                parsed[ticket.Code].tickets.push(ticket.Number)
             }
+            console.log(parsed)
+            for (const key in parsed){
+                facturas.push(parsed[key])
+            }
+            facturas.filter((a,b)=>a-b)
+
         }catch(err){
             error = err
+            
         }
         return {
-            processed:true,
-            error
+            error,
+            facturas
+        }  
+    },
+    cancelFacturas: async(body,params)=>{
+        let error
+        let success=false
+        try{
+            console.log("body", body.targets)
+            let sql = ''
+            for (const code of body.targets){
+                sql+="'"+code+"',"
+            }
+            sql = sql.slice(0,-1)
+
+            await sqlPromise(sqlite, "run", `update facturas set Canceled=1 where Code in (${sql})`)
+            success = true
+        }catch(e){
+            error = e
+        }
+        return {
+            error,
+            success
         }
     }
 }
