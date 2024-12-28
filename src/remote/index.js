@@ -12,8 +12,8 @@ let jobs = [
     // pushBrands,
     // pushGroups,
     // pushImages,
-    // checkRecipts,
-    // printTickets,
+    checkRecipts,
+    printTickets,
     cleanDocs
 ]  
 
