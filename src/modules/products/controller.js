@@ -177,13 +177,13 @@ async function JSPDF (body, params){
 
 
                 const showPrice = formatter.format(
-                parseFloat(product.Price).toFixed(2)
+                parseFloat(product.Price)
                 );
                 const showIVA = formatter.format(
-                (parseFloat(product.Price) * 0.16).toFixed(2)
+                (parseFloat(product.Price) * 0.16)
                 );
                 const showPMVP = formatter.format(
-                (parseFloat(product.Price) * 1.16).toFixed(2)
+                (parseFloat(product.Price) * 1.16)
                 );
                 
                 doc.text(showPrice, rightEdge,4, "right")

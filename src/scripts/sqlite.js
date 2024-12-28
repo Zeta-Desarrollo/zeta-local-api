@@ -47,6 +47,7 @@ function task (){
             TasaUSD REAL,
 
             Date TEXT, 
+            Hour TEXT,
 
             Started INT Default 0,
             Checked INT DEFAULT 0,
@@ -54,9 +55,10 @@ function task (){
         )`);
         
         //Configuracion
-        db.run("CREATE TABLE sysconfig (name TEXT, value INT DEFAULT 0)");
+        db.run("CREATE TABLE sysconfig (name TEXT, value TEXT)");
         const sysconfig = db.prepare("INSERT INTO sysconfig VALUES (?, ?)");
-        sysconfig.run("CentsPerTicket", 5000);
+        sysconfig.run("CentsPerTicket", "5000");
+        sysconfig.run("BottomMessage", "");
         sysconfig.finalize();
 
         //Tickets
