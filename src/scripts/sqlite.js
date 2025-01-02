@@ -26,7 +26,7 @@ function task (){
         perms.run(3,1)
         perms.finalize()
 
-        // //IMAGENES
+        //IMAGENES
 
         db.run("CREATE table images (ItemCode TEXT, hash TEXT, lastUpdate INT DEFAULT -1)")
         db.run("CREATE table config (code INT,imageUpdate INT DEFAULT 0)")

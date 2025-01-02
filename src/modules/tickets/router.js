@@ -6,5 +6,7 @@ const ticketsRouter = Router()
 
 ticketsRouter.post("/getFacturas", isAuth, callController(controller.getFacturas))
 ticketsRouter.post("/cancelFacturas", isAuth, callController(controller.cancelFacturas))
-ticketsRouter.post("/centsPerTicket", isAuth, callController(controller.centsPerTicket))
+ticketsRouter.post("/ticketsConfig", isAuth, callController(controller.ticketsConfig))
+ticketsRouter.post("/updateConfig", isAuth, callController(controller.updateConfig))
+
 export default ticketsRouter

@@ -5,30 +5,49 @@ import { sqlPromise } from "../../utils/sqlite.js"
 const sqlite = new sqlite3.Database("sqlite.db")
 
 const controller = {
-    centsPerTicket: async(body, params)=>{
+    ticketsConfig: async(body, params)=>{
         let error
-        let price
+        let sysconfig = {}
         try{
-            const data = await sqlPromise(sqlite, "get", "select * from sysconfig where name='CentsPerTicket'")
-            price = data.value
+            const data = await sqlPromise(sqlite, "all", "select * from sysconfig where name in ('CentsPerTicket', 'BottomMessage')")
+            // console.log("data",data)
+            for (const config of data){
+                sysconfig[config.name] = config.value
+            }
         }catch(e){
             error = e
         }
         return {
             error,
-            price
+            sysconfig
+        }
+    },
+    updateConfig:async(body, params)=>{
+        let error
+        let price
+        try{
+            console.log("body", body)
+            for (const sysconfig in body.values){
+                await sqlPromise(sqlite, "run", "update sysconfig set value='"+body.values[sysconfig]+"' where name='"+sysconfig+"'")
+            }
+        }catch(e){
+            error = e
+        }
+        return {
+            error,
+            
         }
     },
     getFacturas:async (body,params)=>{
         let error
         let facturas = []
         try{
-            const data = await sqlPromise(sqlite,"all", "select * from facturas join tickets on facturas.Code = tickets.FactCode")
+            const data = await sqlPromise(sqlite,"all", "select * from facturas join tickets on facturas.FullCode = tickets.FactCode")
             const parsed = {}
             for (const ticket of data){
-                if(!parsed[ticket.Code]){
-                    parsed[ticket.Code]={
-                        Code:ticket.Code,
+                if(!parsed[ticket.FullCode]){
+                    parsed[ticket.FullCode]={
+                        FullCode:ticket.FullCode,
                         Total:ticket.Total,
                         Date:ticket.Date,
                         Checked:ticket.Checked,
@@ -36,9 +55,8 @@ const controller = {
                         tickets:[]
                     }
                 }
-                parsed[ticket.Code].tickets.push(ticket.Number)
+                parsed[ticket.FullCode].tickets.push(ticket.Number)
             }
-            console.log(parsed)
             for (const key in parsed){
                 facturas.push(parsed[key])
             }
@@ -57,7 +75,7 @@ const controller = {
         let error
         let success=false
         try{
-            console.log("body", body.targets)
+            // console.log("body", body.targets)
             let sql = ''
             for (const code of body.targets){
                 sql+="'"+code+"',"
