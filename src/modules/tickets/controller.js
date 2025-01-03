@@ -42,7 +42,7 @@ const controller = {
         let error
         let facturas = []
         try{
-            const data = await sqlPromise(sqlite,"all", "select * from facturas join tickets on facturas.FullCode = tickets.FactCode")
+            facturas = await sqlPromise(sqlite,"all", "select * from facturas join tickets on facturas.FullCode = tickets.FactCode")
             const parsed = {}
             for (const ticket of data){
                 if(!parsed[ticket.FullCode]){

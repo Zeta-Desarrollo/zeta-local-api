@@ -62,7 +62,7 @@ function task (){
         sysconfig.finalize();
 
         //Tickets
-        db.run("create table tickets (Number INTEGER PRIMARY KEY,FactCode TEXT, Date TEXT )")
+        db.run("create table tickets (Number INTEGER PRIMARY KEY,FactCode TEXT, Date TEXT, CanceledTicket INT DEFAULT 0, Comment TEXT)")
 
 
 
