@@ -42,25 +42,15 @@ const controller = {
         let error
         let facturas = []
         try{
-            facturas = await sqlPromise(sqlite,"all", "select * from facturas join tickets on facturas.FullCode = tickets.FactCode")
-            const parsed = {}
-            for (const ticket of data){
-                if(!parsed[ticket.FullCode]){
-                    parsed[ticket.FullCode]={
-                        FullCode:ticket.FullCode,
-                        Total:ticket.Total,
-                        Date:ticket.Date,
-                        Checked:ticket.Checked,
-                        Canceled:ticket.Canceled,
-                        tickets:[]
-                    }
-                }
-                parsed[ticket.FullCode].tickets.push(ticket.Number)
+            const registers = await sqlPromise(sqlite,"all", "select * from facturas join tickets on facturas.FullCode = tickets.FactCode order by Number asc")
+            for (const data of registers){
+                facturas.push({
+                    ...data, 
+                    displayNumber:"0".repeat(6-data.Number.toString().length)+data.Number,
+                    displayDate:data.Date+" "+data.Hour,
+                })
             }
-            for (const key in parsed){
-                facturas.push(parsed[key])
-            }
-            facturas.filter((a,b)=>a-b)
+            
 
         }catch(err){
             error = err
@@ -81,8 +71,17 @@ const controller = {
                 sql+="'"+code+"',"
             }
             sql = sql.slice(0,-1)
-
-            await sqlPromise(sqlite, "run", `update facturas set Canceled=1 where Code in (${sql})`)
+            await new Promise((resolve,reject)=>{
+                sqlite.serialize(()=>{
+                    try{
+                        sqlite.run("update tickets set CanceledTicket=?, Comment=? where Number in ("+sql+")",1,body.comment)            
+                        resolve()
+                    }catch(error){
+                        reject(error)
+                    }
+                })
+            })
+            // await sqlPromise(sqlite, "run", `update facturas set Canceled=1, comment=? where Code in (${sql})`)
             success = true
         }catch(e){
             error = e
