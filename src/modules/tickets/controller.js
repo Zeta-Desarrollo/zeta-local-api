@@ -41,14 +41,56 @@ const controller = {
     getFacturas:async (body,params)=>{
         let error
         let facturas = []
+        let tickets = {}
         try{
             const registers = await sqlPromise(sqlite,"all", "select * from facturas join tickets on facturas.FullCode = tickets.FactCode order by Number asc")
+            let facts = {}
+
             for (const data of registers){
-                facturas.push({
-                    ...data, 
-                    displayNumber:"0".repeat(6-data.Number.toString().length)+data.Number,
-                    displayDate:data.Date+" "+data.Hour,
-                })
+                if (!facts[data.FullCode]){
+                    facts[data.FullCode] = {
+                        FullCode:data.FullCode,
+                        NumFactura:data.NumFactura,
+                        NumTicketFiscal:data.NumTicketFiscal,
+                        CodCliente:data.CodCliente,
+                        NomCliente:data.NomCliente,
+                        DireccionCliente:data.DireccionCliente,
+                        Telefono:data.Telefono,
+                        Total:data.Total,
+                        TasaUSD:data.TasaUSD,
+                        Date:data.Date, 
+                        Hour:data.Hour,
+                        Started:data.Started,
+                        Checked:data.Checked,
+                        Canceled:data.Canceled,
+
+                        displayDate:data.Date+" "+data.Hour,
+                        Tickets: []
+                    }
+                }
+                if (!tickets[data.FullCode]){
+                    tickets[data.FullCode] = []
+                }
+
+
+                if (data.FactCode){
+                    const displayNumber = "0".repeat(6-data.Number.toString().length)+data.Number
+                    facts[data.FullCode].Tickets.push( displayNumber )
+
+                    tickets[data.FullCode].push({
+                        CancelledTicket:data.CancelledTicket,
+                        Comment:data.Comment, 
+                        displayNumber,
+                        Number:data.number
+                    })
+                }
+            }
+
+            for(const data of registers){
+                if(!facts[data.FullCode].processed){
+                    facturas.push({...facts[data.FullCode], Tickets:facts[data.FullCode].Tickets.length})
+                    facts[data.FullCode].processed = true
+                }
             }
             
 
@@ -58,7 +100,8 @@ const controller = {
         }
         return {
             error,
-            facturas
+            facturas,
+            tickets
         }  
     },
     cancelFacturas: async(body,params)=>{
@@ -70,6 +113,7 @@ const controller = {
             for (const code of body.targets){
                 sql+="'"+code+"',"
             }
+            console.log("XXD", sql)
             sql = sql.slice(0,-1)
             await new Promise((resolve,reject)=>{
                 sqlite.serialize(()=>{
