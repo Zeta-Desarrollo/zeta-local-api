@@ -29,7 +29,7 @@ async function task (){
             const dbresult = await KLK_DB.query(sql)
             const items = dbresult.recordset
             console.log("items", items.length)
-            const admin = db.prepare("INSERT INTO facturas VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+            const admin = db.prepare("INSERT INTO facturas VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
             for ( const item of items){
                 const hoursToAdd = 4 * 60 * 60 * 1000;
                 item.FechaCreacion.setTime(item.FechaCreacion.getTime() + hoursToAdd);

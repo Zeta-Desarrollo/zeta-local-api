@@ -65,7 +65,8 @@ const controller = {
                         Canceled:data.Canceled,
 
                         displayDate:data.Date+" "+data.Hour,
-                        Tickets: []
+                        Tickets: [],
+                        CanceledTickets:0
                     }
                 }
                 if (!tickets[data.FullCode]){
@@ -73,17 +74,19 @@ const controller = {
                 }
 
 
-                if (data.FactCode){
                     const displayNumber = "0".repeat(6-data.Number.toString().length)+data.Number
                     facts[data.FullCode].Tickets.push( displayNumber )
 
+                    if(data.CanceledTicket){
+                        facts[data.FullCode].CanceledTickets+=1
+                    }
+
                     tickets[data.FullCode].push({
-                        CancelledTicket:data.CancelledTicket,
+                        CanceledTicket:data.CanceledTicket,
                         Comment:data.Comment, 
                         displayNumber,
-                        Number:data.number
+                        Number:data.Number
                     })
-                }
             }
 
             for(const data of registers){
@@ -109,16 +112,23 @@ const controller = {
         let success=false
         try{
             // console.log("body", body.targets)
-            let sql = ''
-            for (const code of body.targets){
-                sql+="'"+code+"',"
+            let facturas = ''
+            for (const code of body.facturas){
+                facturas+="'"+code+"',"
             }
-            console.log("XXD", sql)
-            sql = sql.slice(0,-1)
+            facturas = facturas.slice(0,-1)
+
+            let tickets = ''
+            for (const code of body.tickets){
+                tickets+="'"+code+"',"
+            }
+            tickets = tickets.slice(0,-1)
             await new Promise((resolve,reject)=>{
                 sqlite.serialize(()=>{
                     try{
-                        sqlite.run("update tickets set CanceledTicket=?, Comment=? where Number in ("+sql+")",1,body.comment)            
+                        sqlite.run("update facturas set Canceled=?, FactComment=? where FullCode in ("+facturas+")",1,body.comment)    
+
+                        sqlite.run("update tickets set CanceledTicket=?, Comment=? where Number in ("+tickets+") or FactCode in ("+facturas+")",1,body.comment)            
                         resolve()
                     }catch(error){
                         reject(error)

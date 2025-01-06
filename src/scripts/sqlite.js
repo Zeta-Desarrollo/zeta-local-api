@@ -51,7 +51,8 @@ function task (){
 
             Started INT Default 0,
             Checked INT DEFAULT 0,
-            Canceled INT DEFAULT 0
+            Canceled INT DEFAULT 0,
+            FactComment TEXT
         )`);
         
         //Configuracion
