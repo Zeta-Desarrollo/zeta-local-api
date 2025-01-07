@@ -146,6 +146,16 @@ async function task (){
 
             db.serialize(async () => {
                 try{
+
+
+                    const jobActive = await sqlPromise(db, "get", "select * from sysconfig where name ='TicketsActive'")
+
+                    if (jobActive.value=='false'){
+                        resolve()
+                        return
+                    }
+    
+
                 const sysconfig = await sqlPromise(db, "get", "select * from sysconfig where name ='CentsPerTicket'")
                 const bottomMessage = await sqlPromise(db, "get", "select * from sysconfig where name ='BottomMessage'")
                 

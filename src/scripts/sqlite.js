@@ -60,6 +60,7 @@ function task (){
         const sysconfig = db.prepare("INSERT INTO sysconfig VALUES (?, ?)");
         sysconfig.run("CentsPerTicket", "5000");
         sysconfig.run("BottomMessage", "");
+        sysconfig.run("TicketsActive", "false");
         sysconfig.finalize();
 
         //Tickets

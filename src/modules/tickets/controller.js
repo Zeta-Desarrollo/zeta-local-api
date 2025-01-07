@@ -9,7 +9,7 @@ const controller = {
         let error
         let sysconfig = {}
         try{
-            const data = await sqlPromise(sqlite, "all", "select * from sysconfig where name in ('CentsPerTicket', 'BottomMessage')")
+            const data = await sqlPromise(sqlite, "all", "select * from sysconfig where name in ('CentsPerTicket', 'BottomMessage', 'TicketsActive')")
             // console.log("data",data)
             for (const config of data){
                 sysconfig[config.name] = config.value
@@ -63,9 +63,11 @@ const controller = {
                         Started:data.Started,
                         Checked:data.Checked,
                         Canceled:data.Canceled,
+                        FactComment:data.FactComment,
 
                         displayDate:data.Date+" "+data.Hour,
                         Tickets: [],
+                        displayTickets: "",
                         CanceledTickets:0
                     }
                 }
@@ -76,6 +78,13 @@ const controller = {
 
                     const displayNumber = "0".repeat(6-data.Number.toString().length)+data.Number
                     facts[data.FullCode].Tickets.push( displayNumber )
+                    let list = facts[data.FullCode].Tickets
+                    if (list.length==1){
+                        facts[data.FullCode].displayTickets =  list[0]
+                    }else{
+                        facts[data.FullCode].displayTickets =  list[0] +" - "+ list[ list.length-1]
+
+                    }
 
                     if(data.CanceledTicket){
                         facts[data.FullCode].CanceledTickets+=1
@@ -91,7 +100,10 @@ const controller = {
 
             for(const data of registers){
                 if(!facts[data.FullCode].processed){
-                    facturas.push({...facts[data.FullCode], Tickets:facts[data.FullCode].Tickets.length})
+                    facturas.push({
+                        ...facts[data.FullCode], 
+                        // Tickets:facts[data.FullCode].Tickets.length
+                    })
                     facts[data.FullCode].processed = true
                 }
             }
