@@ -10,6 +10,9 @@ function task (){
         stmt.run("imprimir-etiquetas");
         stmt.run("visor-de-precios");
         stmt.run("cambiar-listado-precios");
+        stmt.run("editar-sorteo");
+        stmt.run("manipular-tickets");
+        
         stmt.finalize();
 
         db.run("CREATE TABLE users (name TEXT, password TEXT, role TEXT, lastlogin DATE)")
@@ -24,6 +27,8 @@ function task (){
         perms.run(1,1)
         perms.run(2,1)
         perms.run(3,1)
+        perms.run(4,1)
+        perms.run(5,1)
         perms.finalize()
 
         //IMAGENES

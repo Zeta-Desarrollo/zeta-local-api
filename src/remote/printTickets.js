@@ -201,12 +201,12 @@ async function task (){
                     const pdfName = "Tickets - "+ data.FullCode
                     await merger.save(`./docs/${pdfName}.pdf`)
                     console.log("merge")
-                    // await new Promise((resolve, reject)=>{
-                    //     ptp.print("./docs/"+pdfName+".pdf", {
-                    //         printer:"POS-80C",
-                    //         scale:"fit"                
-                    //     }).then(resolve).catch(reject);
-                    // })
+                    await new Promise((resolve, reject)=>{
+                        ptp.print("./docs/"+pdfName+".pdf", {
+                            printer:"POS-80C",
+                            scale:"fit"                
+                        }).then(resolve).catch(reject);
+                    })
                     console.log("printed")
                 }
  
