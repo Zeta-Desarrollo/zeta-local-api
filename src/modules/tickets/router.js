@@ -11,5 +11,6 @@ ticketsRouter.post("/getFacturas",  devFunction, isAuth, checkPermissions(["mani
 ticketsRouter.post("/cancelFacturas",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.cancelFacturas))
 ticketsRouter.post("/ticketsConfig",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.ticketsConfig))
 ticketsRouter.post("/updateConfig",  devFunction, isAuth, checkPermissions(["manipular-tickets", "editar-sorteo"]), callController(controller.updateConfig))
+ticketsRouter.post("/manualPrint",  devFunction, isAuth, checkPermissions(["manipular-tickets", "editar-sorteo"]), callController(controller.manualPrint))
 
 export default ticketsRouter

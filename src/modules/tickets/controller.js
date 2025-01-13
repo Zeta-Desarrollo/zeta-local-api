@@ -1,6 +1,8 @@
 
 
 import sqlite3 from "sqlite3"
+import ptp from "pdf-to-printer";
+
 import { sqlPromise } from "../../utils/sqlite.js"
 const sqlite = new sqlite3.Database("sqlite.db")
 
@@ -155,6 +157,37 @@ const controller = {
         return {
             error,
             success
+        }
+    },
+    manualPrint: async(body, params)=>{
+        let error
+        try{
+            console.log("manual", body)
+            const pdfName = "Tickets - "+ body.FullCode
+            await new Promise((resolve,reject)=>{
+                sqlite.serialize(async ()=>{
+                    try{
+                        await new Promise((resolve, reject)=>{
+                            ptp.print("./docs/"+pdfName+".pdf", {
+                                printer:"POS-80C",
+                                scale:"fit"                
+                            }).then(resolve).catch(reject);
+                        })
+                        await sqlPromise(sqlite, "run", `update facturas set Checked=1 where FullCode='${body.FullCode}'`)
+                        resolve()
+                    }catch(e){
+                        console.log("inside",e)
+                        reject(e)
+                    }
+                }) 
+            })
+
+        }catch(e){
+            console.log("out of ",e)
+            error = e
+        }
+        return {
+            error
         }
     }
 }

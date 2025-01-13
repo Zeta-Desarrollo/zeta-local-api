@@ -205,7 +205,10 @@ async function task (){
                         ptp.print("./docs/"+pdfName+".pdf", {
                             printer:"POS-80C",
                             scale:"fit"                
-                        }).then(resolve).catch(reject);
+                        }).then(resolve).catch((err)=>{
+                            console.log("Error printing", err)
+                            reject(err)
+                        });
                     })
                     console.log("printed")
                 }

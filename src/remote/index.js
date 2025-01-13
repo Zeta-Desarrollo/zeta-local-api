@@ -24,10 +24,10 @@ const initJobs = async () => {
             await job.time(),
             job.task,
             null,
-            true,
+            true, //start 
             undefined,
             undefined,
-            true ,// config.isActive ? true : false
+            false ,// config.isActive ? true : false
         )
 
         // if (config.isActive) {
