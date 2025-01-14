@@ -170,7 +170,7 @@ const controller = {
                         await new Promise((resolve, reject)=>{
                             ptp.print("./docs/"+pdfName+".pdf", {
                                 printer:"POS-80C",
-                                scale:"fit"                
+                                scale:"shrink"                
                             }).then(resolve).catch(reject);
                         })
                         await sqlPromise(sqlite, "run", `update facturas set Checked=1 where FullCode='${body.FullCode}'`)

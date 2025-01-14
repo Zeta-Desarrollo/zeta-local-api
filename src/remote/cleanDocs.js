@@ -1,4 +1,6 @@
 import fs from "fs"
+import { jsPDF } from "jspdf";
+
 async function task (){
     try{
         const today = new Date()
@@ -14,13 +16,20 @@ async function task (){
             }
         }
         console.log("done cleaning docs")
-
+        // const doc = new jsPDF({
+        //     // orientation: "landscape",
+        //     unit: "cm",
+        //     format: [7.2, 16],
+            
+        // });
+        // console.log(doc.getFontList())
     }catch(error){
         console.log("failed:", error)
     }
 }
 async function time (){
     return "0 0 6 * * *"
+    // return "0/6 * * * * *"
 }
 const name = "clean-docs"
 export default {

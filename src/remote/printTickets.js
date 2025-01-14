@@ -24,50 +24,54 @@ function generateTicket(bottomMessage, factura, ticket, amount, subNumber){
     const leftSpace = 0
     let text = ""
 
-    doc.setFont("Helvetica", "bold")
+    const FONT = "courier"
+    const NORMAL = "normal"
+    const SIZE = 11
+
+    doc.setFont(FONT, "bold")
     
     //Cabecera
-    doc.setFontSize(12)
-    text = "ZETA C.A."
+    doc.setFontSize(SIZE+2)
+    text = "ZETA, CA."
     doc.text(text, leftSpace+0, 0.5, 0, "left")
 
-    doc.setFontSize(10)
+    doc.setFontSize(SIZE)
 
-    doc.setFont("Helvetica", "")
-    text = "RIF : J-00000000-0"
+    doc.setFont(FONT, NORMAL)
+    text = "RIF : J-50068491-6"
     doc.text(text, leftSpace+0,1,0, "left")
     
-    doc.setFont("Helvetica", "bold")
-    doc.setFontSize(18)
+    doc.setFont(FONT, "bold")
+    doc.setFontSize(SIZE+8)
     text="#"+"0".repeat(6-(ticket.Number.toString().length))+ticket.Number
     doc.text(text, 7.1, 0.5,0, "right")
     
-    doc.setFont("Helvetica", "")
-    doc.setFontSize(10)
+    doc.setFont(FONT, NORMAL)
+    doc.setFontSize(SIZE)
     doc.text(factura.Date,7.1, 1.0,0, "right")
     doc.text(factura.Hour, 7.1, 1.5,0, "right")
 
     //Cliente
     const clienteY = 0.8
 
-    doc.setFontSize(8)
+    doc.setFontSize(SIZE-2)
     text="Nombre"
     doc.text(text, leftSpace*2, clienteY+1,   0, "left")
-    doc.setFontSize(10)
+    doc.setFontSize(SIZE)
     text=factura.NomCliente
     doc.text(text, leftSpace*2, clienteY+1.4,   0, "left")
 
-    doc.setFontSize(8)
+    doc.setFontSize(SIZE-2)
     text="Cedula"
     doc.text(text, leftSpace*2, clienteY+1.9,   0, "left")
-    doc.setFontSize(10)
+    doc.setFontSize(SIZE)
     text=factura.CodCliente
     doc.text(text, leftSpace*2, clienteY+2.3,   0, "left")
 
-    doc.setFontSize(8)
+    doc.setFontSize(SIZE-2)
     text="Teléfono"
     doc.text(text, 4, clienteY+1.9,   0, "left")
-    doc.setFontSize(10)
+    doc.setFontSize(SIZE)
     text=factura.Telefono
     doc.text(text, 4, clienteY+2.3,   0, "left")
 
@@ -77,36 +81,36 @@ function generateTicket(bottomMessage, factura, ticket, amount, subNumber){
     text =("_".repeat(60))
     doc.text(text, leftSpace, compraY-0.5, 0, "left")
 
-    doc.setFontSize(8)
+    doc.setFontSize(SIZE-2)
     text="Correlativo #"
     doc.text(text, leftSpace*2, compraY,   0, "left")
-    doc.setFontSize(10)
+    doc.setFontSize(SIZE)
     text= factura.NumFactura
     doc.text(text, leftSpace*2, compraY+0.4,   0, "left")
 
-    doc.setFontSize(8)
+    doc.setFontSize(SIZE-2)
     text="Factura:"
     doc.text(text, 4, compraY,   0, "left")
 
     const set = factura.NumTicketFiscal.slice(0,3) == "NE-"
     text = set? factura.NumTicketFiscal.slice(3, factura.NumTicketFiscal.length) : factura.NumTicketFiscal
-    doc.setFontSize(10)
+    doc.setFontSize(SIZE)
     text=(set ? "B-":"A-")+text
     doc.text(text, 4, compraY+0.4,   0, "left")
 
-    doc.setFontSize(8)
+    doc.setFontSize(SIZE-2)
     text="Monto REF:"
     doc.text(text, leftSpace*2, compraY+0.9,   0, "left")
 
     const total = factura.Total / factura.TasaUSD
     text = formatter.format(total)
-    doc.setFontSize(10)
+    doc.setFontSize(SIZE)
     doc.text(text, leftSpace*2, compraY+1.3,   0, "left")
 
-    doc.setFontSize(8)
+    doc.setFontSize(SIZE-2)
     text="Ticket:"
     doc.text(text, 4, compraY+0.9,   0, "left")
-    doc.setFontSize(10)
+    doc.setFontSize(SIZE)
 
     let number = "0".repeat(3-subNumber.toString().length)+subNumber.toString()
     let of = "0".repeat(3-amount.toString().length)+amount.toString()
@@ -116,19 +120,15 @@ function generateTicket(bottomMessage, factura, ticket, amount, subNumber){
 
     const bottomY = 5.8
     //Bottom
-    doc.setFontSize(12)
-    doc.setFont("Helvetica", "bold")
+    doc.setFontSize(SIZE+2)
+    doc.setFont(FONT, "bold")
     text =("_".repeat(60))
     doc.text(text, leftSpace, bottomY, 0, "left")
-    doc.setFont("Helvetica", "")
+    doc.setFont(FONT, NORMAL)
 
-    doc.setFontSize(8)
-    text = doc.splitTextToSize(bottomMessage,4.5)
-    doc.text(text, 2.25, bottomY+0.5, 0, "center")
-    doc.setFontSize(12)
-    doc.text("_________", 5.85, bottomY+1.5, 0, "center")
-    doc.setFontSize(9)
-    doc.text("FIRMA", 5.85, bottomY+2, 0, "center")
+    doc.setFontSize(SIZE-2)
+    text = doc.splitTextToSize(bottomMessage,7.2)
+    doc.text(text, 3.6, bottomY+0.5, 0, "center")
 
 
     const fileName = "./docs/ticket-"+ticket.Number.toString()+".pdf"
@@ -163,27 +163,26 @@ async function task (){
                 const year = date.getFullYear()
                 const month = date.getMonth()+1
                 const day = date.getDate()
-                const text = year+"-"+(month<10?"0":"")+month.toString()+"-"+(day<10?"0":"")+day.toString()
+                const text = (day<10?"0":"")+day.toString()+"-"+(month<10?"0":"")+month.toString()+"-"+ year
                 const data = await sqlPromise(db, "get", `select * from facturas where Date = '${ text }' and Checked==0 and Started==0`)
                 if (!data) return
                 await sqlPromise(db, "run", `update facturas set Started=1 where FullCode='${data.FullCode}'`)
-
+                
 
                 //build tickets
                 const amount = Math.floor(data.Total/ data.TasaUSD / (sysconfig.value/100))
                 const ticketSQL = db.prepare("insert into tickets (FactCode, Date) values (?,?)")
-                console.log("data", data.Total, data.TasaUSD, sysconfig.value/100, amount)
                 for (let i=0; i<amount; i++){
                     // console.log("running", data, i)
                     ticketSQL.run(data.FullCode, text)
                 }
 
-                console.log("done")
                 await new Promise((resolve,reject)=>{
                     ticketSQL.finalize((err)=>{
                         if (err){
                             reject(err)
                         }else{
+
                             resolve()
                         }
                     })
@@ -200,22 +199,20 @@ async function task (){
                     }
                     const pdfName = "Tickets - "+ data.FullCode
                     await merger.save(`./docs/${pdfName}.pdf`)
-                    console.log("merge")
-                    await new Promise((resolve, reject)=>{
-                        ptp.print("./docs/"+pdfName+".pdf", {
-                            printer:"POS-80C",
-                            scale:"fit"                
-                        }).then(resolve).catch((err)=>{
-                            console.log("Error printing", err)
-                            reject(err)
-                        });
-                    })
-                    console.log("printed")
+                    // await new Promise((resolve, reject)=>{
+                    //     ptp.print("./docs/"+pdfName+".pdf", {
+                    //         printer:"POS-80C",
+                    //         scale:"fit"                
+                    //     }).then(resolve).catch((err)=>{
+                    //         console.log("Error printing", err)
+                    //         reject(err)
+                    //     });
+                    // })
+                    console.log("printed", pdfName)
                 }
  
                 //mark as procesed
                 await sqlPromise(db, "run", `update facturas set Checked=1 where FullCode='${data.FullCode}'`)
-                console.log("updated")
                 delete global.window;
                 delete global.navigator;
                 delete global.btoa;

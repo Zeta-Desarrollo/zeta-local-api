@@ -27,7 +27,8 @@ async function task (){
                 const year = date.getFullYear()
                 const month = date.getMonth()+1
                 const day = date.getDate()
-                const text = year+"-"+(month<10?"0":"")+month.toString()+"-"+(day<10?"0":"")+day.toString()
+                const text = (day<10?"0":"")+day.toString()+"-"+(month<10?"0":"")+month.toString()+"-"+ year
+                const klktext = year+"-"+(month<10?"0":"")+month.toString()+"-"+(day<10?"0":"")+day.toString()
                 db.all(`select * from facturas where date = '${ text }'`, async (err,data)=>{
                     if (err){
                         console.log("query error", err)
@@ -38,7 +39,7 @@ async function task (){
                         exclude+="'"+d.FullCode+"',"
                     }
                     exclude = exclude.slice(0,-1)
-                    const sql = `select top 10 * from KLK_FACTURAHDR where orden=1 and procesado=1 and FechaCreacion>='${text}' ${exclude.length>0?'and NumFactura+NumTicketFiscal not in ('+exclude+')':''}`
+                    const sql = `select top 10 * from KLK_FACTURAHDR where orden=1 and procesado=1 and FechaCreacion>='${klktext}' ${exclude.length>0?'and NumFactura+NumTicketFiscal not in ('+exclude+')':''}`
                     const dbresult = await KLK_DB.query(sql)
                     const items = dbresult.recordset
                     console.log("items", items.length)
@@ -55,7 +56,7 @@ async function task (){
                         const ampm = hour24>12? "pm":"am"
                         const minute = item.Hora.getMinutes()
                         const seconds = item.Hora.getSeconds()
-                        const FECHA = year1+"-"+(month1<10?"0":"")+month1.toString()+"-"+(day1<10?"0":"")+day1.toString()
+                        const FECHA = (day1<10?"0":"")+day1.toString()+"-"+(month1<10?"0":"")+month1.toString()+"-"+year1
                         const HORA = (hour<10?"0":"")+hour.toString()+":"+(minute<10?"0":"")+minute.toString()+":"+(seconds<10?"0":"")+seconds.toString()+" "+ampm
                         admin.run(
                             item.NumFactura+item.NumTicketFiscal,
