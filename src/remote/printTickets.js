@@ -32,7 +32,7 @@ function generateTicket(bottomMessage, factura, ticket, amount, subNumber){
     
     //Cabecera
     doc.setFontSize(SIZE+2)
-    text = "ZETA, CA."
+    text = "ZETA, C.A."
     doc.text(text, leftSpace+0, 0.5, 0, "left")
 
     doc.setFontSize(SIZE)
