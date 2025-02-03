@@ -1,12 +1,20 @@
-import {callListener} from "./rabbitmq.js"
 import { ALL_PRODUCTS } from "../modules/products/queries.js"
 import { SAP_DB } from "../utils/mssql.js"
 import uniqid from "uniqid"
+import { apolloClient, JOB_UPDATE_PRODUCTS, JOB_UPDATE_PRODUCTS_STARTS, LOGIN, data } from "../apollo.js"
 async function task (){
     try{
         const dbresult = await SAP_DB.query(ALL_PRODUCTS())
         const products = dbresult.recordset
-
+        
+        const mutation = await apolloClient.mutate({
+            mutation:LOGIN,
+            variables:{
+                email:process.env.GRAPHQL_USER,
+                password:process.env.GRAPHQL_PASS,
+            }
+        })
+        data.token = mutation.data.login.token
 
 
         const chunks = []   
@@ -16,16 +24,24 @@ async function task (){
         console.log(`Sending in ${chunks.length} chunks`)
         const id = uniqid()
         console.log("id",id)
-        const createUpdate = await callListener("jobUpdateProductsStart", {
-            id,
-            chunks:chunks.length
+
+        await apolloClient.mutate({
+            mutation:JOB_UPDATE_PRODUCTS_STARTS,
+            variables:{
+                id,
+                chunks:chunks.length
+            }
         })
-        console.log("create", createUpdate)
         for(let i =0; i<chunks.length; i++){
-            const result = await callListener("jobUpdateProducts", {
-                updateId:id,
-                chunk:i,
-                products:chunks[i]
+            const result = await apolloClient.mutate({
+                mutation:JOB_UPDATE_PRODUCTS,
+                variables:{
+                    updateId:id,
+                    chunk:i,
+                    products:chunks[i]
+                }
+            }).catch((err)=>{
+                console.log("excuse moi", JSON.stringify(err, null, 2))
             })
 
             console.log("chunk"+i+"resulted in", result)
@@ -36,7 +52,7 @@ async function task (){
     }
 }
 async function time (){
-    return "* * 5 * * *"
+    return "0 0 0/4 * * *"
 }
 const name = "push-products"
 export default {

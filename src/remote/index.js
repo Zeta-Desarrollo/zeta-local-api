@@ -1,16 +1,16 @@
 import cron from "cron"
 
-// import pushProducts from "./pushProducts.js"
-// import pushBrands from "./pushBrands.js"
-// import pushGroups from "./pushGroups.js"
+import pushProducts from "./pushProducts.js"
+import pushBrands from "./pushBrands.js"
+import pushGroups from "./pushGroups.js"
 // import pushImages from "./pushImages.js"
 import checkRecipts from "./checkRecipts.js"
 import printTickets from "./printTickets.js"
 import cleanDocs from "./cleanDocs.js"
 let jobs = [
-    // pushProducts,
-    // pushBrands,
-    // pushGroups,
+    pushProducts,
+    pushBrands,
+    pushGroups,
     // pushImages,
     checkRecipts,
     printTickets,

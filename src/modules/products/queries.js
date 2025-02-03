@@ -143,7 +143,7 @@ export const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=fa
 export const MARCAS = function(){
     const query = `
     select
-        FirmCode,
+        CAST(FirmCode as varchar) as FirmCode,
         FirmName
     from OMRC 
     order by FirmName asc`
@@ -154,11 +154,11 @@ export const ALL_PRODUCTS = function(){
     const query = `
         select 
             OITM.ItemCode,
-            OITM.ItmsGrpCod,
+            CAST(OITM.ItmsGrpCod as varchar) as ItmsGrpCod,
             ItemName,
             onHand,
             Price,
-            FirmCode,
+            CAST(FirmCode as varchar) as FirmCode,
             frozenFor,
             OITM.TaxCodeAR
         from 
@@ -176,7 +176,10 @@ export const ALL_PRODUCTS = function(){
 
 export const ITEM_GROUPS = function(){
     const query = `
-    select ItmsGrpCod, ItmsGrpNam from OITB
+    select 
+        CAST(ItmsGrpCod as varchar) as ItmsGrpCod, 
+        ItmsGrpNam 
+    from OITB
     `
     return query
 }

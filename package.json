@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/lodeposl/zeta-local-api#readme",
   "dependencies": {
-    "amqplib": "^0.10.3",
+    "@apollo/client": "^3.12.8",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
@@ -30,6 +30,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "firebase-admin": "^12.0.0",
+    "graphql": "^16.10.0",
     "jsonwebtoken": "^9.0.1",
     "jspdf": "^2.5.2",
     "mssql": "^11.0.1",
@@ -38,8 +39,7 @@
     "pdf-to-printer": "^5.6.0",
     "qrcode": "^1.5.3",
     "sharp": "^0.33.3",
-    "sqlite3": "^5.1.6",
-    "uniqid": "^5.4.0"
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.2"
