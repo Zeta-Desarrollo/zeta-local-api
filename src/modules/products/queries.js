@@ -34,6 +34,8 @@ export const PRODUCT_BY_CODE = function(ItemCode, location, includeNoActive=fals
     where 
         PriceList=${priceList}
         and OITM.SellItem='Y'
+        and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
+
         ${ location=='TODOS'? '': `and OITM.U_CBM='${location}'`}
         ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
         ${ includeNoStock ? '' : 'and OITM.OnHand > 0'}
@@ -69,6 +71,8 @@ export const PRODUCTS_BY_CODES = function(ItemCodes, location, includeNoActive=f
     where 
         PriceList=${priceList}
         and OITM.SellItem='Y'
+        and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
+
         ${ location=='TODOS'? '': `and OITM.U_CBM='${location}'`}
         ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
         ${ includeNoStock ? '' : 'and OITM.OnHand > 0'}
@@ -93,6 +97,8 @@ export const FIRM_AND_COUNT = function(location,includeNoActive=false, includeNo
     where
         PriceList=${priceList}
         and OITM.SellItem='Y'
+        and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
+
         ${ location=='TODOS'? '': `and OITM.U_CBM='${location}'`}
         ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
         ${ includeNoStock ? '' :  `and OITM.OnHand > 0`}
@@ -131,6 +137,7 @@ export const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=fa
         PriceList=${priceList}
         and OITM.SellItem='Y'
         and OITM.FirmCode='${FirmCode}'
+        and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
         ${ location=='TODOS'? '': `and OITM.U_CBM='${location}'`}
         ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
         ${ includeNoStock ? '' : 'and OITM.OnHand > 0'}
@@ -229,6 +236,7 @@ export const PRODUCTS_BY_SEARCH = function(brandCode,search){
         and onHand >0 
         and Price > 0
         and PriceList='3' 
+        and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
         and ${filter}
     group by
         OITM.ItemCode,
@@ -264,6 +272,8 @@ export const PROVIDER_AND_COUNT = function(location,includeNoActive=false, inclu
         ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
         ${ includeNoStock ? '' :  `and OITM.OnHand > 0`}
         ${ includeNoPrice ? '' :  `and ITM1.Price > 0`}
+        and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
+
     group by
         OCRD.CardCode,
         OCRD.CardName 
@@ -303,6 +313,8 @@ export const PRODUCTS_BY_PROVEEDOR = function(CardCode, location, includeNoActiv
         and OITM.SellItem='Y'
         and OCRD.CardCode='${CardCode}'
         and OCRD.CardType = 'S'
+        and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
+
 
         ${ location=='TODOS'? '': `and OITM.U_CBM='${location}'`}
         ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
@@ -322,7 +334,7 @@ export const FACT_AND_COUNT = function(props){
             opch.DocDate,
             CardName, 
             NumAtCard,
-			(max(pch1.BaseLine) + 1) as amountProducts
+			count (pch1.ItemCode) as amountProducts
         from 
             opch 
         join 
@@ -334,6 +346,7 @@ export const FACT_AND_COUNT = function(props){
             and opch.DocType='I'
             and opch.DocDate>='${props.minDay}'
 			and opch.DocDate<'${props.maxDay}'
+            and pch1.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
         group by 
             DocNum, 
             opch.DocEntry,
@@ -369,6 +382,7 @@ export const PRODUCTS_BY_FACTURA = function(DocEntry, priceList=2){
     where 
         PriceList=${priceList}
         and pch1.DocEntry='${DocEntry}'
+        and pch1.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
 
     order by pch1.BaseLine asc
         `
