@@ -7,7 +7,8 @@ import crypto from "crypto"
 import path, { resolve } from "path"
 import sharp from "sharp"
 import sqlite3 from "sqlite3"
-import { rejects } from "assert"
+
+import { apolloClient, SET_PRODUCT_IMAGE } from "../apollo.js"
 
 async function task (){
     try{
@@ -116,7 +117,16 @@ async function task (){
                                         destination: `products/${image.ItemCode}.jpeg`,
                                     }     
                                     firebaseBucket.bucket().upload("./public/compressed/"+image.ItemCode+".jpeg", options).then((res)=>{
-                                        resolve(digest)
+                                        apolloClient.mutate({
+                                            mutation:SET_PRODUCT_IMAGE,
+                                            variables:{
+                                                ItemCode:image.ItemCode,
+                                                hasImage:true
+                                            }
+                                        }).then(()=>{resolve(digest)}).catch((err)=>{
+                                            console.log("error updating image on server")
+                                           reject(err)
+                                        })
                                     }).catch((err)=>{
                                        reject(err)
                                     })

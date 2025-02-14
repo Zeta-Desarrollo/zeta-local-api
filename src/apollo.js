@@ -81,4 +81,19 @@ mutation Mutation($email: String, $password: String) {
 
 
 
-
+  export const SET_PRODUCT_IMAGE = gql`
+  mutation setProductImage($ItemCode: String!, $hasImage:Boolean) {
+      setProductImage(ItemCode: $ItemCode, hasImage:$hasImage)
+    }`
+  
+    export const SET_BRAND_IMAGE = gql`
+  mutation setBrandImage($FirmCode: String!, $hasImage:Boolean) {
+      setBrandImage(FirmCode: $FirmCode, hasImage:$hasImage)
+    }`
+  
+    export const SET_GROUP_IMAGE = gql`
+  mutation setGroupImage($code: String!, $outline:Boolean, $has:Boolean) {
+      setGroupImage(code: $code, outline:$outline, has:$has)
+    }`
+  
+    
