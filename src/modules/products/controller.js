@@ -283,6 +283,7 @@ const controller = {
             product = result.recordset[0]
         }catch(err){
             error = err
+            console.log("lmao", err)
         }
         return {
             error,

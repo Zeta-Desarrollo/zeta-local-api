@@ -65,14 +65,27 @@ function task (){
         const sysconfig = db.prepare("INSERT INTO sysconfig VALUES (?, ?)");
         sysconfig.run("CentsPerTicket", "5000");
         sysconfig.run("BottomMessage", "");
-        sysconfig.run("TicketsActive", "false");
+        sysconfig.run("ReciptCheck", "false");
+        sysconfig.run("TicketsPriceActive", "false");
+        sysconfig.run("TicketsProductActive", "false");
+        sysconfig.run("TicketsProducts", "");
         sysconfig.finalize();
 
         //Tickets
-        db.run("create table tickets (Number INTEGER PRIMARY KEY,FactCode TEXT, Date TEXT, CanceledTicket INT DEFAULT 0, Comment TEXT)")
+        db.run("create table tickets (Number INTEGER PRIMARY KEY,FactCode TEXT, Date TEXT, CanceledTicket INT DEFAULT 0, Comment TEXT)")   
 
+        //facturas productos
+        db.run(`create table factura_tickets_productos (
+            FullCode TEXT,
 
-
+            Started INT Default 0,
+            Finished INT DEFAULT 0,
+            Canceled INT DEFAULT 0, 
+            Comment TEXT DEFAULT '')
+        `)
+        //per products tirckerts
+        db.run("create table product_tickets (Number INTEGER PRIMARY KEY,FactCode TEXT, Date TEXT, CanceledTicket INT DEFAULT 0, Comment TEXT)")   
+        
 
     });
     

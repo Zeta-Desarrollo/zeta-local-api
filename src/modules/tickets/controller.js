@@ -11,7 +11,7 @@ const controller = {
         let error
         let sysconfig = {}
         try{
-            const data = await sqlPromise(sqlite, "all", "select * from sysconfig where name in ('CentsPerTicket', 'BottomMessage', 'TicketsActive')")
+            const data = await sqlPromise(sqlite, "all", "select * from sysconfig where name in ('CentsPerTicket', 'BottomMessage', 'TicketsPriceActive')")
             // console.log("data",data)
             for (const config of data){
                 sysconfig[config.name] = config.value
@@ -189,7 +189,53 @@ const controller = {
         return {
             error
         }
-    }
+    },
+    setTicketsProducts: async(body,params)=>{
+        let error
+        try{
+            if (body.products.length<=0) throw "product-required"
+            let text = ""
+            for (const product of body.products){
+                text+=product.ItemCode+":"+product.amount+";"
+            }
+            text = text.slice(0,-1)
+            await sqlPromise(sqlite, "run", "update sysconfig set value='"+text+"' where name='TicketsProducts'")
+
+        }catch(e){
+            error = e
+        }
+        return {
+            error
+        }
+    },
+    getTicketsProducts: async(body,params)=>{
+        let error
+        let products = []
+        try{
+            const data = await sqlPromise(sqlite, "get", "select * from sysconfig where name='TicketsProducts'")
+            console.log("data", data)
+            
+
+            const productData = data.value.split(";")
+            for (const part of productData){
+                if(!part) continue
+                const product = part.split(":") 
+                products.push({
+                    ItemCode:product[0],
+                    amount:+product[1]
+                })
+            }
+
+
+        }catch(e){
+            error = e
+        }
+        return {
+            error,
+            products
+        }
+    },
+
 }
 
 export default controller

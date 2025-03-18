@@ -15,7 +15,7 @@ async function task (){
                 db.serialize(async () => {
 
 
-                const sysconfig = await sqlPromise(db, "get", "select * from sysconfig where name ='TicketsActive'")
+                const sysconfig = await sqlPromise(db, "get", "select * from sysconfig where name ='ReciptCheck'")
 
                 if (sysconfig.value=='false'){
                     resolve()
@@ -44,6 +44,7 @@ async function task (){
                     const items = dbresult.recordset
                     console.log("items", items.length)
                     const admin = db.prepare("INSERT INTO facturas VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+                    const admin2 = db.prepare("INSERT INTO factura_tickets_productos VALUES (?,?,?,?,?)")
                     for ( const item of items){
                         const hoursToAdd = 4 * 60 * 60 * 1000;
                         item.FechaCreacion.setTime(item.FechaCreacion.getTime() + hoursToAdd);
@@ -77,6 +78,10 @@ async function task (){
                             0, 
                             0, 
                             0
+                        )
+                        admin2.run(
+                            item.NumFactura+item.NumTicketFiscal,
+                            0,0,0,''
                         )
                     }
                     admin.finalize()
