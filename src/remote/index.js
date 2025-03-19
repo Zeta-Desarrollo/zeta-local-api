@@ -5,15 +5,17 @@ import pushBrands from "./pushBrands.js"
 import pushGroups from "./pushGroups.js"
 import pushImages from "./pushImages.js"
 import checkRecipts from "./checkRecipts.js"
-import printTickets from "./printTickets.js"
+import printPriceTickets from "./printPriceTickets.js"
 import cleanDocs from "./cleanDocs.js"
+import printProductTickets from "./printProductTickets.js"
 let jobs = [
     // pushProducts,
     // pushBrands,
     // pushGroups,
     // pushImages,
     checkRecipts,
-    printTickets,
+    printPriceTickets,
+    printProductTickets,
     cleanDocs
 ]  
 

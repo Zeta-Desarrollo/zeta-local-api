@@ -42,8 +42,39 @@ async function task (){
                     const sql = `select top 10 * from KLK_FACTURAHDR where orden=1 and procesado=1 and FechaCreacion>='${klktext}' ${exclude.length>0?'and NumFactura+NumTicketFiscal not in ('+exclude+')':''}`
                     const dbresult = await KLK_DB.query(sql)
                     const items = dbresult.recordset
+
+                    //product data
+                    const extraData = {}
+                    let fullCodes = ''
+
+                    if (items.length>0){
+                        for(const i of items){
+                            const fullCode = i.NumFactura+i.NumTicketFiscal
+                            extraData[fullCode] = {}
+                            fullCodes += "'"+fullCode+"',"
+                        }
+                        fullCodes = fullCodes.slice(0,-1)
+    
+                        const sql2 = `select NumFactura+NumFactFiscal as code, STRING_AGG(CodArticulo,':') as products, STRING_AGG(cast(Cantidad as int), ':') as amounts from KLK_FACTURALINE where NumFactura+NumFactFiscal in(${fullCodes}) group by NumFactura+NumFactFiscal`
+    
+                        const {recordset} = await KLK_DB.query(sql2)
+                        for (const data of recordset){
+                            const products = data.products.split(":")
+                            const amounts = data.amounts.split(":")
+                            extraData[data.code] = ""                        
+                            for( let i=0; i<products.length; i++){
+                                extraData[data.code]+= products[i]+":"+amounts[i]+";"
+                            }
+                            extraData[data.code] = extraData[data.code].slice(0,-1)
+    
+                        }
+                    }
+
+       
+
+
                     console.log("items", items.length)
-                    const admin = db.prepare("INSERT INTO facturas VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+                    const admin = db.prepare("INSERT INTO facturas VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
                     const admin2 = db.prepare("INSERT INTO factura_tickets_productos VALUES (?,?,?,?,?)")
                     for ( const item of items){
                         const hoursToAdd = 4 * 60 * 60 * 1000;
@@ -77,7 +108,9 @@ async function task (){
                             HORA,
                             0, 
                             0, 
-                            0
+                            0,
+                            "",
+                            extraData[item.NumFactura+item.NumTicketFiscal]
                         )
                         admin2.run(
                             item.NumFactura+item.NumTicketFiscal,

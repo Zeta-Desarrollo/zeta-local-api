@@ -58,6 +58,7 @@ function task (){
             Checked INT DEFAULT 0,
             Canceled INT DEFAULT 0,
             FactComment TEXT
+            ProductData TEXT
         )`);
         
         //Configuracion

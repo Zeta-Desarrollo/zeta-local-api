@@ -11,7 +11,7 @@ const controller = {
         let error
         let sysconfig = {}
         try{
-            const data = await sqlPromise(sqlite, "all", "select * from sysconfig where name in ('CentsPerTicket', 'BottomMessage', 'TicketsPriceActive')")
+            const data = await sqlPromise(sqlite, "all", "select * from sysconfig where name in ('"+ body.configs.join("','") +"')")
             // console.log("data",data)
             for (const config of data){
                 sysconfig[config.name] = config.value
