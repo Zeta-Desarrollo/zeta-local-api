@@ -30,29 +30,33 @@ function generateProductTicket(bottomMessage, factura, ticket, amount, subNumber
 
     doc.setFont(FONT, "bold")
     
+    doc.setFontSize(SIZE+7)
+    text = "GRAN SORTEO!"
+    doc.text(text, 1.5, 0.5, 0, "left")
+
     //Cabecera
     doc.setFontSize(SIZE+2)
     text = "ZETA, C.A."
-    doc.text(text, leftSpace+0, 0.5, 0, "left")
+    doc.text(text, leftSpace+0, 1.2, 0, "left")
 
     doc.setFontSize(SIZE)
 
     doc.setFont(FONT, NORMAL)
-    text = "RIF : J-50068491-6"
-    doc.text(text, leftSpace+0,1,0, "left")
+    // text = "RIF : J-50068491-6"
+    // doc.text(text, leftSpace+0,1,0, "left")
     
     doc.setFont(FONT, "bold")
-    doc.setFontSize(SIZE+8)
+    doc.setFontSize(SIZE+2)
     text="#"+"0".repeat(6-(ticket.Number.toString().length))+ticket.Number
-    doc.text(text, 7.1, 0.5,0, "right")
+    doc.text(text, 7.1, 1.2,0, "right")
     
     doc.setFont(FONT, NORMAL)
-    doc.setFontSize(SIZE)
-    doc.text(factura.Date,7.1, 1.0,0, "right")
-    doc.text(factura.Hour, 7.1, 1.5,0, "right")
+    // doc.setFontSize(SIZE)
+    // doc.text(factura.Date,7.1, 1.0,0, "right")
+    // doc.text(factura.Hour, 7.1, 1.5,0, "right")
 
     //Cliente
-    const clienteY = 0.8
+    const clienteY = 0.6
 
     doc.setFontSize(SIZE-2)
     text="Nombre"
@@ -61,22 +65,22 @@ function generateProductTicket(bottomMessage, factura, ticket, amount, subNumber
     text=factura.NomCliente
     doc.text(text, leftSpace*2, clienteY+1.4,   0, "left")
 
-    doc.setFontSize(SIZE-2)
-    text="Cedula"
-    doc.text(text, leftSpace*2, clienteY+1.9,   0, "left")
-    doc.setFontSize(SIZE)
-    text=factura.CodCliente
-    doc.text(text, leftSpace*2, clienteY+2.3,   0, "left")
+    // doc.setFontSize(SIZE-2)
+    // text="Cedula"
+    // doc.text(text, leftSpace*2, clienteY+1.9,   0, "left")
+    // doc.setFontSize(SIZE)
+    // text=factura.CodCliente
+    // doc.text(text, leftSpace*2, clienteY+2.3,   0, "left")
 
-    doc.setFontSize(SIZE-2)
-    text="Teléfono"
-    doc.text(text, 4, clienteY+1.9,   0, "left")
-    doc.setFontSize(SIZE)
-    text=factura.Telefono
-    doc.text(text, 4, clienteY+2.3,   0, "left")
+    // doc.setFontSize(SIZE-2)
+    // text="Teléfono"
+    // doc.text(text, 4, clienteY+1.9,   0, "left")
+    // doc.setFontSize(SIZE)
+    // text=factura.Telefono
+    // doc.text(text, 4, clienteY+2.3,   0, "left")
 
     //Compra
-    const compraY = 4
+    const compraY = clienteY+1.9
 
     text =("_".repeat(60))
     doc.text(text, leftSpace, compraY-0.5, 0, "left")
@@ -98,27 +102,27 @@ function generateProductTicket(bottomMessage, factura, ticket, amount, subNumber
     text=(set ? "B-":"A-")+text
     doc.text(text, 4, compraY+0.4,   0, "left")
 
-    doc.setFontSize(SIZE-2)
-    text="Monto REF:"
-    doc.text(text, leftSpace*2, compraY+0.9,   0, "left")
+    // doc.setFontSize(SIZE-2)
+    // text="Monto REF:"
+    // doc.text(text, leftSpace*2, compraY+0.9,   0, "left")
 
-    const total = factura.Total / factura.TasaUSD
-    text = formatter.format(total)
-    doc.setFontSize(SIZE)
-    doc.text(text, leftSpace*2, compraY+1.3,   0, "left")
+    // const total = factura.Total / factura.TasaUSD
+    // text = formatter.format(total)
+    // doc.setFontSize(SIZE)
+    // doc.text(text, leftSpace*2, compraY+1.3,   0, "left")
 
-    doc.setFontSize(SIZE-2)
-    text="Ticket:"
-    doc.text(text, 4, compraY+0.9,   0, "left")
-    doc.setFontSize(SIZE)
+    // doc.setFontSize(SIZE-2)
+    // text="Ticket:"
+    // doc.text(text, 4, compraY+0.9,   0, "left")
+    // doc.setFontSize(SIZE)
 
-    let number = "0".repeat(3-subNumber.toString().length)+subNumber.toString()
-    let of = "0".repeat(3-amount.toString().length)+amount.toString()
-    text= `${number} / ${of}`
-    doc.text(text, 4, compraY+1.3,   0, "left")
+    // let number = "0".repeat(3-subNumber.toString().length)+subNumber.toString()
+    // let of = "0".repeat(3-amount.toString().length)+amount.toString()
+    // text= `${number} / ${of}`
+    // doc.text(text, 4, compraY+1.3,   0, "left")
 
 
-    const bottomY = 5.8
+    const bottomY = compraY + 0.4
     //Bottom
     doc.setFontSize(SIZE+2)
     doc.setFont(FONT, "bold")
