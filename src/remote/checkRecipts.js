@@ -55,15 +55,16 @@ async function task (){
                         }
                         fullCodes = fullCodes.slice(0,-1)
     
-                        const sql2 = `select NumFactura+NumFactFiscal as code, STRING_AGG(CodArticulo,':') as products, STRING_AGG(cast(Cantidad as int), ':') as amounts from KLK_FACTURALINE where NumFactura+NumFactFiscal in(${fullCodes}) group by NumFactura+NumFactFiscal`
+                        const sql2 = `select NumFactura+NumFactFiscal as code, STRING_AGG(Descripcion, ':') as descriptions, STRING_AGG(CodArticulo,':') as products, STRING_AGG(cast(Cantidad as int), ':') as amounts from KLK_FACTURALINE where NumFactura+NumFactFiscal in(${fullCodes}) group by NumFactura+NumFactFiscal`
     
                         const {recordset} = await KLK_DB.query(sql2)
                         for (const data of recordset){
                             const products = data.products.split(":")
                             const amounts = data.amounts.split(":")
+                            const descriptions = data.descriptions.split(":")
                             extraData[data.code] = ""                        
                             for( let i=0; i<products.length; i++){
-                                extraData[data.code]+= products[i]+":"+amounts[i]+";"
+                                extraData[data.code]+= products[i]+":"+amounts[i]+":"+descriptions[i]+";"
                             }
                             extraData[data.code] = extraData[data.code].slice(0,-1)
     

@@ -132,9 +132,18 @@ function generateProductTicket(bottomMessage, topMessage, factura, ticket, amoun
     doc.text(text, leftSpace, bottomY, 0, "left")
     doc.setFont(FONT, NORMAL)
 
+    doc.setFontSize(SIZE)
+    text = "Por la compra de:"
+    doc.text(text, 0, bottomY+0.4, 0, "left")
+    
+    text =ticket.ProductAmount+" "+ticket.ProductName
+    text = doc.splitTextToSize(text, 7.2)
+    doc.text(text, 0, bottomY+0.8, 0, "left")
+
+
     doc.setFontSize(SIZE-2)
     text = doc.splitTextToSize(bottomMessage,7.2)
-    doc.text(text, 3.6, bottomY+0.5, 0, "center")
+    doc.text(text, 3.6, bottomY+1.3, 0, "center")
 
 
     const fileName = "./docs/ticket-"+ticket.Number.toString()+".pdf"
@@ -183,21 +192,23 @@ async function task (){
                 
 
                 //build tickets
+                const ticketSQL = db.prepare("insert into product_tickets (FactCode, Date, ProductName, ProductAmount) values (?,?,?,?)")
+
                 let amount = 0
                 for (const pdata of data.ProductData.split(";")){
                     const product = pdata.split(":")
                     if (TicketsProducts[product[0]]){
-                        amount += Math.floor(product[1] / TicketsProducts[product[0]])
+                        amount = Math.floor(product[1] / TicketsProducts[product[0]])
+
+                        for (let i=0; i<amount; i++){
+                            ticketSQL.run(data.FullCode, text, product[2], TicketsProducts[product[0]])
+                        }
                     }
                 }
-                console.log("printing "+amount+"tickets for recipt ", data.FullCode)
+                console.log("printing tickets for recipt ", data.FullCode)
 
                 // const amount = Math.floor(data.Total/ data.TasaUSD / (sysconfig.value/100))
 
-                const ticketSQL = db.prepare("insert into product_tickets (FactCode, Date) values (?,?)")
-                for (let i=0; i<amount; i++){
-                    ticketSQL.run(data.FullCode, text)
-                }
 
                 await new Promise((resolve,reject)=>{
                     ticketSQL.finalize((err)=>{
