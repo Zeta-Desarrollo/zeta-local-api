@@ -190,6 +190,8 @@ async function task (){
                         amount += Math.floor(product[1] / TicketsProducts[product[0]])
                     }
                 }
+                console.log("printing "+amount+"tickets for recipt ", data.FullCode)
+
                 // const amount = Math.floor(data.Total/ data.TasaUSD / (sysconfig.value/100))
 
                 const ticketSQL = db.prepare("insert into product_tickets (FactCode, Date) values (?,?)")
@@ -219,15 +221,15 @@ async function task (){
                     }
                     const pdfName = "ProductTickets - "+ data.FullCode
                     await merger.save(`./docs/${pdfName}.pdf`)
-                    // await new Promise((resolve, reject)=>{
-                    //     ptp.print("./docs/"+pdfName+".pdf", {
-                    //         printer:"POS-80C",
-                    //         scale:"fit"                
-                    //     }).then(resolve).catch((err)=>{
-                    //         console.log("Error printing", err)
-                    //         reject(err)
-                    //     });
-                    // })
+                    await new Promise((resolve, reject)=>{
+                        ptp.print("./docs/"+pdfName+".pdf", {
+                            printer:"POS-80C",
+                            scale:"fit"                
+                        }).then(resolve).catch((err)=>{
+                            console.log("Error printing", err)
+                            reject(err)
+                        });
+                    })
                 }
  
                 //mark as procesed
