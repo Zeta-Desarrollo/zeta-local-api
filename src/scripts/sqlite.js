@@ -89,7 +89,10 @@ function task (){
         `)
         //per products tirckerts
         db.run("create table product_tickets (Number INTEGER PRIMARY KEY,FactCode TEXT, Date TEXT, CanceledTicket INT DEFAULT 0, Comment TEXT)")   
-        
+       
+        //patch
+        db.run("ALTER TABLE facturas ADD COLUMN ProductData TEXT")
+        db.run("delete from sysconfig where name='TicketsActive'")
 
     });
     
