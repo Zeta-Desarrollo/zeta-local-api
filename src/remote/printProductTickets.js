@@ -12,7 +12,7 @@ const formatter = new Intl.NumberFormat("es-ES", {
     styly:"currency"
   });
 
-function generateProductTicket(bottomMessage, factura, ticket, amount, subNumber){
+function generateProductTicket(bottomMessage, topMessage, factura, ticket, amount, subNumber){
 
 
     const doc = new jsPDF({
@@ -21,7 +21,8 @@ function generateProductTicket(bottomMessage, factura, ticket, amount, subNumber
         format: [7.2, 16],
         
     });
-    const leftSpace = 0
+    let leftSpace = 0
+    let headerY = 1.2
     let text = ""
 
     const FONT = "courier"
@@ -31,13 +32,14 @@ function generateProductTicket(bottomMessage, factura, ticket, amount, subNumber
     doc.setFont(FONT, "bold")
     
     doc.setFontSize(SIZE+7)
-    text = "GRAN SORTEO!"
-    doc.text(text, 1.5, 0.5, 0, "left")
+    text = doc.splitTextToSize(topMessage,7.2).map(i=>i.trim())
+    doc.text(text, 3.6, 0.5, 0, "center")
+    if(text.length>1) headerY +=0.5
 
     //Cabecera
     doc.setFontSize(SIZE+2)
     text = "ZETA, C.A."
-    doc.text(text, leftSpace+0, 1.2, 0, "left")
+    doc.text(text, leftSpace+0, headerY, 0, "left")
 
     doc.setFontSize(SIZE)
 
@@ -48,7 +50,7 @@ function generateProductTicket(bottomMessage, factura, ticket, amount, subNumber
     doc.setFont(FONT, "bold")
     doc.setFontSize(SIZE+2)
     text="#"+"0".repeat(6-(ticket.Number.toString().length))+ticket.Number
-    doc.text(text, 7.1, 1.2,0, "right")
+    doc.text(text, 7.1, headerY,0, "right")
     
     doc.setFont(FONT, NORMAL)
     // doc.setFontSize(SIZE)
@@ -56,14 +58,14 @@ function generateProductTicket(bottomMessage, factura, ticket, amount, subNumber
     // doc.text(factura.Hour, 7.1, 1.5,0, "right")
 
     //Cliente
-    const clienteY = 0.6
+    const clienteY = 0.4 + headerY
 
     doc.setFontSize(SIZE-2)
     text="Nombre"
-    doc.text(text, leftSpace*2, clienteY+1,   0, "left")
+    doc.text(text, leftSpace*2, clienteY,   0, "left")
     doc.setFontSize(SIZE)
     text=factura.NomCliente
-    doc.text(text, leftSpace*2, clienteY+1.4,   0, "left")
+    doc.text(text, leftSpace*2, clienteY+0.4,   0, "left")
 
     // doc.setFontSize(SIZE-2)
     // text="Cedula"
@@ -80,7 +82,7 @@ function generateProductTicket(bottomMessage, factura, ticket, amount, subNumber
     // doc.text(text, 4, clienteY+2.3,   0, "left")
 
     //Compra
-    const compraY = clienteY+1.9
+    const compraY = clienteY+0.9
 
     text =("_".repeat(60))
     doc.text(text, leftSpace, compraY-0.5, 0, "left")
@@ -159,7 +161,6 @@ async function task (){
                     }
     
 
-                const sysconfig = await sqlPromise(db, "get", "select * from sysconfig where name ='CentsPerTicket'")
                 const _TicketsProducts = await sqlPromise(db, "get", "select * from sysconfig where name ='TicketsProducts'")
                 const TicketsProducts = {}
                 for (const data of _TicketsProducts.value.split(";")){
@@ -168,16 +169,17 @@ async function task (){
                 }
 
 
-                const bottomMessage = await sqlPromise(db, "get", "select * from sysconfig where name ='BottomMessage'")
+                const bottomMessage = await sqlPromise(db, "get", "select * from sysconfig where name ='ProductsBottomMessage'")
+                const topMessage = await sqlPromise(db, "get", "select * from sysconfig where name ='ProductsTopMessage'")
                 
                 const date = new Date()
                 const year = date.getFullYear()
                 const month = date.getMonth()+1
                 const day = date.getDate()
                 const text = (day<10?"0":"")+day.toString()+"-"+(month<10?"0":"")+month.toString()+"-"+ year
-                const data = await sqlPromise(db, "get", `select * from facturas join factura_tickets_productos as ftp on facturas.FullCode=ftp.FullCode  where Date = '${ text }' and ftp.Finished==0 and ftp.Started==0`)
+                const data = await sqlPromise(db, "get", `select * from facturas join factura_tickets_productos as ftp on facturas.FullCode=ftp.FullCode  where Date = '${ text }' and ftp.Finished==0 and ftp.Begun==0`)
                 if (!data) return
-                await sqlPromise(db, "run", `update factura_tickets_productos set Started=1 where FullCode='${data.FullCode}'`)
+                await sqlPromise(db, "run", `update factura_tickets_productos set Begun=1 where FullCode='${data.FullCode}'`)
                 
 
                 //build tickets
@@ -212,7 +214,7 @@ async function task (){
                 if (latestTickets.length>0){
                     let i = 1
                     for (const ticket of latestTickets){
-                        await merger.add(generateProductTicket(bottomMessage.value, data, ticket, amount, i));
+                        await merger.add(generateProductTicket(bottomMessage.value, topMessage.value, data, ticket, amount, i));
                         i++
                     }
                     const pdfName = "ProductTickets - "+ data.FullCode

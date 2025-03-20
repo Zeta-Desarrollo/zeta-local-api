@@ -190,52 +190,160 @@ const controller = {
             error
         }
     },
-    setTicketsProducts: async(body,params)=>{
+    getFacturasProductos:async (body,params)=>{
+        let error
+        let facturas = []
+        let tickets = {}
+        try{
+            const registers = await sqlPromise(sqlite,"all", `
+                select * from facturas 
+                    join factura_tickets_productos as ftp on facturas.FullCode=ftp.FullCode
+                    join product_tickets on facturas.FullCode = product_tickets.FactCode order by Number asc
+            `)
+            let facts = {}
+
+            for (const data of registers){
+                if (!facts[data.FullCode]){
+                    facts[data.FullCode] = {
+                        FullCode:data.FullCode,
+                        NumFactura:data.NumFactura,
+                        NumTicketFiscal:data.NumTicketFiscal,
+                        CodCliente:data.CodCliente,
+                        NomCliente:data.NomCliente,
+                        DireccionCliente:data.DireccionCliente,
+                        Telefono:data.Telefono,
+                        Total:data.Total,
+                        TasaUSD:data.TasaUSD,
+                        Date:data.Date, 
+                        Hour:data.Hour,
+                        Started:data.Begun,
+                        Checked:data.Finished,
+                        Canceled:data.CanceledProduct,
+                        FactComment:data.CommentProduct,
+
+                        displayDate:data.Date+" "+data.Hour,
+                        Tickets: [],
+                        displayTickets: "",
+                        CanceledTickets:0
+                    }
+                }
+                if (!tickets[data.FullCode]){
+                    tickets[data.FullCode] = []
+                }
+
+
+                    const displayNumber = "0".repeat(6-data.Number.toString().length)+data.Number
+                    facts[data.FullCode].Tickets.push( displayNumber )
+                    let list = facts[data.FullCode].Tickets
+                    if (list.length==1){
+                        facts[data.FullCode].displayTickets =  list[0]
+                    }else{
+                        facts[data.FullCode].displayTickets =  list[0] +" - "+ list[ list.length-1]
+
+                    }
+
+                    if(data.CanceledTicket){
+                        facts[data.FullCode].CanceledTickets+=1
+                    }
+
+                    tickets[data.FullCode].push({
+                        CanceledTicket:data.CanceledTicket,
+                        Comment:data.Comment, 
+                        displayNumber,
+                        Number:data.Number
+                    })
+            }
+
+            for(const data of registers){
+                if(!facts[data.FullCode].processed){
+                    facturas.push({
+                        ...facts[data.FullCode], 
+                        // Tickets:facts[data.FullCode].Tickets.length
+                    })
+                    facts[data.FullCode].processed = true
+                }
+            }
+            
+
+        }catch(err){
+            error = err
+            
+        }
+        return {
+            error,
+            facturas,
+            tickets
+        }  
+    },
+    cancelFacturasProductos: async(body,params)=>{
+        let error
+        let success=false
+        try{
+            // console.log("body", body.targets)
+            let facturas = ''
+            for (const code of body.facturas){
+                facturas+="'"+code+"',"
+            }
+            facturas = facturas.slice(0,-1)
+
+            let tickets = ''
+            for (const code of body.tickets){
+                tickets+="'"+code+"',"
+            }
+            tickets = tickets.slice(0,-1)
+            await new Promise((resolve,reject)=>{
+                sqlite.serialize(()=>{
+                    try{
+                        sqlite.run("update factura_tickets_productos set CanceledProduct=?, CommentProduct=? where FullCode in ("+facturas+")",1,body.comment)    
+
+                        sqlite.run("update product_tickets set CanceledTicket=?, Comment=? where Number in ("+tickets+") or FactCode in ("+facturas+")",1,body.comment)            
+                        resolve()
+                    }catch(error){
+                        reject(error)
+                    }
+                })
+            })
+            // await sqlPromise(sqlite, "run", `update facturas set Canceled=1, comment=? where Code in (${sql})`)
+            success = true
+        }catch(e){
+            error = e
+        }
+        return {
+            error,
+            success
+        }
+    },
+    manualPrintProductos: async(body, params)=>{
         let error
         try{
-            if (body.products.length<=0) throw "product-required"
-            let text = ""
-            for (const product of body.products){
-                text+=product.ItemCode+":"+product.amount+";"
-            }
-            text = text.slice(0,-1)
-            await sqlPromise(sqlite, "run", "update sysconfig set value='"+text+"' where name='TicketsProducts'")
+            console.log("manual", body)
+            const pdfName = "ProductTickets - "+ body.FullCode
+            await new Promise((resolve,reject)=>{
+                sqlite.serialize(async ()=>{
+                    try{
+                        await new Promise((resolve, reject)=>{
+                            ptp.print("./docs/"+pdfName+".pdf", {
+                                printer:"POS-80C",
+                                scale:"shrink"                
+                            }).then(resolve).catch(reject);
+                        })
+                        await sqlPromise(sqlite, "run", `update factura_tickets_productos set Finished=1 where FullCode='${body.FullCode}'`)
+                        resolve()
+                    }catch(e){
+                        console.log("inside",e)
+                        reject(e)
+                    }
+                }) 
+            })
 
         }catch(e){
+            console.log("out of ",e)
             error = e
         }
         return {
             error
         }
     },
-    getTicketsProducts: async(body,params)=>{
-        let error
-        let products = []
-        try{
-            const data = await sqlPromise(sqlite, "get", "select * from sysconfig where name='TicketsProducts'")
-            console.log("data", data)
-            
-
-            const productData = data.value.split(";")
-            for (const part of productData){
-                if(!part) continue
-                const product = part.split(":") 
-                products.push({
-                    ItemCode:product[0],
-                    amount:+product[1]
-                })
-            }
-
-
-        }catch(e){
-            error = e
-        }
-        return {
-            error,
-            products
-        }
-    },
-
 }
 
 export default controller

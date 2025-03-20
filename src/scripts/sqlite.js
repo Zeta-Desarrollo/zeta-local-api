@@ -70,6 +70,9 @@ function task (){
         sysconfig.run("TicketsPriceActive", "false");
         sysconfig.run("TicketsProductActive", "false");
         sysconfig.run("TicketsProducts", "");
+        sysconfig.run("ProductsBottomMessage", "");
+        sysconfig.run("ProductsTopMessage", "");
+
         sysconfig.finalize();
 
         //Tickets
@@ -79,10 +82,10 @@ function task (){
         db.run(`create table factura_tickets_productos (
             FullCode TEXT,
 
-            Started INT Default 0,
+            Begun INT Default 0,
             Finished INT DEFAULT 0,
-            Canceled INT DEFAULT 0, 
-            Comment TEXT DEFAULT '')
+            CanceledProduct INT DEFAULT 0, 
+            CommentProduct TEXT DEFAULT '')
         `)
         //per products tirckerts
         db.run("create table product_tickets (Number INTEGER PRIMARY KEY,FactCode TEXT, Date TEXT, CanceledTicket INT DEFAULT 0, Comment TEXT)")   

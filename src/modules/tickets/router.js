@@ -9,11 +9,14 @@ const devFunction = showData(false)
 
 ticketsRouter.post("/getFacturas",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.getFacturas))
 ticketsRouter.post("/cancelFacturas",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.cancelFacturas))
+ticketsRouter.post("/manualPrint",  devFunction, isAuth, checkPermissions(["manipular-tickets", "editar-sorteo"]), callController(controller.manualPrint))
+
 ticketsRouter.post("/ticketsConfig",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.ticketsConfig))
 ticketsRouter.post("/updateConfig",  devFunction, isAuth, checkPermissions(["manipular-tickets", "editar-sorteo"]), callController(controller.updateConfig))
-ticketsRouter.post("/manualPrint",  devFunction, isAuth, checkPermissions(["manipular-tickets", "editar-sorteo"]), callController(controller.manualPrint))
-ticketsRouter.post("/getFacturasProductsTickets",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.getFacturasProductsTickets))
-ticketsRouter.post("/setTicketsProducts",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.setTicketsProducts))
-ticketsRouter.post("/getTicketsProducts",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.getTicketsProducts))
+
+ticketsRouter.post("/getFacturasProductos",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.getFacturasProductos))
+ticketsRouter.post("/cancelFacturasProductos",  devFunction, isAuth, checkPermissions(["manipular-tickets"]), callController(controller.cancelFacturasProductos))
+ticketsRouter.post("/manualPrintProductos",  devFunction, isAuth, checkPermissions(["manipular-tickets", "editar-sorteo"]), callController(controller.manualPrintProductos))
+
 
 export default ticketsRouter
