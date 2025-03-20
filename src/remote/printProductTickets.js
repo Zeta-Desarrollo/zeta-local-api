@@ -138,7 +138,7 @@ function generateProductTicket(bottomMessage, topMessage, factura, ticket, amoun
     
     text =ticket.ProductAmount+" "+ticket.ProductName
     text = doc.splitTextToSize(text, 7.2)
-    doc.text(text, 0, bottomY+0.8, 0, "left")
+    doc.text(text[0], 0, bottomY+0.8, 0, "left")
 
 
     doc.setFontSize(SIZE-2)
