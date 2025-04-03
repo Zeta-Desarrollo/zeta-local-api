@@ -97,7 +97,7 @@ async function JSPDF (body, params){
 
             const logoFile = fs.readFileSync("./public/zeta-negro.png")
             const logo = new Uint8Array(logoFile);
-            doc.addImage(logo, "PNG", leftEdge +0.4, 3.8, 2.87+1.6, 1.5)
+            doc.addImage(logo, "PNG", leftEdge +0.8, 3.8, 2.87+1.2, 1.5)
             
             if (body.props.showDate){
                 doc.setFont("Helvetica", "bold")
@@ -107,7 +107,7 @@ async function JSPDF (body, params){
             
             doc.setFont("Helvetica", "bold")
             doc.setFontSize(16)
-            doc.text(product.ItemCode, leftEdge+0.4, 1, "left")
+            doc.text(product.ItemCode, leftEdge+0.8, 1, "left")
             doc.setFontSize(16)
 
             let marcaText = product.FirmCode != -1? product.FirmName : ''
@@ -155,16 +155,16 @@ async function JSPDF (body, params){
             
             
             // let line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
-            let line = doc.splitTextToSize(product.ItemName, 11)
+            let line = doc.splitTextToSize(product.ItemName, 10.5)
 
             while (line.length * FS > (body.props.showPrices?50:120)){
                 FS-=0.1
                 doc.setFontSize(FS)
                 // line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
-                line = doc.splitTextToSize(product.ItemName, 11)
+                line = doc.splitTextToSize(product.ItemName, 10.5)
             }
             // doc.text(line, leftEdge+leftSpace +4, 1.8, "left")
-            doc.text(line, leftEdge+0.4, 1.8, "left")
+            doc.text(line, leftEdge+0.8, 1.8, "left")
             doc.setFontSize(16)
             
             if(body.props.showPrices){
