@@ -150,7 +150,7 @@ async function JSPDF (body, params){
             
             doc.setFont("Helvetica", "")
             
-            FS =  body.props.showPrices? 16 : 32
+            FS =  body.props.showPrices? 24 : 32
             doc.setFontSize(FS)
             
             
