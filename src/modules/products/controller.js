@@ -97,17 +97,17 @@ async function JSPDF (body, params){
 
             const logoFile = fs.readFileSync("./public/zeta-negro.png")
             const logo = new Uint8Array(logoFile);
-            doc.addImage(logo, "PNG", leftEdge , 3.8, 2.87+2, 1.5)
+            doc.addImage(logo, "PNG", leftEdge +0.4, 3.8, 2.87+1.6, 1.5)
             
             if (body.props.showDate){
                 doc.setFont("Helvetica", "bold")
                 doc.setFontSize(16)
-                doc.text(body.props.etiquetaDate, leftEdge + 1, 6);
+                doc.text(body.props.etiquetaDate, leftEdge + 1.2, 6);
             }
             
             doc.setFont("Helvetica", "bold")
             doc.setFontSize(16)
-            doc.text(product.ItemCode, leftEdge, 1, "left")
+            doc.text(product.ItemCode, leftEdge+0.4, 1, "left")
             doc.setFontSize(16)
 
             let marcaText = product.FirmCode != -1? product.FirmName : ''
@@ -164,7 +164,7 @@ async function JSPDF (body, params){
                 line = doc.splitTextToSize(product.ItemName, 11)
             }
             // doc.text(line, leftEdge+leftSpace +4, 1.8, "left")
-            doc.text(line, leftEdge, 1.8, "left")
+            doc.text(line, leftEdge+0.4, 1.8, "left")
             doc.setFontSize(16)
             
             if(body.props.showPrices){
@@ -213,14 +213,14 @@ async function JSPDF (body, params){
         }
         await merger.save(`./docs/${pdfName}.pdf`)
 
-    await new Promise((resolve, reject)=>{
-        ptp.print("./docs/"+pdfName+".pdf", {
-            printer:"Etiquetas",
-            orientation:"landscape",
-            scale:"shrink",
+    // await new Promise((resolve, reject)=>{
+    //     ptp.print("./docs/"+pdfName+".pdf", {
+    //         printer:"Etiquetas",
+    //         orientation:"landscape",
+    //         scale:"shrink",
             
-        }).then(resolve).catch(reject);
-    })
+    //     }).then(resolve).catch(reject);
+    // })
     delete global.window;
     delete global.navigator;
     delete global.btoa;
