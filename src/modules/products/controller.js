@@ -89,23 +89,25 @@ async function JSPDF (body, params){
             const refWhiteFile = fs.readFileSync("./public/ref-white.png")
             const refWhite = new Uint8Array(refWhiteFile);
 
-            const qrFile = fs.readFileSync("./public/"+product.ItemCode+".png")
-            const qr = new Uint8Array(qrFile);
-            doc.addImage(qr, "PNG", leftEdge+0, 0, 5, 5)
-            doc.addImage(refWhite, "PNG", 3.6 , 2, 1.3, 1.3)
+            // const qrFile = fs.readFileSync("./public/"+product.ItemCode+".png")
+            // const qr = new Uint8Array(qrFile);
+            // doc.addImage(qr, "PNG", leftEdge+0, 0, 5, 5)
+            // doc.addImage(refWhite, "PNG", 3.6 , 2, 1.3, 1.3)
 
 
             const logoFile = fs.readFileSync("./public/zeta-negro.png")
             const logo = new Uint8Array(logoFile);
-            doc.addImage(logo, "PNG", leftEdge + 1.2 , 4.7, 2.87, 1)
+            doc.addImage(logo, "PNG", leftEdge , 3.8, 2.87+2, 1.5)
             
             if (body.props.showDate){
-                doc.text(body.props.etiquetaDate, leftEdge + 1.2, 6.2);
+                doc.setFont("Helvetica", "bold")
+                doc.setFontSize(16)
+                doc.text(body.props.etiquetaDate, leftEdge + 1, 6);
             }
             
             doc.setFont("Helvetica", "bold")
             doc.setFontSize(16)
-            doc.text(product.ItemCode, leftEdge +leftSpace+4, 1, "left")
+            doc.text(product.ItemCode, leftEdge, 1, "left")
             doc.setFontSize(16)
 
             let marcaText = product.FirmCode != -1? product.FirmName : ''
@@ -113,20 +115,21 @@ async function JSPDF (body, params){
             let size = doc.getTextWidth(marcaText)
             
             FS = 16 
-            while (size>3.2){
+            // while (size>3.2){
+            while (size>6.5){
                 if(FS<11){
                     const words = marcaText.split(" ")
 
                     if (words.length>1){
                         FS = 14
                         doc.setFontSize(FS)
-                        let inLines = doc.splitTextToSize(marcaText, 3.3)
+                        let inLines = doc.splitTextToSize(marcaText, 6.6)
                         
 
                         while (inLines.length>2 || !wordsForWords(words, inLines)){
                             FS -= 0.1
                             doc.setFontSize(FS)
-                            inLines = doc.splitTextToSize(marcaText, 3.3)
+                            inLines = doc.splitTextToSize(marcaText, 6.6)
                         }
                         marcaText = inLines
                         if (inLines.length!=1){
@@ -151,14 +154,17 @@ async function JSPDF (body, params){
             doc.setFontSize(FS)
             
             
-            let line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
+            // let line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
+            let line = doc.splitTextToSize(product.ItemName, 11)
 
             while (line.length * FS > (body.props.showPrices?50:120)){
                 FS-=0.1
                 doc.setFontSize(FS)
-                line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
+                // line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
+                line = doc.splitTextToSize(product.ItemName, 11)
             }
-            doc.text(line, leftEdge+leftSpace +4, 1.8, "left")
+            // doc.text(line, leftEdge+leftSpace +4, 1.8, "left")
+            doc.text(line, leftEdge, 1.8, "left")
             doc.setFontSize(16)
             
             if(body.props.showPrices){
@@ -207,14 +213,14 @@ async function JSPDF (body, params){
         }
         await merger.save(`./docs/${pdfName}.pdf`)
 
-    await new Promise((resolve, reject)=>{
-        ptp.print("./docs/"+pdfName+".pdf", {
-            printer:"Etiquetas",
-            orientation:"landscape",
-            scale:"shrink",
+    // await new Promise((resolve, reject)=>{
+    //     ptp.print("./docs/"+pdfName+".pdf", {
+    //         printer:"Etiquetas",
+    //         orientation:"landscape",
+    //         scale:"shrink",
             
-        }).then(resolve).catch(reject);
-    })
+    //     }).then(resolve).catch(reject);
+    // })
     delete global.window;
     delete global.navigator;
     delete global.btoa;
