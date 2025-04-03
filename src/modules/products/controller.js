@@ -177,7 +177,7 @@ async function JSPDF (body, params){
                 doc.text("PMVP:", leftEdge+leftSpace  +4,6, "left")
                 doc.setFont("Helvetica", "")
                 
-                const refFile = fs.readFileSync("./public/ref.png")
+                const refFile = fs.readFileSync("./public/ref-black.png")
                 const ref = new Uint8Array(refFile);
                 doc.addImage(ref, "PNG", leftEdge + leftSpace+ 6.2 , 4.1, 1.2, 1.2)
 
