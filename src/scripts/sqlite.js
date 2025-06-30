@@ -19,10 +19,10 @@ function task (){
 
         // db.run("CREATE TABLE users (name TEXT, password TEXT, role TEXT, lastlogin DATE)")
         
-        const admin = db.prepare("INSERT INTO users VALUES (?, ?, ? ,?)")
-        // admin.run("admin", bcrypt.hashSync("12345",10), "admin", new Date())
-        admin.run("TiendaWeb", bcrypt.hashSync(process.env.STORE_PASSWORD,10), "store", new Date())
-        admin.finalize()
+        // const admin = db.prepare("INSERT INTO users VALUES (?, ?, ? ,?)")
+        // // admin.run("admin", bcrypt.hashSync("12345",10), "admin", new Date())
+        // admin.run("TiendaWeb", bcrypt.hashSync(process.env.STORE_PASSWORD,10), "store", new Date())
+        // admin.finalize()
         
 
         // db.run("CREATE table user_permissions (permision INT, user INT)")
@@ -98,7 +98,7 @@ function task (){
         // db.run("delete from sysconfig where name='TicketsActive'")
         // db.run("ALTER TABLE product_tickets ADD COLUMN ProductName TEXT")
         // db.run("ALTER TABLE product_tickets ADD COLUMN ProductAmount TEXT")
-
+        db.run("create table product_data ( ItemCode TEXT,hash TEXT,json TEXT)")
 
     });
     

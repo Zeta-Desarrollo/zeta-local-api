@@ -138,10 +138,6 @@ export const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=fa
         and OITM.SellItem='Y'
         and OITM.FirmCode='${FirmCode}'
         and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
-        ${ location=='TODOS'? '': `and OITM.U_CBM='${location}'`}
-        ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
-        ${ includeNoStock ? '' : 'and OITM.OnHand > 0'}
-        ${ includeNoPrice ? '' : 'and ITM1.Price > 0'}
     order by OITM.ItemCode asc
         `
     return query

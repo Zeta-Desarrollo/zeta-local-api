@@ -21,6 +21,7 @@
   "homepage": "https://github.com/lodeposl/zeta-local-api#readme",
   "dependencies": {
     "@apollo/client": "^3.12.8",
+    "apollo-upload-client": "^18.0.1",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",

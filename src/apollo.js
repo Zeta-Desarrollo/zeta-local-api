@@ -1,6 +1,6 @@
+import dotenv from "dotenv"
+dotenv.config()
 import apollo from "@apollo/client/core/core.cjs";
-
-
 const {
     ApolloClient,
     ApolloLink,
@@ -8,6 +8,18 @@ const {
     InMemoryCache,
     gql
   } = apollo
+
+import createUploadLink from "apollo-upload-client/createUploadLink.mjs"
+
+console.log("XXDDD", process.env.GATEWAY)
+const uploadLink = createUploadLink({
+    // uri: "http://localhost:3000/graphql",
+  uri: process.env.GATEWAY,
+        headers: {
+        "Apollo-Require-Preflight": "true",
+      },
+})
+
 
 export const data = {}
 
@@ -25,18 +37,11 @@ const middleWareLink = new ApolloLink((operation, forward) => {
   return forward(operation);
 });
 
-const httpLinkWithUpload = new HttpLink({
-  // You should use an absolute URL here
-  // uri: config.graphql.url
-  uri: process.env.GATEWAY,
-
-});
-
 export const apolloClient = new ApolloClient({
   // link: authLink.concat(httpLink),
   // link: authLink.concat(httpLinkWithUpload),
   // link: ApolloLink.from([middleWareLink, errorLink, httpLinkWithUpload]),
-  link: ApolloLink.from([middleWareLink, httpLinkWithUpload]),
+  link: ApolloLink.from([middleWareLink, uploadLink]),
   cache: new InMemoryCache({
     possibleTypes:{
       CodeResult:["product", "brand", "group"]
@@ -54,8 +59,8 @@ mutation jobUpdateProductsStart($id:String, $chunks:Int) {
 }`
 
 export const JOB_UPDATE_PRODUCTS =gql`
-mutation jobUpdateProducts($updateId:String, $chunk:Int, $products:[updateProduct]) {
-  jobUpdateProducts(updateId:$updateId, chunk:$chunk, products:$products)
+mutation jobUpdateProducts($products:[updateProduct]) {
+  jobUpdateProducts(products:$products)
 }`
 
 export const JOB_UPDATE_BRANDS =gql`
@@ -95,5 +100,9 @@ mutation Mutation($email: String, $password: String) {
   mutation setGroupImage($code: String!, $outline:Boolean, $has:Boolean) {
       setGroupImage(code: $code, outline:$outline, has:$has)
     }`
-  
-    
+  export const SINGLE_IMAGE_UPLOAD =gql`
+mutation singleImageUpload($File:Upload, $name:String, $type:String!){
+singleImageUpload(File:$File, type:$type, name:$name ){
+  filename
+  mimetype
+}}`
