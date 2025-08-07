@@ -89,25 +89,23 @@ async function JSPDF (body, params){
             const refWhiteFile = fs.readFileSync("./public/ref-white.png")
             const refWhite = new Uint8Array(refWhiteFile);
 
-            // const qrFile = fs.readFileSync("./public/"+product.ItemCode+".png")
-            // const qr = new Uint8Array(qrFile);
-            // doc.addImage(qr, "PNG", leftEdge+0, 0, 5, 5)
-            // doc.addImage(refWhite, "PNG", 3.6 , 2, 1.3, 1.3)
+            const qrFile = fs.readFileSync("./public/"+product.ItemCode+".png")
+            const qr = new Uint8Array(qrFile);
+            doc.addImage(qr, "PNG", leftEdge+0, 0, 5, 5)
+            doc.addImage(refWhite, "PNG", 3.6 , 2, 1.3, 1.3)
 
 
             const logoFile = fs.readFileSync("./public/zeta-negro.png")
             const logo = new Uint8Array(logoFile);
-            doc.addImage(logo, "PNG", leftEdge +0.6, 3.8, 2.87+1.4, 1.5)
+            doc.addImage(logo, "PNG", leftEdge + 1.2 , 4.7, 2.87, 1)
             
             if (body.props.showDate){
-                doc.setFont("Helvetica", "bold")
-                doc.setFontSize(16)
-                doc.text(body.props.etiquetaDate, leftEdge + 1.2, 6);
+                doc.text(body.props.etiquetaDate, leftEdge + 1.2, 6.2);
             }
             
             doc.setFont("Helvetica", "bold")
             doc.setFontSize(16)
-            doc.text(product.ItemCode, leftEdge+0.6, 1, "left")
+            doc.text(product.ItemCode, leftEdge +leftSpace+4, 1, "left")
             doc.setFontSize(16)
 
             let marcaText = product.FirmCode != -1? product.FirmName : ''
@@ -115,21 +113,20 @@ async function JSPDF (body, params){
             let size = doc.getTextWidth(marcaText)
             
             FS = 16 
-            // while (size>3.2){
-            while (size>6.5){
+            while (size>3.2){
                 if(FS<11){
                     const words = marcaText.split(" ")
 
                     if (words.length>1){
                         FS = 14
                         doc.setFontSize(FS)
-                        let inLines = doc.splitTextToSize(marcaText, 6.6)
+                        let inLines = doc.splitTextToSize(marcaText, 3.3)
                         
 
                         while (inLines.length>2 || !wordsForWords(words, inLines)){
                             FS -= 0.1
                             doc.setFontSize(FS)
-                            inLines = doc.splitTextToSize(marcaText, 6.6)
+                            inLines = doc.splitTextToSize(marcaText, 3.3)
                         }
                         marcaText = inLines
                         if (inLines.length!=1){
@@ -150,21 +147,18 @@ async function JSPDF (body, params){
             
             doc.setFont("Helvetica", "")
             
-            FS =  body.props.showPrices? 24 : 32
+            FS =  body.props.showPrices? 16 : 32
             doc.setFontSize(FS)
             
             
-            // let line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
-            let line = doc.splitTextToSize(product.ItemName, 10.5)
+            let line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
 
             while (line.length * FS > (body.props.showPrices?50:120)){
                 FS-=0.1
                 doc.setFontSize(FS)
-                // line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
-                line = doc.splitTextToSize(product.ItemName, 10.5)
+                line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
             }
-            // doc.text(line, leftEdge+leftSpace +4, 1.8, "left")
-            doc.text(line, leftEdge+0.6, 1.8, "left")
+            doc.text(line, leftEdge+leftSpace +4, 1.8, "left")
             doc.setFontSize(16)
             
             if(body.props.showPrices){
@@ -177,7 +171,7 @@ async function JSPDF (body, params){
                 doc.text("PMVP:", leftEdge+leftSpace  +4,6, "left")
                 doc.setFont("Helvetica", "")
                 
-                const refFile = fs.readFileSync("./public/ref-black.png")
+                const refFile = fs.readFileSync("./public/ref.png")
                 const ref = new Uint8Array(refFile);
                 doc.addImage(ref, "PNG", leftEdge + leftSpace+ 6.2 , 4.1, 1.2, 1.2)
 
@@ -240,6 +234,7 @@ const controller = {
         let lists = []
         try{
             const result = await sql.query(PRICE_LISTS())
+            
             lists = result.recordset
         }catch(error){
             error = error.message ? error.message : error
@@ -374,7 +369,7 @@ const controller = {
         let x
         let e
         try {
-            if (body.props.priceList.value!=2){
+            if (body.props.priceList.value!=3){
                 const user = await getUser(body.auth.name)
                 if (user.permissions.indexOf('cambiar-listado-precios')<0){
                     throw "cant-change-list"

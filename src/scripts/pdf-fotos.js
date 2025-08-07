@@ -4,7 +4,7 @@ import fs from "fs"
 import { jsPDF } from "jspdf";
 // import { SAP_DB as sql} from "../../utils/mssql.js"
 import { SAP_DB as sql } from "../utils/mssql.js";
-const FIRM_AND_COUNT = function(location,includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=2){
+const FIRM_AND_COUNT = function(location,includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=3){
 
     const query = `
     select 
@@ -33,7 +33,7 @@ const FIRM_AND_COUNT = function(location,includeNoActive=false, includeNoPrice=f
     return query
 }
 
-const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=2){
+const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=3){
     FirmCode = FirmCode.replace(/[\[\]\(\)\;\+\:]/g, "")
     FirmCode = FirmCode.replace("'","''");
     includeNoStock = includeNoStock ? true : false
