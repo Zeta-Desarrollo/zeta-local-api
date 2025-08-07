@@ -30,7 +30,7 @@ const initJobs = async () => {
             true, //start 
             undefined,
             undefined,
-            true ,// config.isActive ? true : false
+            false ,// config.isActive ? true : false
         )
 
         // if (config.isActive) {

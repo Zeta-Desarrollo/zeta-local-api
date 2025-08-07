@@ -11,7 +11,6 @@ const {
 
 import createUploadLink from "apollo-upload-client/createUploadLink.mjs"
 
-console.log("XXDDD", process.env.GATEWAY)
 const uploadLink = createUploadLink({
     // uri: "http://localhost:3000/graphql",
   uri: process.env.GATEWAY,
