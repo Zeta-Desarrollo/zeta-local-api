@@ -345,6 +345,7 @@ export const FACT_AND_COUNT = function(props){
             and opch.DocType='I'
             and opch.DocDate>='${props.minDay}'
 			and opch.DocDate<'${props.maxDay}'
+            and opch.CANCELED = 'N'
             and pch1.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
         group by 
             DocNum, 
