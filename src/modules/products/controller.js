@@ -91,7 +91,7 @@ async function JSPDF (body, params){
             //qr side
             const qrFile = fs.readFileSync("./public/"+product.ItemCode+".png")
             const qr = new Uint8Array(qrFile);
-            doc.addImage(qr, "PNG", leftEdge+leftSpace+5.2, 1.7, 5, 5)
+            doc.addImage(qr, "PNG", leftEdge+leftSpace+5.2, 1.1, 5, 5)
             // doc.addImage(refWhite, "PNG", 3.6+leftSpace+5.2 , 3.7, 1.3, 1.3)
 
 
@@ -100,7 +100,7 @@ async function JSPDF (body, params){
             doc.addImage(logo, "PNG", leftEdge+leftSpace+5.2 + 1.2 , 0.5, 2.87, 1)
             
             if (body.props.showDate){
-                doc.text(body.props.etiquetaDate, leftEdge+leftSpace+5.2 + 1.2, 2);
+                doc.text(body.props.etiquetaDate, leftEdge+leftSpace+5.2 + 1.2, 6.1);
             }
             //qr side
             
