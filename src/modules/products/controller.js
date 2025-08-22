@@ -92,7 +92,7 @@ async function JSPDF (body, params){
             const qrFile = fs.readFileSync("./public/"+product.ItemCode+".png")
             const qr = new Uint8Array(qrFile);
             doc.addImage(qr, "PNG", leftEdge+leftSpace+5.2, 1.7, 5, 5)
-            doc.addImage(refWhite, "PNG", 3.6+leftSpace+5.2 , 3.7, 1.3, 1.3)
+            // doc.addImage(refWhite, "PNG", 3.6+leftSpace+5.2 , 3.7, 1.3, 1.3)
 
 
             const logoFile = fs.readFileSync("./public/zeta-negro.png")
@@ -175,7 +175,7 @@ async function JSPDF (body, params){
                 const refFile = fs.readFileSync("./public/ref.png")
                 const ref = new Uint8Array(refFile);
                 // doc.addImage(ref, "PNG", leftEdge + leftSpace+ 5.2 , 4.1, 1.2, 1.2)
-                doc.addImage(ref, "PNG", leftEdge+leftSpace+1, 4.1, 1.2, 1.2)
+                doc.addImage(ref, "PNG", leftEdge+0.5+leftSpace+1, 4.1, 1.2, 1.2)
 
 
                 const showPrice = formatter.format(
