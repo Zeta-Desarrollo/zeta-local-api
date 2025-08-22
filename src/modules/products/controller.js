@@ -371,7 +371,7 @@ const controller = {
         let x
         let e
         try {
-            if (body.props.priceList.value!=3){
+            if (body.props.priceList.value!=5){
                 const user = await getUser(body.auth.name)
                 if (user.permissions.indexOf('cambiar-listado-precios')<0){
                     throw "cant-change-list"
