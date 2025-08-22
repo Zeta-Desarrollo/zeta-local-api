@@ -187,8 +187,10 @@ async function JSPDF (body, params){
                 const showPMVP = formatter.format(
                 (parseFloat(product.Price) * 1.16)
                 );
+                doc.setFontSize(20)
                 
                 doc.text(showPrice, leftEdge+leftSpace+5.2,4, "right")
+                doc.setFontSize(16)
                 if(product.TaxCodeAR == 'IVA_EXE'){
                     doc.setFontSize(15)
                 }
