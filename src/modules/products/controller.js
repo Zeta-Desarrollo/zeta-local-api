@@ -219,7 +219,7 @@ async function JSPDF (body, params){
     delete global.navigator;
     delete global.btoa;
     }catch(error){
-        console.log("what happened?", error)
+        console.log("what happened?", new Date(), error)
         e = error.message? error.message :error
     }
     return {
@@ -284,7 +284,7 @@ const controller = {
             product = result.recordset[0]
         }catch(err){
             error = err
-            console.log("lmao", err)
+            console.log("error", err)
         }
         return {
             error,
@@ -390,7 +390,27 @@ const controller = {
             error:e
         }
     },
-
+    checkPrint: async (body, params)=>{
+        //priceList
+        const products = {}
+        let totalErrors = 0
+        for (const p of body.products){
+            products[p] = {errors:["not-found"]}
+        }
+        const result = await sql.query(PRODUCTS_BY_CODES(body.products,"TODOS", true, true, true, 5))
+        const codes = result.recordset
+        for (const code of codes){
+            const errors = []
+            if (code.frozenFor != 'N') errors.push("inactive")
+            if (code.onHand <= 0) errors.push("out-of-stock")
+            if (code.Price  <= 0) errors.push("no-price")
+            
+            totalErrors += errors.length
+            products[code.ItemCode] = {...code, errors}
+        }
+        return {products, totalErrors}
+        
+    },
     queryProveedores:async(body, params)=>{
         let error
         let proveedores = []

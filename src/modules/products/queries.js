@@ -58,7 +58,8 @@ export const PRODUCTS_BY_CODES = function(ItemCodes, location, includeNoActive=f
         Price,
         OMRC.FirmName,
         OMRC.FirmCode,
-        TaxCodeAR
+        TaxCodeAR,
+        frozenFor
     from 
         OITM 
     join 

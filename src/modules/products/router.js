@@ -12,6 +12,7 @@ productsRouter.post("/marcas", devFunction, isAuth, checkPermissions([],["imprim
 productsRouter.post("/byMarca/:code", devFunction, isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]), callController(controller.productsByMarca))
 productsRouter.get("/bySearch/:brand/:search",devFunction,  isAuth, checkPermissions(["visor-de-precios"]), callController(controller.productsBySearch))
 productsRouter.post("/redirect",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.redirect))
+productsRouter.post("/checkPrint",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.checkPrint))
 productsRouter.get("/price-lists",devFunction, isAuth, callController(controller.getPriceLists))
 productsRouter.post("/proveedores",devFunction,  isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]),  callController(controller.queryProveedores))
 productsRouter.post("/byProveedor/:code",devFunction,  isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]), callController(controller.productsByProveedor))
