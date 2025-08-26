@@ -46,7 +46,7 @@ async function JSPDF (body, params){
         const productData = {
 
         }
-        const result = await sql.query(PRODUCTS_BY_CODES(body.products, body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+        const result = await sql.query(PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value))
         if (result.recordset.length===0) throw "invalid-codes"
         if (body.products.length==1){
             product=result.recordset[0]
