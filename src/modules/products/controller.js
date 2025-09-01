@@ -272,10 +272,9 @@ async function storageLabel (body, params){
             
         
             doc.setFont("Helvetica", "bold")
-            doc.setFontSize(16)
-            doc.text(product.ItemCode, leftEdge, 0.8, "left")
+            doc.setFontSize(22)
+            doc.text(product.ItemCode, leftEdge, 1, "left")
 
-            doc.text("Ref "+product.U_NIV_I, leftEdge, 1.3, "left")
             doc.setFontSize(16)
 
             let marcaText = product.FirmCode != -1? product.FirmName : ''
@@ -318,22 +317,21 @@ async function storageLabel (body, params){
             doc.setFont("Helvetica", "")
             
             // FS =  body.props.showPrices? 16 : 32
-            FS = 48
+            FS = 20
             doc.setFontSize(FS)
             
             
             let line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge )
 
-            while (line.length * FS > 120){
+            while (line.length * FS > 100){
                 FS-=0.1
                 doc.setFontSize(FS)
                 line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge )
             }
             doc.text(line, leftEdge, 2.3, "left")
-            doc.setFontSize(16)
-        
-
-            
+            doc.setFont("Helvetica", "bold")
+            doc.setFontSize(18)
+            doc.text(product.U_NIV_I, leftEdge, 6.0, "left") //6.2
         
             doc.save("./docs/"+product.ItemCode+".pdf")
             let i = 0
