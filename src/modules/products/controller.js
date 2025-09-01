@@ -2,6 +2,7 @@ import qrcode from "qrcode"
 import { SAP_DB as sql} from "../../utils/mssql.js"
 import fs from "fs"
 // import ipp from "ipp"
+//testcodes
 // import PDFDocument from "pdfkit"
 import ptp from "pdf-to-printer";
 
@@ -207,14 +208,161 @@ async function JSPDF (body, params){
         }
         await merger.save(`./docs/${pdfName}.pdf`)
 
-    await new Promise((resolve, reject)=>{
-        ptp.print("./docs/"+pdfName+".pdf", {
-            printer:"Etiquetas",
-            orientation:"landscape",
-            scale:"shrink",
+    // await new Promise((resolve, reject)=>{
+    //     ptp.print("./docs/"+pdfName+".pdf", {
+    //         printer:"Etiquetas",
+    //         orientation:"landscape",
+    //         scale:"shrink",
             
-        }).then(resolve).catch(reject);
-    })
+    //     }).then(resolve).catch(reject);
+    // })
+    delete global.window;
+    delete global.navigator;
+    delete global.btoa;
+    }catch(error){
+        console.log("what happened?", new Date(), error)
+        e = error.message? error.message :error
+    }
+    return {
+        res:product,
+        error:e
+    }
+}
+
+async function storageLabel (body, params){
+    let e
+    let product = "lol"
+    global.window = {document: {createElementNS: () => {return {}} }};
+    global.navigator = {};
+    global.btoa = () => {};
+    let FS
+    // Default export is a4 paper, portrait, using millimeters for units
+    try{
+        let pdfName = "Bulk "+ (new Date()+"").replace(/:/g,"-")
+        const merger = new PDFMerger()
+        const productData = {
+
+        }
+        const result = await sql.query(PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value))
+        if (result.recordset.length===0) throw "invalid-codes"
+        if (body.products.length==1){
+            product=result.recordset[0]
+        }
+        const allProducts = result.recordset
+        for (const product of allProducts){
+            productData[product.ItemCode] = product
+        }
+
+
+        for (const ItemCode of body.products){
+            const product = productData[ItemCode]
+            
+            const doc = new jsPDF({
+                orientation: "landscape",
+                unit: "cm",
+                format: [15.24, 10.08],
+                
+            });
+            
+            const leftEdge = 1.8
+            const leftSpace = 1
+            const rightEdge = 12.5
+            
+            doc.setFontSize(16)
+            
+            //generate qr
+            const url = `http://${process.env.FRONT_IP}/#/consulta/${product.ItemCode}`
+            const filePath = `./public/${product.ItemCode}.png`
+
+            if(!fs.existsSync(filePath)){
+                await qrcode.toFile(filePath,url, {
+                    version:4,
+                    errorCorrectionLevel:"M",
+                    color:{
+                        light: '#0000'
+                    }
+                })
+            }
+            const refWhiteFile = fs.readFileSync("./public/ref-white.png")
+            const refWhite = new Uint8Array(refWhiteFile);
+
+            doc.setFont("Helvetica", "bold")
+            doc.setFontSize(32)
+            doc.text(product.ItemCode, leftEdge, 1, "left")
+
+            let marcaText = product.FirmCode != -1? product.FirmName : ''
+            let marcaLine = 2.1
+            FS = 32
+
+            let size = doc.getTextWidth(marcaText)
+            
+            while (size>(rightEdge-leftEdge-leftSpace)){
+                if(FS<12){
+                    const words = marcaText.split(" ")
+
+                    if (words.length>1){
+                        FS = 18
+                        doc.setFontSize(FS)
+                        let inLines = doc.splitTextToSize(marcaText, 7.2)
+                        
+
+                        while (inLines.length>2 || !wordsForWords(words, inLines)){
+                            FS -= 0.1
+                            doc.setFontSize(FS)
+                            inLines = doc.splitTextToSize(marcaText, 7.2)
+                        }
+                        marcaText = inLines
+                        if (inLines.length!=1){
+                            marcaLine = 1.5
+                        }
+                        break
+                    }
+
+                }
+                
+                FS -= 0.1
+                doc.setFontSize(FS)
+                size = doc.getTextWidth(marcaText)
+
+                
+            }
+            const brandFS = FS
+            doc.text(marcaText, rightEdge, marcaLine, "right")
+            doc.setFontSize(16)
+            
+            doc.setFont("Helvetica", "")
+            
+            FS =  48
+            doc.setFontSize(FS)
+            
+            
+            let line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge )
+
+            while (line.length * FS > 180){
+                FS-=0.1
+                doc.setFontSize(FS)
+                line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge )
+            }
+            doc.text(line, leftEdge, 3.5+(brandFS<24?0.5:0), "left")
+
+            doc.save("./docs/"+product.ItemCode+".pdf")
+            let i = 0
+            while (i<body.props.copies){
+                await merger.add("./docs/"+product.ItemCode+".pdf");
+                i++
+            }
+
+        }
+        await merger.save(`./docs/${pdfName}.pdf`)
+
+    // await new Promise((resolve, reject)=>{
+    //     ptp.print("./docs/"+pdfName+".pdf", {
+    //         printer:"Etiquetas",
+    //         orientation:"landscape",
+    //         scale:"shrink",
+            
+    //     }).then(resolve).catch(reject);
+    // })
     delete global.window;
     delete global.navigator;
     delete global.btoa;
@@ -375,7 +523,41 @@ const controller = {
                     throw "cant-change-list"
                 }
             }
-            const result = await JSPDF(body, params)
+            // console.log("body", body)
+            // let res
+            // res = await sql.query(`
+            //     select top 1 ItemCode, (len(ItemName) - len(replace(ItemName,' ',''))+1) as length from oitm order by length desc;
+            // `)
+            // console.log("res1",res.recordset)
+            // res = await sql.query(`
+            //     select top 1 oitm.ItemCode, Price, len(CAST(Price as int)) as length from oitm join itm1 on oitm.ItemCode = itm1.ItemCode 
+            //     where 
+            //         priceList=3
+            //         and OITM.SellItem='Y'
+            //         and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO') 
+            //     order by length desc;
+            // `)
+            // console.log("res2",res.recordset)
+            // res = await sql.query(`
+            //     select top 1 oitm.ItemCode, FirmName, len(FirmName) as length from oitm 
+            //         join itm1 on oitm.ItemCode = itm1.ItemCode 
+            //         join OMRC on OITM.FirmCode = OMRC.FirmCode
+            //     where 
+            //         priceList=3
+            //         and OITM.SellItem='Y'
+            //         and omrc.FirmCode!='-1'
+            //         and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO') 
+            //     order by length desc;
+            // `)
+            // console.log("res3",res.recordset)
+
+
+            let result
+            if (body.props.storageLabel){
+                result = await storageLabel(body, params)
+            }else{
+                result = await JSPDF(body, params)
+            }
             if (result.error){
                 e = result.error
             }
