@@ -355,14 +355,14 @@ async function storageLabel (body, params){
         }
         await merger.save(`./docs/${pdfName}.pdf`)
 
-    // await new Promise((resolve, reject)=>{
-    //     ptp.print("./docs/"+pdfName+".pdf", {
-    //         printer:"Etiquetas",
-    //         orientation:"landscape",
-    //         scale:"shrink",
+    await new Promise((resolve, reject)=>{
+        ptp.print("./docs/"+pdfName+".pdf", {
+            printer:"Etiquetas",
+            orientation:"landscape",
+            scale:"shrink",
             
-    //     }).then(resolve).catch(reject);
-    // })
+        }).then(resolve).catch(reject);
+    })
     delete global.window;
     delete global.navigator;
     delete global.btoa;
