@@ -264,7 +264,7 @@ async function storageLabel (body, params){
                 
             });
             
-            const leftEdge = 1.8
+            const leftEdge = 2
             const leftSpace = 1
             const rightEdge = 12.5
             
@@ -273,9 +273,9 @@ async function storageLabel (body, params){
         
             doc.setFont("Helvetica", "bold")
             doc.setFontSize(16)
-            doc.text(product.ItemCode, leftEdge, 0.5, "left")
+            doc.text(product.ItemCode, leftEdge, 0.8, "left")
 
-            doc.text("Ref "+product.U_NIV_I, leftEdge, 1, "left")
+            doc.text("Ref "+product.U_NIV_I, leftEdge, 1.3, "left")
             doc.setFontSize(16)
 
             let marcaText = product.FirmCode != -1? product.FirmName : ''
@@ -329,7 +329,7 @@ async function storageLabel (body, params){
                 doc.setFontSize(FS)
                 line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge )
             }
-            doc.text(line, leftEdge, 2, "left")
+            doc.text(line, leftEdge, 2.3, "left")
             doc.setFontSize(16)
         
 
