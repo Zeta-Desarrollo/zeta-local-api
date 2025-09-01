@@ -53,6 +53,7 @@ export const PRODUCTS_BY_CODES = function(ItemCodes, location, includeNoActive=f
     return `
     select 
         OITM.ItemCode,
+        U_NIV_I,
         ItemName,
         onHand,
         Price,

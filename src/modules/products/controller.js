@@ -270,50 +270,37 @@ async function storageLabel (body, params){
             
             doc.setFontSize(16)
             
-            //generate qr
-            const url = `http://${process.env.FRONT_IP}/#/consulta/${product.ItemCode}`
-            const filePath = `./public/${product.ItemCode}.png`
-
-            if(!fs.existsSync(filePath)){
-                await qrcode.toFile(filePath,url, {
-                    version:4,
-                    errorCorrectionLevel:"M",
-                    color:{
-                        light: '#0000'
-                    }
-                })
-            }
-            const refWhiteFile = fs.readFileSync("./public/ref-white.png")
-            const refWhite = new Uint8Array(refWhiteFile);
-
+        
             doc.setFont("Helvetica", "bold")
-            doc.setFontSize(32)
-            doc.text(product.ItemCode, leftEdge, 1, "left")
+            doc.setFontSize(16)
+            doc.text(product.ItemCode, leftEdge, 0.5, "left")
+
+            doc.text("Ref "+product.U_NIV_I, leftEdge, 1, "left")
+            doc.setFontSize(16)
 
             let marcaText = product.FirmCode != -1? product.FirmName : ''
-            let marcaLine = 2.1
-            FS = 32
-
+            let marcaLine = 1
             let size = doc.getTextWidth(marcaText)
             
-            while (size>(rightEdge-leftEdge-leftSpace)){
-                if(FS<12){
+            FS = 16 
+            while (size>5.2){
+                if(FS<11){
                     const words = marcaText.split(" ")
 
                     if (words.length>1){
-                        FS = 18
+                        FS = 14
                         doc.setFontSize(FS)
-                        let inLines = doc.splitTextToSize(marcaText, 7.2)
+                        let inLines = doc.splitTextToSize(marcaText, 3.3)
                         
 
                         while (inLines.length>2 || !wordsForWords(words, inLines)){
                             FS -= 0.1
                             doc.setFontSize(FS)
-                            inLines = doc.splitTextToSize(marcaText, 7.2)
+                            inLines = doc.splitTextToSize(marcaText, 3.3)
                         }
                         marcaText = inLines
                         if (inLines.length!=1){
-                            marcaLine = 1.5
+                            marcaLine = 0.5
                         }
                         break
                     }
@@ -323,28 +310,31 @@ async function storageLabel (body, params){
                 FS -= 0.1
                 doc.setFontSize(FS)
                 size = doc.getTextWidth(marcaText)
-
                 
             }
-            const brandFS = FS
             doc.text(marcaText, rightEdge, marcaLine, "right")
             doc.setFontSize(16)
             
             doc.setFont("Helvetica", "")
             
-            FS =  48
+            // FS =  body.props.showPrices? 16 : 32
+            FS = 48
             doc.setFontSize(FS)
             
             
             let line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge )
 
-            while (line.length * FS > 180){
+            while (line.length * FS > 120){
                 FS-=0.1
                 doc.setFontSize(FS)
                 line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge )
             }
-            doc.text(line, leftEdge, 3.5+(brandFS<24?0.5:0), "left")
+            doc.text(line, leftEdge, 2, "left")
+            doc.setFontSize(16)
+        
 
+            
+        
             doc.save("./docs/"+product.ItemCode+".pdf")
             let i = 0
             while (i<body.props.copies){
@@ -524,11 +514,14 @@ const controller = {
                 }
             }
             // console.log("body", body)
-            // let res
-            // res = await sql.query(`
-            //     select top 1 ItemCode, (len(ItemName) - len(replace(ItemName,' ',''))+1) as length from oitm order by length desc;
-            // `)
-            // console.log("res1",res.recordset)
+            let res
+            res = await sql.query(`
+                select top 3 ItemCode, (len(ItemName) - len(replace(ItemName,' ',''))+1) as length from oitm order by length desc;
+            `)
+            console.log("res1",res.recordset)
+            //1011625
+            //3006080
+            //3006079
             // res = await sql.query(`
             //     select top 1 oitm.ItemCode, Price, len(CAST(Price as int)) as length from oitm join itm1 on oitm.ItemCode = itm1.ItemCode 
             //     where 
@@ -550,7 +543,7 @@ const controller = {
             //     order by length desc;
             // `)
             // console.log("res3",res.recordset)
-
+            //5001504
 
             let result
             if (body.props.storageLabel){
