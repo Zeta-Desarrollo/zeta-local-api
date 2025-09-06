@@ -517,11 +517,11 @@ const controller = {
                 }
             }
             // console.log("body", body)
-            let res
-            res = await sql.query(`
-                select top 3 ItemCode, (len(ItemName) - len(replace(ItemName,' ',''))+1) as length from oitm order by length desc;
-            `)
-            console.log("res1",res.recordset)
+            // let res
+            // res = await sql.query(`
+            //     select top 3 ItemCode, (len(ItemName) - len(replace(ItemName,' ',''))+1) as length from oitm order by length desc;
+            // `)
+            // console.log("res1",res.recordset)
             //1011625
             //3006080
             //3006079
