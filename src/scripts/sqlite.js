@@ -1,9 +1,7 @@
-// const sqlite3 = require('sqlite3').verbose();
 import {config} from "dotenv"
 config()
 import bcrypt from "bcrypt"
-import sqlite3 from "sqlite3"
-const db = new sqlite3.Database("sqlite.db")
+import { sqliteDB as db } from "../utils/sqlite.js"
 function task (){
     db.serialize(() => {
         // db.run("CREATE TABLE permissions (name TEXT)");
@@ -98,7 +96,13 @@ function task (){
         // db.run("delete from sysconfig where name='TicketsActive'")
         // db.run("ALTER TABLE product_tickets ADD COLUMN ProductName TEXT")
         // db.run("ALTER TABLE product_tickets ADD COLUMN ProductAmount TEXT")
-        db.run("create table product_data ( ItemCode TEXT,hash TEXT,json TEXT)")
+        // db.run("create table product_data ( ItemCode TEXT,hash TEXT,json TEXT)")
+        db.run("create table impresion (Number INT, Date TEXT, mode TEXT, finished INT, status TEXT)")
+        db.run("create table impresion_etiqueta (Impresion INT, orden INT, ItemCode TEXT, printed INT)")
+        db.run("insert into impresion values (0, '', '', 1, 'null')")
+        db.run("INSERT INTO sysconfig VALUES ('PrintLabels','true')");
+
+
 
     });
     

@@ -6,14 +6,13 @@ import fs from "fs"
 import crypto from "crypto"
 import path, { resolve } from "path"
 import sharp from "sharp"
-import sqlite3 from "sqlite3"
+import { sqliteDB as sqlite } from "../utils/sqlite.js"
 
 import { apolloClient, SET_PRODUCT_IMAGE } from "../apollo.js"
 
 async function task (){
     try{
         if (SAP_DB ===undefined) throw "no-sap-db"
-        const sqlite = new sqlite3.Database("sqlite.db")
         //inicializar imagenes
         sqlite.serialize(async ()=>{
             

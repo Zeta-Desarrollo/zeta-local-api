@@ -1,6 +1,7 @@
 import qrcode from "qrcode"
 import { SAP_DB as sql} from "../../utils/mssql.js"
 import fs from "fs"
+
 // import ipp from "ipp"
 //testcodes
 // import PDFDocument from "pdfkit"
@@ -11,6 +12,8 @@ import PDFMerger from "pdf-merger-js";
 import { jsPDF } from "jspdf";
 
 import { getUser } from "../user/controller.js";
+
+import { sqliteDB, sqlPromise } from "../../utils/sqlite.js";
 
 const formatter = new Intl.NumberFormat("es-ES", {
     minimumFractionDigits: 2,
@@ -589,6 +592,51 @@ const controller = {
         return {products, totalErrors}
         
     },
+    backendBulkPrint:async(body, params)=>{
+        let result
+        let error 
+
+        try {
+            const impresionActiva = await sqlPromise(sqliteDB, "all", "select Number from impresion where finished != 1")
+            if (impresionActiva.length>0) throw "print-active"
+            
+            const impresionPrevia = await sqlPromise(sqliteDB, "get", "select Number from impresion order by Number desc")
+            console.log("res", impresionPrevia)
+
+            const sql =  `insert into impresion values (${impresionPrevia.Number+1}, '${new Date()}', '${JSON.stringify(body.props)}', 0, 'start')`
+
+            await sqlPromise(sqliteDB, "run", sql )
+
+            for (let index = 0; index < body.products.length; index++){
+                const product = body.products[index]
+                await sqlPromise(sqliteDB, "run", `insert into impresion_etiqueta values (${impresionPrevia.Number+1}, ${index}, '${product}', 0)`)
+            }
+
+            
+        }catch(e){
+            console.log("ocurrio un error", new Date(), e)
+            error = e 
+        }
+
+
+        return {
+            error,
+            result
+        }
+
+
+    },
+    cancelBulkPrint:async(body,params)=>{
+        let error = ""
+        try{
+            await sqlPromise(sqliteDB, "run", "update impresion set finished=1, status='canceled' where finished =0")
+        }catch(e){
+            error =e
+        }
+        return {
+            error
+        }
+    },
     queryProveedores:async(body, params)=>{
         let error
         let proveedores = []
@@ -662,5 +710,5 @@ const controller = {
     },
 
 }
-export {JSPDF}
+export {JSPDF, storageLabel}
 export default controller

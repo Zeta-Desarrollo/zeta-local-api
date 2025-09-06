@@ -2,8 +2,7 @@ import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
 
-import sqlite3 from "sqlite3"
-const sqlite = new sqlite3.Database("sqlite.db")
+import { sqliteDB as sqlite } from "../../utils/sqlite.js"
 
 export async function getUser(userName){
   return new Promise((resolve, reject)=>{

@@ -1,10 +1,9 @@
 
 
-import sqlite3 from "sqlite3"
+import { sqliteDB as sqlite } from "../../utils/sqlite.js";
 import ptp from "pdf-to-printer";
 
 import { sqlPromise } from "../../utils/sqlite.js"
-const sqlite = new sqlite3.Database("sqlite.db")
 
 const controller = {
     ticketsConfig: async(body, params)=>{

@@ -2,10 +2,9 @@ import { ALL_PRODUCTS } from "../modules/products/queries.js"
 import { SAP_DB } from "../utils/mssql.js"
 import uniqid from "uniqid"
 import { apolloClient, JOB_UPDATE_PRODUCTS, JOB_UPDATE_PRODUCTS_STARTS, LOGIN, data } from "../apollo.js"
-import sqlite3 from "sqlite3"
+import { sqliteDB as db } from "../utils/sqlite.js"
 // import { hashSync, compareSync } from "bcrypt"
 import {createHash} from "node:crypto"
-const db = new sqlite3.Database("sqlite.db")
 import { sqlPromise } from "../utils/sqlite.js"
 
 async function task() {

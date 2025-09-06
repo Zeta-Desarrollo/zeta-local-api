@@ -1,4 +1,4 @@
-import sqlite3 from "sqlite3"
+import { sqliteDB as db } from "../utils/sqlite.js";
 import { sqlPromise } from "../utils/sqlite.js"
 
 import ptp from "pdf-to-printer";
@@ -152,7 +152,6 @@ function generateProductTicket(bottomMessage, topMessage, factura, ticket, amoun
 }
 async function task (){
     try{
-        const db = new sqlite3.Database("sqlite.db")
         global.window = {document: {createElementNS: () => {return {}} }};
         global.navigator = {};
         global.btoa = () => {};

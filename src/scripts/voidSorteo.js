@@ -1,6 +1,5 @@
 // const sqlite3 = require('sqlite3').verbose();
-import sqlite3 from "sqlite3"
-const db = new sqlite3.Database("sqlite.db")
+import { sqliteDB as db } from "../utils/sqlite.js";
 import fs from "fs"
 
 import { sqlPromise } from "../utils/sqlite.js";

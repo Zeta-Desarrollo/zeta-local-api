@@ -1,7 +1,7 @@
 import ptp from "pdf-to-printer";
 import PDFMerger from "pdf-merger-js";
 import { jsPDF } from "jspdf";
-import sqlite from "sqlite3"
+import { sqliteDB as db } from "../utils/sqlite.js";
 import { sqlPromise } from "../utils/sqlite.js";
 
 const formatter = new Intl.NumberFormat("es-ES", {
@@ -261,7 +261,6 @@ function generateTicket(bottomMessage, factura, ticket, amount, subNumber){
 }
 async function task (){
     const merger = new PDFMerger()
-    const db = new sqlite.Database("sqlite.db")
     const sysconfig = await sqlPromise(db, "get", "select * from sysconfig where name ='CentsPerTicket'")
     const bottomMessage = await sqlPromise(db, "get", "select * from sysconfig where name ='BottomMessage'")
     const factura = await sqlPromise(db, "get", `select * from facturas where FullCode='${'C002-01-0009421600074145'}'`)

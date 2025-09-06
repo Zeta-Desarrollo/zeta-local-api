@@ -2,10 +2,9 @@ import { Console } from "console"
 import { SAP_DB, KLK_DB } from "../utils/mssql.js"
 import { sqlPromise } from "../utils/sqlite.js"
 
-import sqlite3 from "sqlite3"
+import { sqliteDB as db } from "../utils/sqlite.js"
 async function task (){
     try{
-        const db = new sqlite3.Database("sqlite.db")
 
         // const xd = await KLK_DB.query("select * from KLK_CAJA")
         // console.log("SSS",xd)
