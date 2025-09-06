@@ -78,7 +78,8 @@ export const PRODUCTS_BY_CODES = function(ItemCodes, location, includeNoActive=f
         ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
         ${ includeNoStock ? '' : 'and OITM.OnHand > 0'}
         ${ includeNoPrice ? '' : 'and ITM1.Price > 0'}
-        and OITM.ItemCode in (${parsed})`
+        and OITM.ItemCode in (${parsed})
+    order by OITM.ItemCode desc`
 }
 
 
