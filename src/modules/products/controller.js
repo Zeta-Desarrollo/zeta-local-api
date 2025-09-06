@@ -89,24 +89,25 @@ async function JSPDF (body, params){
             }
             const refWhiteFile = fs.readFileSync("./public/ref-white.png")
             const refWhite = new Uint8Array(refWhiteFile);
-
+            //qr side
             const qrFile = fs.readFileSync("./public/"+product.ItemCode+".png")
             const qr = new Uint8Array(qrFile);
-            doc.addImage(qr, "PNG", leftEdge+0, 0, 5, 5)
-            doc.addImage(refWhite, "PNG", 3.6 , 2, 1.3, 1.3)
+            doc.addImage(qr, "PNG", leftEdge+leftSpace+5.2, 1.1, 5, 5)
+            // doc.addImage(refWhite, "PNG", 3.6+leftSpace+5.2 , 3.7, 1.3, 1.3)
 
 
             const logoFile = fs.readFileSync("./public/zeta-negro.png")
             const logo = new Uint8Array(logoFile);
-            doc.addImage(logo, "PNG", leftEdge + 1.2 , 4.7, 2.87, 1)
+            doc.addImage(logo, "PNG", leftEdge+leftSpace+5.2 + 1.2 , 0.5, 2.87, 1)
             
             if (body.props.showDate){
-                doc.text(body.props.etiquetaDate, leftEdge + 1.2, 6.2);
+                doc.text(body.props.etiquetaDate, leftEdge+leftSpace+5.2 + 1.2, 6.1);
             }
+            //qr side
             
             doc.setFont("Helvetica", "bold")
             doc.setFontSize(16)
-            doc.text(product.ItemCode, leftEdge +leftSpace+4, 1, "left")
+            doc.text(product.ItemCode, leftEdge+0.5, 1, "left")
             doc.setFontSize(16)
 
             let marcaText = product.FirmCode != -1? product.FirmName : ''
@@ -143,7 +144,7 @@ async function JSPDF (body, params){
                 size = doc.getTextWidth(marcaText)
                 
             }
-            doc.text(marcaText, rightEdge, marcaLine, "right")
+            doc.text(marcaText, leftEdge+leftSpace+5.2, marcaLine, "right")
             doc.setFontSize(16)
             
             doc.setFont("Helvetica", "")
@@ -159,7 +160,7 @@ async function JSPDF (body, params){
                 doc.setFontSize(FS)
                 line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge - leftSpace -4)
             }
-            doc.text(line, leftEdge+leftSpace +4, 1.8, "left")
+            doc.text(line, leftEdge+0.5, 1.8, "left")
             doc.setFontSize(16)
             
             if(body.props.showPrices){
@@ -167,14 +168,15 @@ async function JSPDF (body, params){
                 if (product.Price<=86){
                 doc.setFontSize(20)
                 }
-                doc.text("B.I:", leftEdge+leftSpace +4, 4, "left")
-                doc.text("IVA:", leftEdge+leftSpace  +4,5, "left")
-                doc.text("PMVP:", leftEdge+leftSpace  +4,6, "left")
+                doc.text("B.I:", leftEdge+0.5, 4, "left")
+                doc.text("IVA:", leftEdge+0.5,5, "left")
+                doc.text("PMVP:", leftEdge+0.5,6, "left")
                 doc.setFont("Helvetica", "")
                 
-                const refFile = fs.readFileSync("./public/ref.png")
+                const refFile = fs.readFileSync("./public/ref-square.png")
                 const ref = new Uint8Array(refFile);
-                doc.addImage(ref, "PNG", leftEdge + leftSpace+ 6.2 , 4.1, 1.2, 1.2)
+                // doc.addImage(ref, "PNG", leftEdge + leftSpace+ 5.2 , 4.1, 1.2, 1.2)
+                doc.addImage(ref, "PNG", leftEdge+0.5+leftSpace+1, 4.1, 1.2, 1.2)
 
 
                 const showPrice = formatter.format(
@@ -186,14 +188,16 @@ async function JSPDF (body, params){
                 const showPMVP = formatter.format(
                 (parseFloat(product.Price) * 1.16)
                 );
+                doc.setFontSize(20)
                 
-                doc.text(showPrice, rightEdge,4, "right")
+                doc.text(showPrice, leftEdge+leftSpace+5.2,4, "right")
+                doc.setFontSize(16)
                 if(product.TaxCodeAR == 'IVA_EXE'){
                     doc.setFontSize(15)
                 }
-                doc.text(product.TaxCodeAR == 'IVA_EXE'? 'EXENTO'  : showIVA, rightEdge,5, "right")
+                doc.text(product.TaxCodeAR == 'IVA_EXE'? 'EXENTO'  : showIVA, leftEdge+leftSpace+5.2,5, "right")
                 doc.setFontSize(20)
-                doc.text(product.TaxCodeAR == 'IVA_EXE'? showPrice : showPMVP, rightEdge,6, "right")
+                doc.text(product.TaxCodeAR == 'IVA_EXE'? showPrice : showPMVP, leftEdge+leftSpace+5.2,6, "right")
             }
 
             
@@ -228,6 +232,7 @@ async function JSPDF (body, params){
         error:e
     }
 }
+
 
 async function storageLabel (body, params){
     let e
