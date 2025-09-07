@@ -624,16 +624,41 @@ const controller = {
             result
         }
 
+    },
+    getBulkPrintStatus:async(body,params)=>{
+        let impresionActiva = {}
+        let etiquetas = []
+        const r1 = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1")
+        if(r1.length>0){
+            impresionActiva = r1[0]
+            etiquetas = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Impresion=${impresionActiva.Number}`)
+        }
+        return {
+            impresionActiva,
+            etiquetas
+        }
+
 
     },
     cancelBulkPrint:async(body,params)=>{
         let error = ""
+        let remains = []
         try{
-            await sqlPromise(sqliteDB, "run", "update impresion set finished=1, status='canceled' where finished =0")
+            const r1 = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1")
+
+            if(r1.length>0){
+                const impresionActiva = r1[0]
+                await sqlPromise(sqliteDB, "run", `update impresion set finished=1, status='canceled' where Number=${impresionActiva.Number}`)
+                const r2 = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Impresion=${impresionActiva.Number} and printed=0`)
+                remains = r2.map((i)=>i.ItemCode)
+            }
+
+ 
         }catch(e){
             error =e
         }
         return {
+            remains,
             error
         }
     },
