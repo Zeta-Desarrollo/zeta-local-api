@@ -113,6 +113,7 @@ export const FIRM_AND_COUNT = function(location,includeNoActive=false, includeNo
 }
 
 export const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5){
+    console.log("FFF", FirmCode)
     FirmCode = FirmCode.replace(/[\[\]\(\)\;\+\:]/g, "")
     FirmCode = FirmCode.replace("'","''");
     includeNoStock = includeNoStock ? true : false
@@ -120,6 +121,7 @@ export const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=fa
     select 
         OITM.ItemCode,
         ItemName,
+        frozenFor,
         onHand,
         U_NIV_I,
         Price,
@@ -291,6 +293,7 @@ export const PRODUCTS_BY_PROVEEDOR = function(CardCode, location, includeNoActiv
     select 
         OITM.ItemCode,
         ItemName,
+        frozenFor,
         onHand,
         U_NIV_I,
         Price,
@@ -360,7 +363,7 @@ export const FACT_AND_COUNT = function(props){
         return query
 }
 
-export const PRODUCTS_BY_FACTURA = function(DocEntry, priceList=5){
+export const PRODUCTS_BY_FACTURA = function(DocEntry, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5){
     const query = `
     select 
         OITM.ItemCode,
@@ -371,6 +374,7 @@ export const PRODUCTS_BY_FACTURA = function(DocEntry, priceList=5){
         OMRC.FirmName,
         OMRC.FirmCode,
         OITM.ItmsGrpCod,
+        frozenFor,
         OITM.TaxCodeAR
     from 
         OITM 

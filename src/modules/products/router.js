@@ -15,7 +15,7 @@ productsRouter.post("/singleCode",  devFunction, isAuth, checkPermissions(["impr
 productsRouter.post("/bulkPrint",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.backendBulkPrint))
 productsRouter.get("/getBulkPrintStatus",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.getBulkPrintStatus))
 productsRouter.post("/cancelBulkPrint",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.cancelBulkPrint))
-productsRouter.post("/checkPrint",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.checkPrint))
+productsRouter.post("/checkPrint",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.checkBulkPrint))
 productsRouter.get("/price-lists",devFunction, isAuth, callController(controller.getPriceLists))
 productsRouter.post("/proveedores",devFunction,  isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]),  callController(controller.queryProveedores))
 productsRouter.post("/byProveedor/:code",devFunction,  isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]), callController(controller.productsByProveedor))

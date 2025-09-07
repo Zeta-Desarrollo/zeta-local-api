@@ -8,19 +8,19 @@ async function task() {
             return
         }
 
-        const result = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1 order by Number desc")
+        const result = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1 order by Impresion desc")
         if (result.length == 0){
             console.log("no hay impresion activa")
             return
         }
         const impresionActiva = result [0]
         const props = JSON.parse(impresionActiva.mode)
-        const siguientes = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Impresion =${impresionActiva.Number} and printed = 0 order by orden asc limit 10`) 
+        const siguientes = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Impresion =${impresionActiva.Impresion} and printed = 0 order by orden asc limit 10`) 
         //revisar si ya se imprimieron todos
         console.log("siguie", siguientes)
         if (siguientes.length == 0){
-            await sqlPromise(sqliteDB, "run", `update impresion set finished=1, status='finished' where Number = ${impresionActiva.Number} `)
-            console.log("impresion", impresionActiva.Number, "finalizada")
+            await sqlPromise(sqliteDB, "run", `update impresion set finished=1, status='finished' where Impresion = ${impresionActiva.Impresion} `)
+            console.log("impresion", impresionActiva.Impresion, "finalizada")
             return
         }
         const codigos = siguientes.map((i)=>i.ItemCode)
@@ -38,7 +38,7 @@ async function task() {
             }
         //imprimir etiquetas
 
-        await sqlPromise(sqliteDB, "run", `update impresion_etiqueta set printed = 1 where Impresion=${impresionActiva.Number} and ItemCode in ${mapeados}`) 
+        await sqlPromise(sqliteDB, "run", `update impresion_etiqueta set printed = 1 where Impresion=${impresionActiva.Impresion} and ItemCode in ${mapeados}`) 
 
 
     } catch (error) {

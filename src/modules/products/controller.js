@@ -443,7 +443,7 @@ const controller = {
             if (!params.code) throw  "code-required"
             const location = body.props.location? body.props.location: "TODOS"
 
-            const result = await sql.query(PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+            const result = await sql.query(PRODUCTS_BY_MARCA(params.code, body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
             if (result.recordset.length===0) throw "invalid-code"
             
             products = result.recordset
@@ -592,32 +592,110 @@ const controller = {
         return {products, totalErrors}
         
     },
+    checkBulkPrint:async (body, param)=>{
+        /**
+         *  body : {
+         *      props:{}
+         *      type:"",
+         *      products:[],
+         *      bulks:[]
+         * }
+         */
+        const products = {}
+        const uncheckedBulks=[]
+        let totalErrors = 0
+        try{
+
+        switch (body.type){
+            case "codes":
+                const result = await sql.query(PRODUCTS_BY_CODES(body.products,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+                uncheckedBulks.push({
+                    code:"codes",
+                    name:"codes",
+                    products:result.recordset
+                })
+                break;
+            default:
+                const search = body.type=="marcas"? PRODUCTS_BY_MARCA: (body.type=="facturas"?PRODUCTS_BY_FACTURA:PRODUCTS_BY_PROVEEDOR)
+                for (const bulk of body.bulks){
+                    const result = await sql.query(search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+                        uncheckedBulks.push({
+                        code:bulk.code,
+                        name:bulk.name,
+                        products:result.recordset
+                    })
+                }
+                
+
+        }
+
+        for (const bulk of uncheckedBulks){
+            for (const product of bulk.products){
+                    const errors = []
+                    if (product.frozenFor != 'N') errors.push("inactive")
+                    if (product.onHand <= 0) errors.push("out-of-stock")
+                    if (product.Price  <= 0) errors.push("no-price")
+                    totalErrors += errors.length
+                    products[product.ItemCode] = errors
+            }
+        }
+    }catch(e){
+        console.log("???", e)
+    }
+        return {products, totalErrors}
+
+    },
     backendBulkPrint:async(body, params)=>{
+        /**
+         * body : {
+         *      exclude:[]
+         *      props: {}, // print options
+         *      type:  ""  // brand, reciept, provider, code
+         *      bulks:[    
+         *          {
+  
+         *                  code: "",  // DB Code for type
+         *                  name: "",  // DB Display name
+
+         *          }
+         *      ]
+         * }
+         */
         let result
         let error 
-
         try {
-            const impresionActiva = await sqlPromise(sqliteDB, "all", "select Number from impresion where finished != 1")
+            const impresionActiva = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
             if (impresionActiva.length>0) throw "print-active"
             
-            const impresionPrevia = await sqlPromise(sqliteDB, "get", "select Number from impresion order by Number desc")
-            console.log("res", impresionPrevia)
+            const impresionPrevia = await sqlPromise(sqliteDB, "get", "select Impresion from impresion order by Impresion desc")
 
-            const sql =  `insert into impresion values (${impresionPrevia.Number+1}, '${new Date()}', '${JSON.stringify(body.props)}', 0, 'start')`
+            const sqlString =  `insert into impresion values (${impresionPrevia.Impresion+1}, '${+(new Date())}', '${body.type}','${JSON.stringify(body.props)}',  0, 'start')`
 
-            await sqlPromise(sqliteDB, "run", sql )
+            await sqlPromise(sqliteDB, "run", sqlString )
 
-            for (let index = 0; index < body.products.length; index++){
-                const product = body.products[index]
-                await sqlPromise(sqliteDB, "run", `insert into impresion_etiqueta values (${impresionPrevia.Number+1}, ${index}, '${product}', 0)`)
+            for (let index = 0; index < body.bulks.length; index++){
+                const bulk = body.bulks[index]
+                await sqlPromise(sqliteDB, "run", `insert into impresion_lote values (${impresionPrevia.Impresion+1}, ${index}, '${bulk.code}', '${bulk.name}', 0)`)
+                let sqlResult
+                if(body.type == "codes"){
+                    sqlResult = await sql.query(PRODUCTS_BY_CODES(body.products,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+                }else{
+                    const search = body.type=="marcas"? PRODUCTS_BY_MARCA: (body.type=="facturas"?PRODUCTS_BY_FACTURA:PRODUCTS_BY_PROVEEDOR)
+                    sqlResult = await sql.query(search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+                }
+                const r = sqlResult.recordset.filter((p)=>{
+                    return body.exclude.indexOf(p.ItemCode)<0
+                })
+                for (let index2 = 0; index2 < r.length; index2++){
+                    const product = r[index2]
+                    await sqlPromise(sqliteDB, "run", `insert into impresion_etiqueta values (${index}, ${index2}, '${product.ItemCode}', 0)`)
+                }
             }
-
             
         }catch(e){
             console.log("ocurrio un error", new Date(), e)
             error = e 
         }
-
 
         return {
             error,
@@ -626,41 +704,80 @@ const controller = {
 
     },
     getBulkPrintStatus:async(body,params)=>{
-        let impresionActiva = {}
-        let etiquetas = []
+         /**
+         * data : {
+         *      Impresion: 0, // El indice de la tabla [impresion]
+         *      props: {}, // print options
+         *      type:  ""  // brand, reciept, provider, code
+         *      date: 0,   // Date of print, in miliseconds
+         *      bulks:[    
+         *          {
+         *              Lote: 0, //El indice de la tabla [impresion_lote]
+         *              data:{
+         *                  code: "",  // DB Code for type
+         *                  name: "",  // DB Display name
+         *                  finished:0 // Wether all prints in the bulk are done
+         *              },
+         *              printed:[],    // ItemCodes that have been printed
+         *              notPrinted:[], // ItemCodes that have not been printed
+         *          }
+         *      ]
+         * }
+         */
+        const data = {
+            Impresion:0,
+            props:{},
+            type:"",
+            date: 0,
+            bulks:[]
+        }
+
         const r1 = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1")
         if(r1.length>0){
-            impresionActiva = r1[0]
-            etiquetas = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Impresion=${impresionActiva.Number}`)
+            const impresionActiva = r1[0]
+            data.Impresion = impresionActiva.Impresion
+            data.type = impresionActiva.type
+            data.props = JSON.parse(impresionActiva.mode)
+            data.date = impresionActiva.Date
+            const lotes = await sqlPromise(sqliteDB, "all", `select * from impresion_lote where Impresion=${impresionActiva.Impresion}`)
+            for (const lote of lotes){
+                const bulk = {
+                    Lote: lote.Lote,
+                    data:{
+                        code:lote.code,
+                        name:lote.name
+                    },
+                    printed:[],
+                    notPrinted:[]
+                }
+                const etiquetas = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Lote=${lote.Lote}`)
+                for (const etiqueta of etiquetas){
+                    bulk[etiqueta.printed?"printed":"notPrinted"] = etiqueta.ItemCode
+                }
+                data.bulks.push(bulk)
+            }
         }
-        return {
-            impresionActiva,
-            etiquetas
-        }
+        return data
 
 
     },
     cancelBulkPrint:async(body,params)=>{
         let error = ""
-        let remains = []
+        let Impresion = 0
         try{
             const r1 = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1")
 
             if(r1.length>0){
                 const impresionActiva = r1[0]
-                await sqlPromise(sqliteDB, "run", `update impresion set finished=1, status='canceled' where Number=${impresionActiva.Number}`)
-                const r2 = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Impresion=${impresionActiva.Number} and printed=0`)
-                remains = r2.map((i)=>i.ItemCode)
+                await sqlPromise(sqliteDB, "run", `update impresion set finished=1, status='canceled' where Impresion=${impresionActiva.Impresion}`)
+                Impresion = impresionActiva.Impresion
             }
 
  
         }catch(e){
-            error =e
+            console.log("error", e)
         }
-        return {
-            remains,
-            error
-        }
+        return Impresion
     },
     queryProveedores:async(body, params)=>{
         let error
@@ -720,7 +837,7 @@ const controller = {
         try{
             if (!params.code) throw  "code-required"
 
-            const result = await sql.query(PRODUCTS_BY_FACTURA(params.code, body.props.priceList.value))
+            const result = await sql.query(PRODUCTS_BY_FACTURA(params.code,"", null, null, null, body.props.priceList.value))
             if (result.recordset.length===0) throw "invalid-code"
             
             products = result.recordset
