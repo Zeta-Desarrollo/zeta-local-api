@@ -7,6 +7,7 @@ const productsRouter = Router()
 const devFunction = showData(false)
 
 productsRouter.get("/info/:code", devFunction, callController(controller.queryCode))
+productsRouter.get("/info2/:code", devFunction, callController(controller.productWithDiscounts))
 productsRouter.post("/qr/:code", devFunction, isAuth, checkPermissions(["imprimir-etiquetas"]), callController(controller.generateQR))
 productsRouter.post("/marcas", devFunction, isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]),  callController(controller.queryMarcas))
 productsRouter.post("/byMarca/:code", devFunction, isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]), callController(controller.productsByMarca))

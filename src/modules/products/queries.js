@@ -1,3 +1,31 @@
+export const PRODUCT_MULTI_PRICE = function(ItemCode){
+        const sql = `
+    select 
+        OITM.ItemCode,
+        U_NIV_I,
+        ItemName,
+        onHand,
+        PriceList,
+        Price,
+        OMRC.FirmName,
+        OMRC.FirmCode,
+        TaxCodeAR,
+        frozenFor
+    from 
+        OITM 
+    join 
+        ITM1 
+            on OITM.ItemCode = ITM1.ItemCode 
+    join
+        OMRC
+            on OITM.FirmCode = OMRC.FirmCode
+    where 
+        OITM.SellItem='Y'
+        and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
+        and OITM.ItemCode='${ItemCode}'
+    `
+    return sql
+}
 export const PRICE_LISTS = function(){
     const sql = `
     select 

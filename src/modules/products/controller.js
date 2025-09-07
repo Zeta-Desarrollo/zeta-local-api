@@ -6,7 +6,7 @@ import fs from "fs"
 // import PDFDocument from "pdfkit"
 import ptp from "pdf-to-printer";
 
-import { MARCAS, PRODUCT_BY_CODE, FIRM_AND_COUNT, PRODUCTS_BY_MARCA, PRODUCTS_BY_SEARCH, PRODUCTS_BY_CODES, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR, FACT_AND_COUNT, PRODUCTS_BY_FACTURA } from "./queries.js"
+import { MARCAS, PRODUCT_BY_CODE, FIRM_AND_COUNT, PRODUCT_MULTI_PRICE, PRODUCTS_BY_MARCA, PRODUCTS_BY_SEARCH, PRODUCTS_BY_CODES, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR, FACT_AND_COUNT, PRODUCTS_BY_FACTURA } from "./queries.js"
 import PDFMerger from "pdf-merger-js";
 import { jsPDF } from "jspdf";
 
@@ -370,6 +370,30 @@ async function storageLabel (body, params){
 }
 
 const controller = {
+    productWithDiscounts: async (body,params)=>{
+        let error
+        let product = {}
+        let prices = {}
+
+        try{
+                const results = await sql.query(PRODUCT_MULTI_PRICE(params.code))
+                for (const p of results.recordset){
+                    prices[p.PriceList] = p.Price
+                }
+                product = results.recordset[0]
+                delete product.Price
+                delete product.PriceList
+
+        }catch(e){
+            error = e
+        }
+
+        return {
+            error,
+            product,
+            prices
+        }
+    },
     getPriceLists: async(body, params)=>{
         let error
         let lists = []
