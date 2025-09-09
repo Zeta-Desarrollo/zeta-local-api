@@ -140,8 +140,7 @@ export const FIRM_AND_COUNT = function(location,includeNoActive=false, includeNo
     return query
 }
 
-export const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5){
-    console.log("FFF", FirmCode)
+export const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5, sort="asc"){
     FirmCode = FirmCode.replace(/[\[\]\(\)\;\+\:]/g, "")
     FirmCode = FirmCode.replace("'","''");
     includeNoStock = includeNoStock ? true : false
@@ -174,7 +173,7 @@ export const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=fa
         ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
         ${ includeNoStock ? '' : 'and OITM.OnHand > 0'}
         ${ includeNoPrice ? '' : 'and ITM1.Price > 0'}
-    order by OITM.ItemCode asc
+    order by OITM.ItemCode ${sort}
         `
     return query
 }
@@ -313,7 +312,7 @@ export const PROVIDER_AND_COUNT = function(location,includeNoActive=false, inclu
     return query
 }
 
-export const PRODUCTS_BY_PROVEEDOR = function(CardCode, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5){
+export const PRODUCTS_BY_PROVEEDOR = function(CardCode, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5, sort="asc"){
     CardCode = CardCode.replace(/[\[\]\(\)\;\+\:]/g, "")
     CardCode = CardCode.replace("'","''");
     includeNoStock = includeNoStock ? true : false
@@ -353,7 +352,7 @@ export const PRODUCTS_BY_PROVEEDOR = function(CardCode, location, includeNoActiv
         ${ includeNoActive ? '' : "and OITM.frozenFor = 'N'"}
         ${ includeNoStock ? '' : 'and OITM.OnHand > 0'}
         ${ includeNoPrice ? '' : 'and ITM1.Price > 0'}
-    order by OITM.ItemCode asc
+    order by OITM.ItemCode ${sort}
         `
 
     return query
@@ -391,7 +390,7 @@ export const FACT_AND_COUNT = function(props){
         return query
 }
 
-export const PRODUCTS_BY_FACTURA = function(DocEntry, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5){
+export const PRODUCTS_BY_FACTURA = function(DocEntry, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5, sort = "asc"){
     const query = `
     select 
         OITM.ItemCode,
@@ -419,7 +418,7 @@ export const PRODUCTS_BY_FACTURA = function(DocEntry, location, includeNoActive=
         and pch1.DocEntry='${DocEntry}'
         and pch1.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
 
-    order by pch1.BaseLine asc
+    order by pch1.BaseLine ${sort}
         `
         return query
 }

@@ -101,11 +101,11 @@ function task (){
 
         db.run("create table impresion (Impresion INT, Date TEXT, type TEXT, mode TEXT, finished INT, status TEXT)")
         db.run("create table impresion_lote (Impresion INT, Lote INT, code TEXT, name TEXT, finished INT)")
-        db.run("create table impresion_etiqueta (Lote INT, orden INT, ItemCode TEXT, printed INT)")
+        db.run("create table impresion_etiqueta (Impresion INT, Lote INT, orden INT, ItemCode TEXT, printed INT)")
         
         db.run("insert into impresion values (0, 0, 'codes', '{}', 1, 'null')")
         db.run("insert into impresion_lote values (0, 0, '0', '-', 1)")
-        db.run("insert into impresion_etiqueta values (0, 0, 'ELIMINADO', 1)")
+        db.run("insert into impresion_etiqueta values (0, 0, 0, 'ELIMINADO', 1)")
         
 
 

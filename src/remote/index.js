@@ -19,7 +19,7 @@ let jobs = [
     printPriceTickets,
     printProductTickets,
     cleanDocs,
-    // printLabels
+    printLabels
 ]  
 
 let running = {}

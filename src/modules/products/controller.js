@@ -664,7 +664,7 @@ const controller = {
             }
         }
     }catch(e){
-        console.log("???", e)
+        console.log("error", e)
     }
         return {products, totalErrors}
 
@@ -672,7 +672,8 @@ const controller = {
     backendBulkPrint:async(body, params)=>{
         /**
          * body : {
-         *      exclude:[]
+         *      exclude:[],
+         *      products:[], //list of prodict codes for when type == codes
          *      props: {}, // print options
          *      type:  ""  // brand, reciept, provider, code
          *      bulks:[    
@@ -696,7 +697,7 @@ const controller = {
             const sqlString =  `insert into impresion values (${impresionPrevia.Impresion+1}, '${+(new Date())}', '${body.type}','${JSON.stringify(body.props)}',  0, 'start')`
 
             await sqlPromise(sqliteDB, "run", sqlString )
-
+            
             for (let index = 0; index < body.bulks.length; index++){
                 const bulk = body.bulks[index]
                 await sqlPromise(sqliteDB, "run", `insert into impresion_lote values (${impresionPrevia.Impresion+1}, ${index}, '${bulk.code}', '${bulk.name}', 0)`)
@@ -705,14 +706,14 @@ const controller = {
                     sqlResult = await sql.query(PRODUCTS_BY_CODES(body.products,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
                 }else{
                     const search = body.type=="marcas"? PRODUCTS_BY_MARCA: (body.type=="facturas"?PRODUCTS_BY_FACTURA:PRODUCTS_BY_PROVEEDOR)
-                    sqlResult = await sql.query(search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+                    sqlResult = await sql.query(search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value, "desc"))
                 }
                 const r = sqlResult.recordset.filter((p)=>{
                     return body.exclude.indexOf(p.ItemCode)<0
                 })
                 for (let index2 = 0; index2 < r.length; index2++){
                     const product = r[index2]
-                    await sqlPromise(sqliteDB, "run", `insert into impresion_etiqueta values (${index}, ${index2}, '${product.ItemCode}', 0)`)
+                    await sqlPromise(sqliteDB, "run", `insert into impresion_etiqueta values (${impresionPrevia.Impresion+1}, ${index}, ${index2}, '${product.ItemCode}', 0)`)
                 }
             }
             
@@ -784,6 +785,44 @@ const controller = {
         return data
 
 
+    },
+    bulkPrintStatus: async(body, params)=>{
+        const data = {
+            Impresion:0,
+            Lote:0,
+            LoteCodigo:"",
+            LoteNombre:"",
+            TotalLotes:0,
+            LoteActual:0,
+
+            TotalEtiquetas:0,
+            EtiquetaActual:0
+        }   
+        let foundCurrent = false
+        const r1 = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1")
+        if (r1.length!=0){
+            data.Impresion = r1[0].Impresion
+            const r2 = await sqlPromise(sqliteDB, "all", `select * from impresion_lote where Impresion=${data.Impresion} order by Lote asc`)
+            data.TotalLotes = r2.length
+            data.LoteActual = r2.map(i=>i.finished).reduce((acc, cur)=>acc+cur, 0)
+                for(const lote of r2){
+                    if(!lote.finished && !foundCurrent){
+                        data.Lote = lote.Lote
+                        data.LoteCodigo = lote.code
+                        data.LoteNombre = lote.name
+                        foundCurrent = true
+                        break;
+                    }
+                }
+            if (foundCurrent){
+                const r3 = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Impresion =${data.Impresion} and Lote = ${data.Lote} order by orden asc`)
+                data.TotalEtiquetas = r3.length
+                data.EtiquetaActual = r3.map(i=>i.printed).reduce((acc, cur)=>acc+cur, 0)
+            }
+
+
+        }
+        return data
     },
     cancelBulkPrint:async(body,params)=>{
         let error = ""

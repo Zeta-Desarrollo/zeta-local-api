@@ -27,7 +27,6 @@ const controller = {
         let error
         let price
         try{
-            console.log("body", body)
             for (const sysconfig in body.values){
                 await sqlPromise(sqlite, "run", "update sysconfig set value='"+body.values[sysconfig]+"' where name='"+sysconfig+"'")
             }
@@ -161,7 +160,6 @@ const controller = {
     manualPrint: async(body, params)=>{
         let error
         try{
-            console.log("manual", body)
             const pdfName = "Tickets - "+ body.FullCode
             await new Promise((resolve,reject)=>{
                 sqlite.serialize(async ()=>{
@@ -175,7 +173,7 @@ const controller = {
                         await sqlPromise(sqlite, "run", `update facturas set Checked=1 where FullCode='${body.FullCode}'`)
                         resolve()
                     }catch(e){
-                        console.log("inside",e)
+                        console.log("error",e)
                         reject(e)
                     }
                 }) 
@@ -315,7 +313,6 @@ const controller = {
     manualPrintProductos: async(body, params)=>{
         let error
         try{
-            console.log("manual", body)
             const pdfName = "ProductTickets - "+ body.FullCode
             await new Promise((resolve,reject)=>{
                 sqlite.serialize(async ()=>{
@@ -329,7 +326,6 @@ const controller = {
                         await sqlPromise(sqlite, "run", `update factura_tickets_productos set Finished=1 where FullCode='${body.FullCode}'`)
                         resolve()
                     }catch(e){
-                        console.log("inside",e)
                         reject(e)
                     }
                 }) 
