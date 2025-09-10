@@ -533,46 +533,29 @@ const controller = {
             image
         }
     },
-    redirect:async(body, params)=>{
+    singleCode:async(body, params)=>{
         let x
         let e
         try {
+            const r1 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
+            if (r1.length>0) throw "print-active"
+            const r2 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion order by Impresion desc limit 1")
+            console.log("!!!0,", body)
+            const sqlString =  `insert into impresion values (${r2[0].Impresion+1}, '${+(new Date())}', '${body.type}','${JSON.stringify(body.props)}',  1, 'finished')`
+            await sqlPromise(sqliteDB, "run", sqlString )
+            await sqlPromise(sqliteDB, "run", `insert into impresion_lote values (${r2[0].Impresion+1}, 0, '', 'code', 1)`)
+            await sqlPromise(sqliteDB, "run", `insert into impresion_etiqueta values (0, 0, 0, ${body.products[0]}, 1)`)
+
+
             if (body.props.priceList.value!=5){
                 const user = await getUser(body.auth.name)
                 if (user.permissions.indexOf('cambiar-listado-precios')<0){
                     throw "cant-change-list"
                 }
             }
-            // console.log("body", body)
-            // let res
-            // res = await sql.query(`
-            //     select top 3 ItemCode, (len(ItemName) - len(replace(ItemName,' ',''))+1) as length from oitm order by length desc;
-            // `)
-            // console.log("res1",res.recordset)
             //1011625
             //3006080
             //3006079
-            // res = await sql.query(`
-            //     select top 1 oitm.ItemCode, Price, len(CAST(Price as int)) as length from oitm join itm1 on oitm.ItemCode = itm1.ItemCode 
-            //     where 
-            //         priceList=3
-            //         and OITM.SellItem='Y'
-            //         and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO') 
-            //     order by length desc;
-            // `)
-            // console.log("res2",res.recordset)
-            // res = await sql.query(`
-            //     select top 1 oitm.ItemCode, FirmName, len(FirmName) as length from oitm 
-            //         join itm1 on oitm.ItemCode = itm1.ItemCode 
-            //         join OMRC on OITM.FirmCode = OMRC.FirmCode
-            //     where 
-            //         priceList=3
-            //         and OITM.SellItem='Y'
-            //         and omrc.FirmCode!='-1'
-            //         and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO') 
-            //     order by length desc;
-            // `)
-            // console.log("res3",res.recordset)
             //5001504
 
             let result
@@ -632,7 +615,7 @@ const controller = {
 
         switch (body.type){
             case "codes":
-                const result = await sql.query(PRODUCTS_BY_CODES(body.products,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+                const result = await sql.query(PRODUCTS_BY_CODES(body.products,"TODOS", true, true, true, body.props.priceList.value))
                 uncheckedBulks.push({
                     code:"codes",
                     name:"codes",
@@ -693,7 +676,7 @@ const controller = {
             if (impresionActiva.length>0) throw "print-active"
             
             const impresionPrevia = await sqlPromise(sqliteDB, "get", "select Impresion from impresion order by Impresion desc")
-
+            console.log("??", body)
             const sqlString =  `insert into impresion values (${impresionPrevia.Impresion+1}, '${+(new Date())}', '${body.type}','${JSON.stringify(body.props)}',  0, 'start')`
 
             await sqlPromise(sqliteDB, "run", sqlString )
