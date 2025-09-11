@@ -14,6 +14,9 @@ import { jsPDF } from "jspdf";
 import { getUser } from "../user/controller.js";
 
 import { sqliteDB, sqlPromise } from "../../utils/sqlite.js";
+const cacheData = {
+    printActive:false
+}
 
 const formatter = new Intl.NumberFormat("es-ES", {
     minimumFractionDigits: 2,
@@ -537,6 +540,7 @@ const controller = {
         let x
         let e
         try {
+            console.log("body", body)
             const r1 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
             if (r1.length>0) throw "print-active"
             const r2 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion order by Impresion desc limit 1")
@@ -578,27 +582,7 @@ const controller = {
             error:e
         }
     },
-    checkPrint: async (body, params)=>{
-        //priceList
-        const products = {}
-        let totalErrors = 0
-        for (const p of body.products){
-            products[p] = {errors:["not-found"]}
-        }
-        const result = await sql.query(PRODUCTS_BY_CODES(body.products,"TODOS", true, true, true, 5))
-        const codes = result.recordset
-        for (const code of codes){
-            const errors = []
-            if (code.frozenFor != 'N') errors.push("inactive")
-            if (code.onHand <= 0) errors.push("out-of-stock")
-            if (code.Price  <= 0) errors.push("no-price")
-            
-            totalErrors += errors.length
-            products[code.ItemCode] = {...code, errors}
-        }
-        return {products, totalErrors}
-        
-    },
+
     checkBulkPrint:async (body, param)=>{
         /**
          *  body : {
@@ -674,9 +658,8 @@ const controller = {
         try {
             const impresionActiva = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
             if (impresionActiva.length>0) throw "print-active"
-            
+            cacheData.printActive = true            
             const impresionPrevia = await sqlPromise(sqliteDB, "get", "select Impresion from impresion order by Impresion desc")
-            console.log("??", body)
             const sqlString =  `insert into impresion values (${impresionPrevia.Impresion+1}, '${+(new Date())}', '${body.type}','${JSON.stringify(body.props)}',  0, 'start')`
 
             await sqlPromise(sqliteDB, "run", sqlString )
@@ -711,66 +694,9 @@ const controller = {
         }
 
     },
-    getBulkPrintStatus:async(body,params)=>{
-         /**
-         * data : {
-         *      Impresion: 0, // El indice de la tabla [impresion]
-         *      props: {}, // print options
-         *      type:  ""  // brand, reciept, provider, code
-         *      date: 0,   // Date of print, in miliseconds
-         *      bulks:[    
-         *          {
-         *              Lote: 0, //El indice de la tabla [impresion_lote]
-         *              data:{
-         *                  code: "",  // DB Code for type
-         *                  name: "",  // DB Display name
-         *                  finished:0 // Wether all prints in the bulk are done
-         *              },
-         *              printed:[],    // ItemCodes that have been printed
-         *              notPrinted:[], // ItemCodes that have not been printed
-         *          }
-         *      ]
-         * }
-         */
-        const data = {
-            Impresion:0,
-            props:{},
-            type:"",
-            date: 0,
-            bulks:[]
-        }
-
-        const r1 = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1")
-        if(r1.length>0){
-            const impresionActiva = r1[0]
-            data.Impresion = impresionActiva.Impresion
-            data.type = impresionActiva.type
-            data.props = JSON.parse(impresionActiva.mode)
-            data.date = impresionActiva.Date
-            const lotes = await sqlPromise(sqliteDB, "all", `select * from impresion_lote where Impresion=${impresionActiva.Impresion}`)
-            for (const lote of lotes){
-                const bulk = {
-                    Lote: lote.Lote,
-                    data:{
-                        code:lote.code,
-                        name:lote.name
-                    },
-                    printed:[],
-                    notPrinted:[]
-                }
-                const etiquetas = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Lote=${lote.Lote}`)
-                for (const etiqueta of etiquetas){
-                    bulk[etiqueta.printed?"printed":"notPrinted"] = etiqueta.ItemCode
-                }
-                data.bulks.push(bulk)
-            }
-        }
-        return data
-
-
-    },
     bulkPrintStatus: async(body, params)=>{
         const data = {
+            printActive:cacheData.printActive,
             Impresion:0,
             Lote:0,
             LoteCodigo:"",
@@ -808,22 +734,48 @@ const controller = {
         return data
     },
     cancelBulkPrint:async(body,params)=>{
-        let error = ""
         let Impresion = 0
         try{
+            
             const r1 = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1")
-
-            if(r1.length>0){
-                const impresionActiva = r1[0]
-                await sqlPromise(sqliteDB, "run", `update impresion set finished=1, status='canceled' where Impresion=${impresionActiva.Impresion}`)
-                Impresion = impresionActiva.Impresion
+            
+            if(r1.length>0){    
+                Impresion = r1[0].Impresion
+                await sqlPromise(sqliteDB, "run", `update impresion set finished=1, status='canceled' where Impresion=${r1[0].Impresion}`)
             }
-
  
         }catch(e){
             console.log("error", e)
         }
         return Impresion
+    },
+    getPrintStatus:async(body,params)=>{
+        let impresionActiva = {}
+        try{
+            const r1 = await sqlPromise(sqliteDB, "all", `select * from impresion where Impresion =${body.Impresion}`)
+
+            if(r1.length>0){
+                impresionActiva = {...r1[0], bulks:[]}
+                const Impresion = impresionActiva.Impresion
+                const r2 = await sqlPromise(sqliteDB, "all", `select * from impresion_lote where Impresion=${Impresion}`)
+                for (const r of r2){
+                    const bulk = {
+                        ...r,
+                        etiquetas:[]
+                    }
+                    const r3 = await sqlPromise(sqliteDB, "all", `select * from impresion_etiqueta where Impresion=${Impresion} and Lote=${r.Lote}`)
+                    bulk.etiquetas = r3
+                    impresionActiva.bulks.push(bulk)
+                }
+
+            }
+
+
+ 
+        }catch(e){
+            console.log("error", e)
+        }
+        return impresionActiva
     },
     queryProveedores:async(body, params)=>{
         let error
@@ -898,5 +850,5 @@ const controller = {
     },
 
 }
-export {JSPDF, storageLabel}
+export {JSPDF, storageLabel, cacheData}
 export default controller

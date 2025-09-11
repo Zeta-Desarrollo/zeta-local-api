@@ -1,5 +1,5 @@
 import { sqliteDB as db, sqliteDB, sqlPromise } from "../utils/sqlite.js"
-import { JSPDF, storageLabel } from "../modules/products/controller.js"
+import { JSPDF, cacheData, storageLabel } from "../modules/products/controller.js"
 async function task() {
     try {
         const sysconfig = await sqlPromise(db, "get", "select * from sysconfig where name ='PrintLabels'")
@@ -11,8 +11,15 @@ async function task() {
         const result = await sqlPromise(sqliteDB, "all", "select * from impresion where finished != 1 order by Impresion desc")
         if (result.length == 0){
             // console.log("no hay impresion activa")
+            cacheData.printActive = false
             return
         }
+        cacheData.printActive = true
+        console.log("About to print")
+        await new Promise((resolve,reject)=>{
+            setTimeout(resolve, 3000)
+        })
+
         const impresionActiva = result [0]
         const props = JSON.parse(impresionActiva.mode)
 
@@ -60,7 +67,7 @@ async function task() {
     }
 }
 async function time() {
-    return "0/10 * * * * *"
+    return "0/6 * * * * *"
 }
 const name = "print-labels"
 export default {
