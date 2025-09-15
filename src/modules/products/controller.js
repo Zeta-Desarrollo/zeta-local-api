@@ -777,6 +777,29 @@ const controller = {
         }
         return impresionActiva
     },
+    resumeBulkPrint: async (body, params)=>{
+        for (const Lote in body.bulkCheckBoxes){
+            const print = body.bulkCheckBoxes[Lote]
+
+            await sqlPromise(sqliteDB, "run", `update impresion_lote set finished=${print?0:1} where Impresion=${body.Impresion} and Lote=${Lote}`)
+            
+            await sqlPromise(sqliteDB, "run", `update impresion_etiqueta set printed=${print?0:1} where Impresion=${body.Impresion} and Lote=${Lote}`)
+        }
+        for (const Lote in body.partialCheckBoxes){
+            const print = body.partialCheckBoxes[Lote]
+
+            await sqlPromise(sqliteDB, "run", `update impresion_lote set finished=${print?0:1} where Impresion=${body.Impresion} and Lote=${Lote}`)
+
+        }
+        for (const code in body.checkBoxes){
+            const parts = code.split("-")
+            const print = body.checkBoxes[code]
+            await sqlPromise(sqliteDB, "run", `update impresion_etiqueta set printed=${print?0:1} where Impresion=${body.Impresion} and Lote=${parts[0]} and orden=${parts[1]}`)
+
+        }
+        await sqlPromise(sqliteDB, "run", `update impresion set finished=0 where Impresion=${body.Impresion}`)
+        return true
+    },
     queryProveedores:async(body, params)=>{
         let error
         let proveedores = []

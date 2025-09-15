@@ -102,6 +102,12 @@ function task (){
         db.run("create table impresion (Impresion INT, Date TEXT, type TEXT, mode TEXT, finished INT, status TEXT)")
         db.run("create table impresion_lote (Impresion INT, Lote INT, code TEXT, name TEXT, finished INT)")
         db.run("create table impresion_etiqueta (Impresion INT, Lote INT, orden INT, ItemCode TEXT, printed INT)")
+
+        db.run("create unique index impresion_index on impresion (Impresion)")
+        db.run("create unique index impresion_lote_index on impresion_lote (Impresion, Lote)")
+        db.run("create unique index impresion_etiqueta_index on impresion_etiqueta (Impresion, Lote, orden)")
+        
+ 
         
         db.run("insert into impresion values (0, 0, 'codes', '{}', 1, 'null')")
         db.run("insert into impresion_lote values (0, 0, '0', '-', 1)")
