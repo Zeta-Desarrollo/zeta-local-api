@@ -1,6 +1,6 @@
 {
   "name": "zeta-local-api",
-  "version": "1.0.0",
+  "version": "7.0.0",
   "description": "local api backend for ZETA.CA",
   "main": "index.js",
   "scripts": {
