@@ -599,7 +599,7 @@ const controller = {
 
         switch (body.type){
             case "codes":
-                const result = await sql.query(PRODUCTS_BY_CODES(body.products,"TODOS", true, true, true, body.props.priceList.value))
+                const result = await sql.query(PRODUCTS_BY_CODES(body.products,"TODOS", true, true, true, body.props.priceList.value, true))
                 uncheckedBulks.push({
                     code:"codes",
                     name:"codes",
@@ -609,7 +609,7 @@ const controller = {
             default:
                 const search = body.type=="marcas"? PRODUCTS_BY_MARCA: (body.type=="facturas"?PRODUCTS_BY_FACTURA:PRODUCTS_BY_PROVEEDOR)
                 for (const bulk of body.bulks){
-                    const result = await sql.query(search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+                    const result = await sql.query(search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value, "asc", true))
                         uncheckedBulks.push({
                         code:bulk.code,
                         name:bulk.name,
@@ -626,6 +626,7 @@ const controller = {
                     if (product.frozenFor != 'N') errors.push("inactive")
                     if (product.onHand <= 0) errors.push("out-of-stock")
                     if (product.Price  <= 0) errors.push("no-price")
+                    if (product.SellItem  != "Y") errors.push("no-sell")
                     totalErrors += errors.length
                     products[product.ItemCode] = errors
             }

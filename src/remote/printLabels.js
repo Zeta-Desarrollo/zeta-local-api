@@ -15,10 +15,7 @@ async function task() {
             return
         }
         cacheData.printActive = true
-        console.log("About to print")
-        await new Promise((resolve,reject)=>{
-            setTimeout(resolve, 3000)
-        })
+    
 
         const impresionActiva = result [0]
         const props = JSON.parse(impresionActiva.mode)
