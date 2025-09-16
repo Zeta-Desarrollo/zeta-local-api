@@ -544,11 +544,10 @@ const controller = {
             const r1 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
             if (r1.length>0) throw "print-active"
             const r2 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion order by Impresion desc limit 1")
-            console.log("!!!0,", body)
             const sqlString =  `insert into impresion values (${r2[0].Impresion+1}, '${+(new Date())}', '${body.type}','${JSON.stringify(body.props)}',  1, 'finished')`
             await sqlPromise(sqliteDB, "run", sqlString )
             await sqlPromise(sqliteDB, "run", `insert into impresion_lote values (${r2[0].Impresion+1}, 0, '', 'code', 1)`)
-            await sqlPromise(sqliteDB, "run", `insert into impresion_etiqueta values (0, 0, 0, ${body.products[0]}, 1)`)
+            await sqlPromise(sqliteDB, "run", `insert into impresion_etiqueta values (${r2[0].Impresion+1}, 0, 0, ${body.products[0]}, 1)`)
 
 
             if (body.props.priceList.value!=5){
