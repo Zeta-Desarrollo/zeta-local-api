@@ -9,8 +9,8 @@ async function task (){
             if (file=='.gitignore') continue
             const path = `./docs/${file}`
             const {birthtime} = fs.statSync(path)
-            const difference = (today-birthtime)/1000/60/60/24
-            if (difference>14){
+            const difference = (today-birthtime)/1000/60
+            if (difference>10){
                 fs.rmSync(path)
                 console.log("deleted: ",path)
             }
@@ -28,7 +28,7 @@ async function task (){
     }
 }
 async function time (){
-    return "0 0 6 * * *"
+    return "0 0/5 * * * *"
     // return "0/6 * * * * *"
 }
 const name = "clean-docs"

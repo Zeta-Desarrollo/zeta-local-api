@@ -328,13 +328,13 @@ async function storageLabel (body, params){
             doc.setFont("Helvetica", "")
             
             // FS =  body.props.showPrices? 16 : 32
-            FS = 20
+            FS = 50
             doc.setFontSize(FS)
             
             
             let line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge )
 
-            while (line.length * FS > 100){
+            while (line.length * FS > 110){
                 FS-=0.1
                 doc.setFontSize(FS)
                 line = doc.splitTextToSize(product.ItemName, rightEdge - leftEdge )
