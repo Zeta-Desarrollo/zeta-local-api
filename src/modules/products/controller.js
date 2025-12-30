@@ -113,8 +113,8 @@ async function JSPDF (body, params){
             
             doc.setFont("Helvetica", "bold")
             doc.setFontSize(16)
-            doc.setFillColor("#111111")
-            doc.rect(leftEdge+leftSpace+4, 0, 7, 1, "F");
+            doc.setFillColor("#000000")
+            doc.rect(leftEdge+leftSpace+4, 0, 5.8, 1, "F");
             doc.setTextColor("#ffffff")
             doc.text(product.ItemCode, leftEdge+leftSpace+4, 1, "left")
             doc.setFontSize(16)
