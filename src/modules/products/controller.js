@@ -98,12 +98,12 @@ async function JSPDF (body, params){
             //qr side
             const qrFile = fs.readFileSync("./public/"+product.ItemCode+".png")
             const qr = new Uint8Array(qrFile);
-            doc.addImage(qr, "PNG", leftEdge, 0.5, 5, 5)
+            doc.addImage(qr, "PNG", leftEdge, 0.4, 5, 5)
             // doc.addImage(refWhite, "PNG", 3.6, 2.5, 1.3, 1.3)
             //qr s
 
             if (body.props.showDate){
-                doc.text(body.props.etiquetaDate, leftEdge+1.1, 0.8);
+                doc.text(body.props.etiquetaDate, leftEdge+1, 0.8);
             }
             
             const logoFile = fs.readFileSync("./public/zeta-negro.png")
