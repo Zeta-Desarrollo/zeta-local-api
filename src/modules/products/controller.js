@@ -98,24 +98,24 @@ async function JSPDF (body, params){
             //qr side
             const qrFile = fs.readFileSync("./public/"+product.ItemCode+".png")
             const qr = new Uint8Array(qrFile);
-            doc.addImage(qr, "PNG", leftEdge, 0.4, 5, 5)
+            doc.addImage(qr, "PNG", leftEdge, 0, 5, 5)
             // doc.addImage(refWhite, "PNG", 3.6, 2.5, 1.3, 1.3)
             //qr s
 
             if (body.props.showDate){
-                doc.text(body.props.etiquetaDate, leftEdge+1, 0.8);
+                doc.text(body.props.etiquetaDate, leftEdge+1,5.4);
             }
             
-            const logoFile = fs.readFileSync("./public/zeta-negro.png")
+            const logoFile = fs.readFileSync("./public/zeta-blanco.png")
             const logo = new Uint8Array(logoFile);
-            doc.addImage(logo, "PNG", leftEdge + 1.2 , 5, 2.87, 1)
+            doc.addImage(logo, "PNG", leftEdge + 1.5 , 2.4, 2.07, 0.6)
             
             
             doc.setFont("Helvetica", "bold")
             doc.setFontSize(16)
             doc.setFillColor("#000000")
-            doc.rect(leftEdge+leftSpace+4, 0, 5.8, 1, "F");
-            doc.setTextColor("#ffffff")
+            doc.rect(leftEdge+leftSpace+3.6, 0.5, 0.3, 5.5, "F");
+            // doc.setTextColor("#ffffff")
             doc.text(product.ItemCode, leftEdge+leftSpace+4, 1, "left")
             doc.setFontSize(16)
 
@@ -181,14 +181,14 @@ async function JSPDF (body, params){
                 doc.setFontSize(20)
                 }
                 doc.text("B.I:", leftEdge+leftSpace+4, 4, "left")
-                doc.text("IVA:", leftEdge+leftSpace+4,5, "left")
-                doc.text("PMVP:", leftEdge+leftSpace+4,6, "left")
+                doc.text("IVA:", leftEdge+leftSpace+4,4.7, "left")
+                doc.text("PMVP:", leftEdge+leftSpace+4,5.4, "left")
                 doc.setFont("Helvetica", "")
                 
                 const refFile = fs.readFileSync("./public/ref-no-ring.png")
                 const ref = new Uint8Array(refFile);
                 // doc.addImage(ref, "PNG", leftEdge + leftSpace+ 5.2 , 4.1, 1.2, 1.2)
-                doc.addImage(ref, "PNG", leftEdge+leftSpace+6, 4.1, 1.2, 1.2)
+                doc.addImage(ref, "PNG", leftEdge+leftSpace+6, 4, 1.2, 1.2)
 
 
                 const showPrice = formatter.format(
@@ -207,13 +207,14 @@ async function JSPDF (body, params){
                 if(product.TaxCodeAR == 'IVA_EXE'){
                     doc.setFontSize(15)
                 }
-                doc.text(product.TaxCodeAR == 'IVA_EXE'? 'EXENTO'  : showIVA, rightEdge,5, "right")
+                doc.text(product.TaxCodeAR == 'IVA_EXE'? 'EXENTO'  : showIVA, rightEdge,4.7, "right")
                 doc.setFontSize(20)
-                doc.text(product.TaxCodeAR == 'IVA_EXE'? showPrice : showPMVP, rightEdge,6, "right")
+                doc.text(product.TaxCodeAR == 'IVA_EXE'? showPrice : showPMVP, rightEdge,5.4, "right")
             }
 
+            doc.setFillColor("#000000")
+            doc.rect(leftEdge+0.5, 5.7, 11, 0.3, "F");
             
-        
             doc.save("./docs/"+product.ItemCode+".pdf")
             let i = 0
             while (i<body.props.copies){
