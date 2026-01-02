@@ -188,7 +188,7 @@ async function JSPDF (body, params){
                 const refFile = fs.readFileSync("./public/ref-no-ring.png")
                 const ref = new Uint8Array(refFile);
                 // doc.addImage(ref, "PNG", leftEdge + leftSpace+ 5.2 , 4.1, 1.2, 1.2)
-                doc.addImage(ref, "PNG", leftEdge+leftSpace+6, 4, 1.2, 1.2)
+                doc.addImage(ref, "PNG", leftEdge+leftSpace+6, 3.8, 1.2, 1.2)
 
 
                 const showPrice = formatter.format(
