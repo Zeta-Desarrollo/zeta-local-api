@@ -213,7 +213,7 @@ async function JSPDF (body, params){
             }
 
             doc.setFillColor("#000000")
-            doc.rect(leftEdge+0.5, 5.7, 11, 0.3, "F");
+            doc.rect(leftEdge+0.5, 5.7, 10.5, 0.3, "F");
             
             doc.save("./docs/"+product.ItemCode+".pdf")
             let i = 0
