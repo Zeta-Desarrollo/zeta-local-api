@@ -112,7 +112,7 @@ function task (){
         // db.run("insert into impresion_etiqueta values (0, 0, 0, 'ELIMINADO', 1)")
         
         db.run("create table template (Template TEXT, Def INT default 0)")
-        db.run("create table template_segment (Template TEXT, Segment INT,  type TEXT, x REAL, y REAL, w REAL, h REAL, data TEXT, bold INT, orientation TEXT, font REAL)" )
+        db.run("create table template_segment (Template TEXT, Segment INT,  type TEXT, x TEXT, y TEXT, w TEXT, h TEXT, data TEXT, bold INT, orientation TEXT, font TEXT)" )
 
         db.run("create unique index template_index on template (Template)")
         db.run("create unique index template_segment_index on template_segment (Template, Segment)")
