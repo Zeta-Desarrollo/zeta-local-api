@@ -33,7 +33,7 @@ function wordsForWords(words, split){
     return splitInWords
 }
 
-async function modularJSPDF (template, productData){
+async function modularJSPDF (templateData,template, productData){
     let e
     let product = ""
     global.window = {document: {createElementNS: () => {return {}} }};
@@ -45,7 +45,7 @@ async function modularJSPDF (template, productData){
     let FS
     // Default export is a4 paper, portrait, using millimeters for units
     try{
-        let pdfName = "Template "+ (new Date()+"").replace(/:/g,"-")
+        let pdfName = templateData.Template+"_sample"
         const merger = new PDFMerger()
 
         for (const product of productData){
@@ -69,23 +69,21 @@ async function modularJSPDF (template, productData){
                     h:+segmentData.h,
                     font:+segmentData.font
                 }
-                console.log("Seg", segment)
-
+                let FS
                 switch(segment.type){
-                    case "data":
+                    case "text":
                         if(segment.bold>0){
                             doc.setFont("Helvetica", "bold")            
                         }
                         doc.setFontSize(segment.font)
-                        doc.text(product[segment.data], segment.x+leftEdge, segment.y, segment.orientation)
+                        doc.text(segment.data, segment.x+leftEdge, segment.y, segment.orientation)
                         doc.setFontSize(16)
                         if (segment.bold>0){
                             doc.setFont("Helvetica", "")
                         }
 
                         break;
-                    case "dataSized":
-
+                    case "data":
                         let text
                         //specifically if the data field is the brand name
                         if(segment.data == 'FirmName'){
@@ -98,44 +96,55 @@ async function modularJSPDF (template, productData){
                         if(segment.bold>0){
                             doc.setFont("Helvetica", "bold")            
                         }
-                        doc.setFontSize(segment.font)
-                        
-                        let FS = segment.font
-                        // let line = 1
-                        // let size = doc.getTextWidth(text)
+                        FS = segment.font
+                        let dataline = 1
+                        let size = doc.getTextWidth(text)
 
-                        // while (size>segment.w){
-                        //     console.log("FS",FS, size, segment.w)
-                        //     if(FS<11){
-                        //         const words = text.split(" ")
+                        while (size>segment.w){
+                            if(FS<11){
+                                const words = text.split(" ")
 
-                        //         if (words.length>1){
-                        //             FS = 14
-                        //             doc.setFontSize(FS)
-                        //             let inLines = doc.splitTextToSize(text, 3.3)
+                                if (words.length>1){
+                                    FS = 14
+                                    doc.setFontSize(FS)
+                                    let inLines = doc.splitTextToSize(text, 3.3)
                                     
 
-                        //             while (inLines.length>(segment.h-segment.y+1) || !wordsForWords(words, inLines)){
-                        //                 FS -= 0.1
-                        //                 doc.setFontSize(FS)
-                        //                 inLines = doc.splitTextToSize(text, 3.3)
-                        //             }
-                        //             text = inLines
-                        //             if (inLines.length!=1){
-                        //                 line = 0.5
-                        //             }
+                                    while (inLines.length>(segment.h-segment.y+1) || !wordsForWords(words, inLines)){
+                                        FS -= 0.1
+                                        doc.setFontSize(FS)
+                                        inLines = doc.splitTextToSize(text, 3.3)
+                                    }
+                                    text = inLines
+                                    if (inLines.length!=1){
+                                        dataline = 0.5
+                                    }
                                 
-                        //             break
-                        //         }
+                                    break
+                                }
 
-                        //     }
+                            }
                             
-                        //     FS -= 0.1
-                        //     doc.setFontSize(FS)
-                        //     size = doc.getTextWidth(text)
+                            FS -= 0.1
+                            doc.setFontSize(FS)
+                            size = doc.getTextWidth(text)
                             
-                        // }
-                        // doc.text(text, segment.x+leftEdge, segment.y+line, segment.orientation)
+                        }
+                        doc.text(text, segment.x+leftEdge, segment.y+dataline, segment.orientation)
+                        if (segment.bold>0){
+                            doc.setFont("Helvetica", "")
+                        }
+
+                        break;
+                    case "dataSized":
+
+         
+                        if(segment.bold>0){
+                            doc.setFont("Helvetica", "bold")            
+                        }
+                        doc.setFontSize(segment.font)
+                        
+                        FS = segment.font
 
                         let line = doc.splitTextToSize(product[segment.data], segment.w)
                         // while (line.length * FS > (body.props.showPrices?50:120)){
@@ -158,22 +167,20 @@ async function modularJSPDF (template, productData){
                             'iva':0.16,
                             'pmvp':1.16
                         }
-        
+                        if(segment.bold>0){
+                            doc.setFont("Helvetica", "bold")            
+                        }
 
                         let showPrice
                         switch(product.TaxCodeAR){
                             case "IVA_EXE":
                                 if(segment.data=="iva") {
                                     showPrice = "EXENTO"
-                                    doc.setFontSize(15)
 
                                 }
                                 else{
                                     showPrice = formatter.format(parseFloat(product.Price));
-                                    doc.setFontSize(16)
-                                    if (product.Price<=86){
-                                        doc.setFontSize(20)
-                                    }
+                                    
                                 }
                                                
                                 break;
@@ -181,8 +188,12 @@ async function modularJSPDF (template, productData){
                                 showPrice = formatter.format(parseFloat(product.Price) * prices[segment.data]);
                                 break;
                         }
-                        doc.text(showPrice, segment.x , segment.y, segment.orientation)
+                        doc.setFontSize(segment.font)
 
+                        doc.text(showPrice, segment.x+leftEdge , segment.y, segment.orientation)
+                        if (segment.bold>0){
+                            doc.setFont("Helvetica", "")
+                        }
 
                         break;
                     case "qr":
@@ -213,6 +224,8 @@ async function modularJSPDF (template, productData){
                         let labelDate = segment.data
                         if (segment.data == 'Fecha de impresion'){
                             labelDate = DATE_FORMAT.format(new Date())
+                        }else{
+                            labelDate = DATE_FORMAT.format(new Date(segment.data))
                         }
                         //printOption
                         // if (body.props.showDate){
@@ -233,29 +246,28 @@ async function modularJSPDF (template, productData){
             // const rightEdge = 12.5
             
 
-            doc.save("./docs/"+product.ItemCode+".pdf")
+            doc.save("./samples/"+product.ItemCode+".pdf")
             let i = 0
             while (i<1){
-                await merger.add("./docs/"+product.ItemCode+".pdf");
+                await merger.add("./samples/"+product.ItemCode+".pdf");
                 i++
             }
 
         }
-        await merger.save(`./docs/${pdfName}.pdf`)
+        await merger.save(`./samples/${pdfName}.pdf`)
 
-    await new Promise((resolve, reject)=>{
-        ptp.print("./docs/"+pdfName+".pdf", {
-            printer:"Etiquetas",
-            orientation:"landscape",
-            scale:"shrink",
+    // await new Promise((resolve, reject)=>{
+    //     ptp.print("./samples/"+pdfName+".pdf", {
+    //         printer:"Etiquetas",
+    //         orientation:"landscape",
+    //         scale:"shrink",
             
-        }).then(resolve).catch(reject);
-    })
+    //     }).then(resolve).catch(reject);
+    // })
     delete global.window;
     delete global.navigator;
     delete global.btoa;
     }catch(error){
-        console.log("what happened?", new Date(), error)
         e = error.message? error.message :error
     }
     return {
@@ -329,13 +341,13 @@ const controller = {
         sampleCodes.push(bigWordsBrand.recordset[0].ItemCode)
         sampleCodes.push(bigSizeName.recordset[0].ItemCode)
         sampleCodes.push(bigSizeBrand.recordset[0].ItemCode)
-            console.log("XXXX", sampleCodes)
         const result = await sql.query(PRODUCTS_BY_CODES(sampleCodes, 'TODOS', true, true, true, 5))
 
         //template 
         const segmentData = await sqlPromise(sqliteDB, "all", `select * from template_segment where Template='${body.template}'`)
+        const templateData = await sqlPromise(sqliteDB, "all", `select * from template where Template='${body.template}'`)
 
-        await modularJSPDF(segmentData, result.recordset)
+        await modularJSPDF(templateData[0],segmentData, result.recordset)
     }
 }
 
