@@ -187,8 +187,19 @@ async function modularJSPDF (templateData,template, productData){
                             default:
                                 showPrice = formatter.format(parseFloat(product.Price) * prices[segment.data]);
                                 break;
+                        } 
+
+                        FS = segment.font
+                        doc.setFontSize(FS)
+                        let esize = doc.getTextWidth(showPrice)
+                        console.log("DICK", showPrice, esize)
+                        while (esize>2.4){
+                            FS-=0.1
+                            doc.setFontSize(FS)
+                            esize = doc.getTextWidth(showPrice)
                         }
-                        doc.setFontSize(segment.font)
+                        console.log("ASS", showPrice, esize)
+
 
                         doc.text(showPrice, segment.x+leftEdge , segment.y, segment.orientation)
                         if (segment.bold>0){
@@ -324,23 +335,26 @@ const controller = {
     generateSamples:async(body,params)=>{
         const sampleCodes = []
 
-        const bigPrice = await sql.query(`select top 1 ItemCode,Price from itm1 where PriceList=5 order by Price desc`)
-        const bigWordsName = await sql.query(`select top 1 ItemCode, ItemName, (LEN(ItemName)-LEN(replace(ItemName, ' ', ''))) as wordCount from oitm order by wordCount desc`)
+        const bigPrice = await sql.query(`select top 1 ItemCode,Price from itm1 where PriceList=5 and ItemCode!='00000' order by Price desc`)
+        const bigWordsName = await sql.query(`select top 1 ItemCode, ItemName, (LEN(ItemName)-LEN(replace(ItemName, ' ', ''))) as wordCount from oitm where ItemCode!='00000' order by wordCount desc`)
         const bigWordsBrand = await sql.query(`select top 1 ItemCode, FirmName, (LEN(FirmName)-LEN(replace(FirmName, ' ', ''))) as wordCount from oitm     join
         OMRC
             on OITM.FirmCode = OMRC.FirmCode 
-            order by wordCount desc`)
-        const bigSizeName = await sql.query(`select top 1 ItemCode, LEN(ItemName) as letterCount from oitm order by letterCount desc`)
+        where ItemCode!='00000' and omrc.FirmCode!=-1
+        order by wordCount desc`)
+        const bigSizeName = await sql.query(`select top 1 ItemCode, LEN(ItemName) as letterCount from oitm where ItemCode!='00000' order by letterCount desc`)
         const bigSizeBrand = await sql.query(`select top 1 ItemCode, LEN(FirmName) letterCount from oitm join
         OMRC
-            on OITM.FirmCode = OMRC.FirmCode 
+            on OITM.FirmCode = OMRC.FirmCode  
+            where ItemCode!='00000' and omrc.FirmCode!=-1
             order by letterCount desc`)
 
-        // sampleCodes.push(bigPrice.recordset[0].ItemCode)
+        sampleCodes.push(bigPrice.recordset[0].ItemCode)
         sampleCodes.push(bigWordsName.recordset[0].ItemCode)
         sampleCodes.push(bigWordsBrand.recordset[0].ItemCode)
         sampleCodes.push(bigSizeName.recordset[0].ItemCode)
         sampleCodes.push(bigSizeBrand.recordset[0].ItemCode)
+        console.log(sampleCodes)
         const result = await sql.query(PRODUCTS_BY_CODES(sampleCodes, 'TODOS', true, true, true, 5))
 
         //template 
