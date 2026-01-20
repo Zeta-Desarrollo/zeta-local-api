@@ -1,5 +1,6 @@
 import { sqliteDB as db, sqliteDB, sqlPromise } from "../utils/sqlite.js"
 import { JSPDF, cacheData, storageLabel } from "../modules/products/controller.js"
+import { modularJSPDF } from "../modules/templates/controller.js"
 async function task() {
     try {
         const sysconfig = await sqlPromise(db, "get", "select * from sysconfig where name ='PrintLabels'")
@@ -42,14 +43,15 @@ async function task() {
             const mapeados = `('${codigos.join("','")}')`
                     //imprimir etiquetas
             let res
-            if (props.storageLabel){
-                res = await storageLabel({products:codigos, props:props},null)
-            }else{
-                res = await JSPDF({products:codigos, props:props}, null)
-            }
-            if (res.error){
-                console.log("error", res.error)
-            }
+            await modularJSPDF(props,codigos)
+            // if (props.storageLabel){
+            //     res = await storageLabel({products:codigos, props:props},null)
+            // }else{
+            //     res = await JSPDF({products:codigos, props:props}, null)
+            // }
+            // if (res.error){
+            //     console.log("error", res.error)
+            // }
                     //imprimir etiquetas
 
             await sqlPromise(sqliteDB, "run", `update impresion_etiqueta set printed = 1 where Impresion=${impresionActiva.Impresion} and ItemCode in ${mapeados}`) 

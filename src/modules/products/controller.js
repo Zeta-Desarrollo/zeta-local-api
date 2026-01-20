@@ -14,6 +14,7 @@ import { jsPDF } from "jspdf";
 import { getUser } from "../user/controller.js";
 
 import { sqliteDB, sqlPromise } from "../../utils/sqlite.js";
+import {modularJSPDF} from "../templates/controller.js"
 const cacheData = {
     printActive:false
 }
@@ -710,16 +711,17 @@ const controller = {
             //5001504
 
             let result
-            if (body.props.storageLabel){
-                result = await storageLabel(body, params)
-            }else{
-                if(body.props.noPriceLabel){
-                    result = await noPriceLabel(body, params)
+            // if (body.props.storageLabel){
+            //     result = await storageLabel(body, params)
+            // }else{
+            //     if(body.props.noPriceLabel){
+            //         result = await noPriceLabel(body, params)
 
-                }else{
-                    result = await JSPDF(body, params)
-                }
-            }
+            //     }else{
+            //         result = await JSPDF(body, params)
+            //     }
+            // }
+            await modularJSPDF(body.props, body.products)
             if (result.error){
                 e = result.error
             }

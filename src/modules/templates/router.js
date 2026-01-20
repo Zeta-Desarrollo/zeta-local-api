@@ -10,6 +10,7 @@ templatesRouter.post("/getTemplates", devFunction, isAuth, checkRole(["admin"]),
 templatesRouter.post("/newTemplate", devFunction, isAuth, checkRole(["admin"]), callController(controller.newTemplate))
 templatesRouter.post("/editTemplate", devFunction, isAuth, checkRole(["admin"]), callController(controller.editTemplate))
 templatesRouter.post("/setDefault", devFunction, isAuth, checkRole(["admin"]), callController(controller.setDefault))
+templatesRouter.post("/toggleTemplate", devFunction, isAuth, checkRole(["admin"]), callController(controller.toggleTemplate))
 templatesRouter.post("/generateSamples", devFunction, isAuth, checkRole(["admin"]), callController(controller.generateSamples))
 
 export default templatesRouter

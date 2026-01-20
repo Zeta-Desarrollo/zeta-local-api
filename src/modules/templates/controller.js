@@ -33,7 +33,7 @@ function wordsForWords(words, split){
     return splitInWords
 }
 
-async function modularJSPDF (templateData,template, productData){
+export async function modularJSPDF (props, productCodes){
     let e
     let product = ""
     global.window = {document: {createElementNS: () => {return {}} }};
@@ -42,13 +42,28 @@ async function modularJSPDF (templateData,template, productData){
     const leftEdge = 1.8
     const leftSpace = 1
     const rightEdge = 12.5
+    const template = props.template.split(' (Principal)').join('')
+    console.log(template, productCodes)
+
     let FS
+            //template 
+        const templateData = await sqlPromise(sqliteDB, "all", `select * from template_segment where Template='${template}'`)
+        // const templateData = await sqlPromise(sqliteDB, "all", `select * from template where Template='${template}'`)
+
     // Default export is a4 paper, portrait, using millimeters for units
     try{
-        let pdfName = templateData.Template+"_sample"
+        let pdfName = props.samples? template+"_sample" : "Bulk "+ (new Date()+"").replace(/:/g,"-")
         const merger = new PDFMerger()
 
-        for (const product of productData){
+        const result = await sql.query(PRODUCTS_BY_CODES(productCodes, 'TODOS', true, true, true, 5))
+        if (result.recordset.length===0) throw "invalid-codes"
+        const productData = {}
+        const allProducts = result.recordset
+        for (const product of allProducts){
+            productData[product.ItemCode] = product
+        }
+        for (const ItemCode of productCodes){
+            const product = productData[ItemCode]
             
             const doc = new jsPDF({
                 orientation: "landscape",
@@ -60,7 +75,7 @@ async function modularJSPDF (templateData,template, productData){
             doc.setFontSize(16)
             doc.setFillColor("#000000")
             
-            for (const segmentData of template){
+            for (const segmentData of templateData){
                 const segment = {
                     ...segmentData,
                     x:+segmentData.x,
@@ -192,13 +207,11 @@ async function modularJSPDF (templateData,template, productData){
                         FS = segment.font
                         doc.setFontSize(FS)
                         let esize = doc.getTextWidth(showPrice)
-                        console.log("DICK", showPrice, esize)
                         while (esize>2.4){
                             FS-=0.1
                             doc.setFontSize(FS)
                             esize = doc.getTextWidth(showPrice)
                         }
-                        console.log("ASS", showPrice, esize)
 
 
                         doc.text(showPrice, segment.x+leftEdge , segment.y, segment.orientation)
@@ -257,15 +270,15 @@ async function modularJSPDF (templateData,template, productData){
             // const rightEdge = 12.5
             
 
-            doc.save("./samples/"+product.ItemCode+".pdf")
+            doc.save(`./${props.samples?'samples':'docs'}/`+product.ItemCode+".pdf")
             let i = 0
             while (i<1){
-                await merger.add("./samples/"+product.ItemCode+".pdf");
+                await merger.add(`./${props.samples?'samples':'docs'}/`+product.ItemCode+".pdf");
                 i++
             }
 
         }
-        await merger.save(`./samples/${pdfName}.pdf`)
+        await merger.save(`./${props.samples?'samples':'docs'}/${pdfName}.pdf`)
 
     // await new Promise((resolve, reject)=>{
     //     ptp.print("./samples/"+pdfName+".pdf", {
@@ -309,7 +322,7 @@ const controller = {
         
 
         return {
-            templates,
+            templates:templates.sort(((a,b)=>b.Def-a.Def)),
         }
     },
     newTemplate:async(body,params)=>{
@@ -329,8 +342,13 @@ const controller = {
         }
     },
     setDefault:async(body, params)=>{
-        await sqlPromise(sqliteDB, "run", `update template set Def = 1 where Template ='${name}'`)
-        await sqlPromise(sqliteDB, "run", `update template set Def = 0 where Template !='${name}'`)
+        console.log("body", body)
+        await sqlPromise(sqliteDB, "run", `update template set Def = 1, Active=1 where Template ='${body.name}'`)
+        await sqlPromise(sqliteDB, "run", `update template set Def = 0 where Template !='${body.name}'`)
+    },
+    toggleTemplate:async(body, params)=>{
+        console.log("XD", body)
+        await sqlPromise(sqliteDB, "run", `update template set Active = ${body.state} where Template in ('${body.names.join("','")}')`)
     },
     generateSamples:async(body,params)=>{
         const sampleCodes = []
@@ -355,13 +373,9 @@ const controller = {
         sampleCodes.push(bigSizeName.recordset[0].ItemCode)
         sampleCodes.push(bigSizeBrand.recordset[0].ItemCode)
         console.log(sampleCodes)
-        const result = await sql.query(PRODUCTS_BY_CODES(sampleCodes, 'TODOS', true, true, true, 5))
 
-        //template 
-        const segmentData = await sqlPromise(sqliteDB, "all", `select * from template_segment where Template='${body.template}'`)
-        const templateData = await sqlPromise(sqliteDB, "all", `select * from template where Template='${body.template}'`)
 
-        await modularJSPDF(templateData[0],segmentData, result.recordset)
+        await modularJSPDF({samples:true, template:body.template}, sampleCodes)
     }
 }
 
