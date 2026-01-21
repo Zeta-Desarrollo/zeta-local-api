@@ -689,7 +689,6 @@ const controller = {
         let x
         let e
         try {
-            console.log("body", body)
             const r1 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
             if (r1.length>0) throw "print-active"
             const r2 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion order by Impresion desc limit 1")
@@ -721,7 +720,7 @@ const controller = {
             //         result = await JSPDF(body, params)
             //     }
             // }
-            await modularJSPDF(body.props, body.products)
+            result = await modularJSPDF(body.props, body.products)
             if (result.error){
                 e = result.error
             }

@@ -43,7 +43,6 @@ export async function modularJSPDF (props, productCodes){
     const leftSpace = 1
     const rightEdge = 12.5
     const template = props.template.split(' (Principal)').join('')
-    console.log(template, productCodes)
 
     let FS
             //template 
@@ -113,6 +112,7 @@ export async function modularJSPDF (props, productCodes){
                         }
                         FS = segment.font
                         let dataline = 1
+                        text = text?text:''
                         let size = doc.getTextWidth(text)
 
                         while (size>segment.w){
@@ -327,7 +327,7 @@ const controller = {
     },
     newTemplate:async(body,params)=>{
         
-        await sqlPromise(sqliteDB, "run", `insert into template values ('${body.name}', 0)` )
+        await sqlPromise(sqliteDB, "run", `insert into template values ('${body.name}', 0,1 )` )
         for(const [index, segment] of body.segments.entries()){
             const segmentData = `'${body.name}', ${index}, '${segment.type}','${segment.x}','${segment.y}','${segment.w}','${segment.h}','${segment.data}','${segment.bold?1:0}','${segment.orientation}','${segment.font}'`
             await sqlPromise(sqliteDB, "run", `insert into template_segment values (${segmentData})` )
@@ -342,12 +342,10 @@ const controller = {
         }
     },
     setDefault:async(body, params)=>{
-        console.log("body", body)
         await sqlPromise(sqliteDB, "run", `update template set Def = 1, Active=1 where Template ='${body.name}'`)
         await sqlPromise(sqliteDB, "run", `update template set Def = 0 where Template !='${body.name}'`)
     },
     toggleTemplate:async(body, params)=>{
-        console.log("XD", body)
         await sqlPromise(sqliteDB, "run", `update template set Active = ${body.state} where Template in ('${body.names.join("','")}')`)
     },
     generateSamples:async(body,params)=>{
@@ -372,7 +370,6 @@ const controller = {
         sampleCodes.push(bigWordsBrand.recordset[0].ItemCode)
         sampleCodes.push(bigSizeName.recordset[0].ItemCode)
         sampleCodes.push(bigSizeBrand.recordset[0].ItemCode)
-        console.log(sampleCodes)
 
 
         await modularJSPDF({samples:true, template:body.template}, sampleCodes)
