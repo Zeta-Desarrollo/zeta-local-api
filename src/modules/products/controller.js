@@ -1,5 +1,6 @@
 import qrcode from "qrcode"
 import { SAP_DB as sql} from "../../utils/mssql.js"
+
 import fs from "fs"
 
 // import ipp from "ipp"
@@ -563,6 +564,17 @@ const controller = {
             lists
         }
     },
+    getDefaultPriceList:async(body,params)=>{
+        let error
+        let Default = 3
+        try{
+            const result = await sqlPromise(sqliteDB, 'get', "select value from sysconfig where name='DefaultPriceList'")
+            Default = result.value
+        }catch(error){
+            error = error.message ? error.message : error
+        }
+        return {error, Default}
+    },
     getAllMarcas: async (body, params)=>{
         let error
         let marcas = []
@@ -617,12 +629,14 @@ const controller = {
         try{
             if (!params.code) throw  "code-required"
             const location = body.props.location? body.props.location: "TODOS"
-
-            const result = await sql.query(PRODUCTS_BY_MARCA(params.code, body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+            const query = PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
+            console.log("ASDASD", query)
+            const result = await sql.query(query)
             if (result.recordset.length===0) throw "invalid-code"
             
             products = result.recordset
         }catch(err){
+            console.log("Err",err)
             error = err
         }
         return {

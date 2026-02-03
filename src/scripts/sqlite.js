@@ -97,22 +97,28 @@ function task (){
         // db.run("ALTER TABLE product_tickets ADD COLUMN ProductName TEXT")
         // db.run("ALTER TABLE product_tickets ADD COLUMN ProductAmount TEXT")
         // db.run("create table product_data ( ItemCode TEXT,hash TEXT,json TEXT)")
-        db.run("INSERT INTO sysconfig VALUES ('PrintLabels','true')");
+        // db.run("INSERT INTO sysconfig VALUES ('PrintLabels','true')");
 
-        db.run("create table impresion (Impresion INT, Date TEXT, type TEXT, mode TEXT, finished INT, status TEXT)")
-        db.run("create table impresion_lote (Impresion INT, Lote INT, code TEXT, name TEXT, finished INT)")
-        db.run("create table impresion_etiqueta (Impresion INT, Lote INT, orden INT, ItemCode TEXT, printed INT)")
+        // db.run("create table impresion (Impresion INT, Date TEXT, type TEXT, mode TEXT, finished INT, status TEXT)")
+        // db.run("create table impresion_lote (Impresion INT, Lote INT, code TEXT, name TEXT, finished INT)")
+        // db.run("create table impresion_etiqueta (Impresion INT, Lote INT, orden INT, ItemCode TEXT, printed INT)")
 
-        db.run("create unique index impresion_index on impresion (Impresion)")
-        db.run("create unique index impresion_lote_index on impresion_lote (Impresion, Lote)")
-        db.run("create unique index impresion_etiqueta_index on impresion_etiqueta (Impresion, Lote, orden)")
+        // db.run("create unique index impresion_index on impresion (Impresion)")
+        // db.run("create unique index impresion_lote_index on impresion_lote (Impresion, Lote)")
+        // db.run("create unique index impresion_etiqueta_index on impresion_etiqueta (Impresion, Lote, orden)")
         
  
         
-        db.run("insert into impresion values (0, 0, 'codes', '{}', 1, 'null')")
-        db.run("insert into impresion_lote values (0, 0, '0', '-', 1)")
-        db.run("insert into impresion_etiqueta values (0, 0, 0, 'ELIMINADO', 1)")
+        // db.run("insert into impresion values (0, 0, 'codes', '{}', 1, 'null')")
+        // db.run("insert into impresion_lote values (0, 0, '0', '-', 1)")
+        // db.run("insert into impresion_etiqueta values (0, 0, 0, 'ELIMINADO', 1)")
         
+        //RFQ
+        db.run("create table quotation (Quotation INT, note TEXT, client TEXT, seller TEXT, priceList INT, created INT, updated INT, generated INT)")
+        db.run("create table quotation_product (Quotation INT, ItemCode TEXT, price REAL, iva TEXT, quantity REAL)")
+        db.run("create unique index quoatation_index on quotation (Quotation)")
+        db.run("create unique index quotation_product_index on quotation_product (Quotation, ItemCode)")
+        db.run("INSERT INTO sysconfig VALUES ('DefaultPriceList', 3)");
 
 
 

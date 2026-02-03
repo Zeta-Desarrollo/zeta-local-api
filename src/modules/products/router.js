@@ -20,6 +20,7 @@ productsRouter.post("/getPrintStatus",  devFunction, isAuth, checkPermissions(["
 productsRouter.post("/checkPrint",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.checkBulkPrint))
 productsRouter.post("/resumeBulkPrint",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.resumeBulkPrint))
 productsRouter.get("/price-lists",devFunction, isAuth, callController(controller.getPriceLists))
+productsRouter.get("/defaultPriceList",devFunction, callController(controller.getDefaultPriceList))
 productsRouter.post("/proveedores",devFunction,  isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]),  callController(controller.queryProveedores))
 productsRouter.post("/byProveedor/:code",devFunction,  isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]), callController(controller.productsByProveedor))
 productsRouter.post("/facturas", devFunction, isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]),  callController(controller.queryFacturas))
