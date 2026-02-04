@@ -115,7 +115,7 @@ function task (){
         
         //RFQ
         db.run("create table quotation (Quotation INT, note TEXT, client TEXT, seller TEXT, priceList INT, created INT, updated INT, generated INT)")
-        db.run("create table quotation_product (Quotation INT, ItemCode TEXT, price REAL, iva TEXT, quantity REAL)")
+        db.run("create table quotation_product (Quotation INT, ItemCode TEXT, ItemName TEXT, price REAL, iva TEXT, quantity REAL)")
         db.run("create unique index quoatation_index on quotation (Quotation)")
         db.run("create unique index quotation_product_index on quotation_product (Quotation, ItemCode)")
         db.run("INSERT INTO sysconfig VALUES ('DefaultPriceList', 3)");

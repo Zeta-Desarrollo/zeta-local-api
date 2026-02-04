@@ -609,7 +609,7 @@ const controller = {
         let product = {}
         try{
             if (!params.code) throw  "code-required"
-            const result = await sql.query(PRODUCT_BY_CODE(params.code, 'TODOS', true, true, true, 3))
+            const result = await sql.query(PRODUCT_BY_CODE(params.code, 'TODOS', true, true, true, body.priceList?body.priceList:3))
             if (result.recordset.length===0) throw "invalid-code"
             
             product = result.recordset[0]
