@@ -114,7 +114,7 @@ function task (){
         // db.run("insert into impresion_etiqueta values (0, 0, 0, 'ELIMINADO', 1)")
         
         //RFQ
-        db.run("create table quotation (Quotation INT, note TEXT, client TEXT, seller TEXT, priceList INT, created INT, updated INT, generated INT)")
+        db.run("create table quotation (Quotation INT, note TEXT, client TEXT, seller TEXT, priceList TEXT, created INT, updated INT, generated INT)")
         db.run("create table quotation_product (Quotation INT, ItemCode TEXT, ItemName TEXT, price REAL, iva TEXT, quantity REAL)")
         db.run("create unique index quoatation_index on quotation (Quotation)")
         db.run("create unique index quotation_product_index on quotation_product (Quotation, ItemCode)")

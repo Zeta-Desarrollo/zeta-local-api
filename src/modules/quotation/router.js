@@ -7,6 +7,7 @@ const quotationRouter = Router()
 quotationRouter.post("/createQuotation", callController(controller.createQuotation))
 quotationRouter.post("/list", callController(controller.list))
 quotationRouter.post("/get", callController(controller.get))
+quotationRouter.post("/generate", callController(controller.generate))
 
 
 export default quotationRouter
