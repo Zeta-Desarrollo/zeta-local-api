@@ -19,12 +19,8 @@ async function init (){
     app.use(cors())
     app.use(express.static("public"))
     app.use(express.static("front"))
-    app.use("/quotations", express.static("quotations", {
-        setHeaders:(res, path, stat)=>{
-            console.log("ppp",path,stat)
-            res.set('Content-Disposition',  `attachment; filename=${path.split("quotations/")[1]}.ext`)
-        }
-    }))
+
+    app.use("/quotationsweb", express.static("quotations"))
     // app.use("/precios",express.static("visor"))
     app.use(bodyParser.json())
     app.use("/user", userRouter)
