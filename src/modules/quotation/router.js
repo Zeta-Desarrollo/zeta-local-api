@@ -5,6 +5,7 @@ import { callController, isAuth, checkRole } from "../../utils/express.js";
 const quotationRouter = Router()
 
 quotationRouter.post("/createQuotation", callController(controller.createQuotation))
+quotationRouter.post("/saveQuotation", callController(controller.saveQuotation))
 quotationRouter.post("/list", callController(controller.list))
 quotationRouter.post("/get", callController(controller.get))
 quotationRouter.post("/generate", callController(controller.generate))

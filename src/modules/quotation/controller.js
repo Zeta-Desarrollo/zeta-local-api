@@ -28,10 +28,49 @@ const controller = {
     for (const product of result.recordset) {
       productData[product.ItemCode] = product
     }
-    await sqlPromise(sqliteDB, "run", `insert into quotation values (${quotation.Quotation}, '${quotation.note}', '${quotation.client}','${quotation.client}', '${JSON.stringify(quotation.priceList)}', ${quotation.created}, ${quotation.updated}, ${quotation.generated})`)
+    await sqlPromise(sqliteDB, "run", `insert into quotation values (${quotation.Quotation}, '${quotation.note}', '${quotation.client}','${quotation.seller}', '${JSON.stringify(quotation.priceList)}', ${quotation.created}, ${quotation.updated}, ${quotation.generated})`)
     for (const ItemCode of products) {
 
       await sqlPromise(sqliteDB, "run", `insert into quotation_product values (${quotation.Quotation}, '${ItemCode}', '${productData[ItemCode].ItemName}', ${productData[ItemCode].Price}, '${productData[ItemCode].TaxCodeAR}', ${quantities[ItemCode]})`)
+
+    }
+    return {
+      Quotation: quotation.Quotation
+    }
+  },
+  saveQuotation: async ({ Quotation, note, client, seller, priceList, products, quantities }, params) => {
+    const qData = await sqlPromise(sqliteDB, "get", "select Quotation from quotation where Quotation="+Quotation)
+
+    const quotation = {
+      Quotation,
+      note, client, seller, priceList,
+      created: qData.created,
+      updated:  + new Date(),
+      generated: 0
+    }
+    const result = await sql.query(PRODUCTS_BY_CODES(products, 'TODOS', true, true, true, 3))
+
+    const productData = {}
+    for (const product of result.recordset) {
+      productData[product.ItemCode] = product
+    }
+    const quotationsql =`update quotation 
+      set 
+        note ='${quotation.note}',
+        client='${quotation.client}',
+        seller='${quotation.client}', 
+        priceList='${JSON.stringify(quotation.priceList)}', 
+        updated=${quotation.updated}
+      where Quotation=${quotation.Quotation}`
+
+    await sqlPromise(sqliteDB, "run", quotationsql)
+    //deleete old product records
+    await sqlPromise(sqliteDB, "run", `delete from quotation_product where Quotation=${quotation.Quotation}`)
+    //recreate new
+    for (const ItemCode of products) {
+
+      await sqlPromise(sqliteDB, "run", `insert into quotation_product values (${quotation.Quotation}, '${ItemCode}', '${productData[ItemCode].ItemName}', ${productData[ItemCode].Price}, '${productData[ItemCode].TaxCodeAR}', ${quantities[ItemCode]})`)
+
 
     }
     return {
