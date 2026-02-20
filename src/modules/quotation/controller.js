@@ -83,7 +83,8 @@ const controller = {
     try {
       const obj = {}
       const order = []
-      const data = await sqlPromise(sqliteDB, "all", "select * from quotation order by created desc")
+      const listSql = `select * from quotation where created>${body.min} and created<${body.max} order by created desc`
+      const data = await sqlPromise(sqliteDB, "all", listSql)
 
       for (const quotation of data) {
         obj[quotation.Quotation] = { ...quotation, products: [], priceList:JSON.parse(quotation.priceList) }
