@@ -161,7 +161,7 @@ const controller = {
       doc.text('Lista de Precios:', 5, line+5)
             doc.setFont("Helvetica", "")
 
-      const generated = new Date(quotation.created)
+      const generated = new Date(quotation.updated? quotation.updated: quotation.created)
       doc.text(`${generated.toLocaleDateString()} ${generated.toLocaleTimeString()}`, 50, line)
       doc.text(`${JSON.parse(quotation.priceList).label}`, 50, line+5)
 
