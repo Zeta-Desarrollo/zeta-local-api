@@ -553,7 +553,7 @@ const controller = {
         let error
         let lists = []
         try{
-            const result = await sql.query(PRICE_LISTS())
+            const result = await sql.query(PRICE_LISTS([2,3,4,5]))
             
             lists = result.recordset
         }catch(error){

@@ -26,13 +26,18 @@ export const PRODUCT_MULTI_PRICE = function(ItemCode){
     `
     return sql
 }
-export const PRICE_LISTS = function(){
+export const PRICE_LISTS = function(codes=[]){
+    const joined = codes.join("','")
+    const filter = `where ListNum in (${
+        codes.length==1? `'${joined}'` : joined
+    })`
     const sql = `
     select 
         ListNum,
         ListName
     from
         OPLN
+    ${codes.length>0? filter: " "}
     
     order by ListNum asc
     `
