@@ -29,7 +29,7 @@ export const PRODUCT_MULTI_PRICE = function(ItemCode){
 export const PRICE_LISTS = function(codes=[]){
     const joined = codes.join(",")
     const filter = `where ListNum in (${
-        codes.length==1? `'${joined}'` : joined
+        codes.length==1? `${joined}` : joined
     })`
     const sql = `
     select 
