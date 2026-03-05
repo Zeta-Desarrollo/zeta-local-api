@@ -553,7 +553,9 @@ const controller = {
         let error
         let lists = []
         try{
-            const result = await sql.query(PRICE_LISTS([2,3,4,5]))
+            const sysconfig = await sqlPromise(sqliteDB, 'get', "select value from sysconfig where name='QrModulePriceLists'")
+
+            const result = await sql.query(PRICE_LISTS(JSON.parse(sysconfig.value)))
             
             lists = result.recordset
         }catch(error){
@@ -570,6 +572,7 @@ const controller = {
         try{
             const result = await sqlPromise(sqliteDB, 'get', "select value from sysconfig where name='DefaultPriceList'")
             Default = result.value
+            
         }catch(error){
             error = error.message ? error.message : error
         }

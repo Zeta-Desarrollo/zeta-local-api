@@ -271,7 +271,35 @@ const controller = {
       error: e
     }
 
-  }
+  },
+  getPriceLists: async(body, params)=>{
+        let error
+        let lists = []
+        try{
+            const sysconfig = await sqlPromise(sqliteDB, 'get', "select value from sysconfig where name='QuotationModulePriceLists'")
+
+            const result = await sql.query(PRICE_LISTS(JSON.parse(sysconfig.value)))
+            
+            lists = result.recordset
+        }catch(error){
+            error = error.message ? error.message : error
+        }
+        return {
+            error,
+            lists
+        }
+    },
+    getDefaultPriceList:async(body,params)=>{
+        let error
+        let Default = 3
+        try{
+            const result = await sqlPromise(sqliteDB, 'get', "select value from sysconfig where name='DefaultQuotationPriceList'")
+            Default = result.value
+        }catch(error){
+            error = error.message ? error.message : error
+        }
+        return {error, Default}
+    },
 }
 
 export default controller
