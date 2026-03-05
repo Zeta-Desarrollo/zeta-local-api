@@ -4,7 +4,7 @@ import { jsPDF } from "jspdf";
 
 import { sqliteDB, sqlPromise } from "../../utils/sqlite.js"
 import { SAP_DB as sql } from "../../utils/mssql.js"
-import { PRODUCTS_BY_CODES } from "../products/queries.js"
+import { PRODUCTS_BY_CODES, PRICE_LISTS } from "../products/queries.js"
 
 const formatter = new Intl.NumberFormat("es-ES", {
     minimumFractionDigits: 2,
@@ -277,7 +277,7 @@ const controller = {
         let lists = []
         try{
             const sysconfig = await sqlPromise(sqliteDB, 'get', "select value from sysconfig where name='QuotationModulePriceLists'")
-
+          
             const result = await sql.query(PRICE_LISTS(JSON.parse(sysconfig.value)))
             
             lists = result.recordset
