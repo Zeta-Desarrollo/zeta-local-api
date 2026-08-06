@@ -1,0 +1,76 @@
+import xmlrpc from "xmlrpc";
+
+const odoourl = "zetaca-staging-35995145.dev.odoo.com"
+class ODOO_RPC{
+    database
+    username
+    password
+    authid
+    constructor(host){
+        this.host=host
+        this.auth = false
+
+        this.Common = xmlrpc.createClient({ host, path:'/xmlrpc/2/common'})
+        this.Object = xmlrpc.createClient({ host, path:'/xmlrpc/2/object'})
+    }
+    async methodCall(client, name, parameters){
+        return new Promise((resolve, reject)=>{
+            client.methodCall(name, parameters,(error, value)=>{
+                if(error){
+                    console.log("Failure on", this.path, name, error)
+                    reject(error)
+                    return
+                }
+                resolve(value)
+            })
+        })
+    }
+    async authenticate(database, user, password){
+        const id = await this.methodCall(this.Common, "authenticate", [
+            database,
+            user,
+            password,
+            {}
+        ])
+        this.auth = true
+        this.authid = id
+        this.database=database
+        this.username = user
+        this.password = password
+        console.log(this.username+ " Authenticated!")
+    }
+
+    async execute(model, func, list, obj){
+        return this.methodCall(this.Object,"execute_kw", 
+            [
+                this.database, 
+                this.authid,
+                this.password,
+                model,
+                func,
+                list,
+                obj
+            ])
+
+    }
+}
+
+export default async function (){
+    
+    const odoo = new ODOO_RPC(odoourl)
+
+    const versionData = await odoo.methodCall(odoo.Common, "version", [])
+    console.log("Version data", versionData)
+    
+    await odoo.authenticate("zetaca-staging-35995145", "api.zetainterno_1@gallerycomputer.local", "12349876*")
+
+
+    // const productIds = await odoo.execute("product.template", "search", [[["type", "=", "consu"]]], {offset:0, limit:6})
+    // console.log("product ids", productIds)
+
+    const productIds = await odoo.execute("product.template", "search", [[["default_code", "=", "1009648"]]], {offset:0, limit:6})
+    console.log("product ids", productIds)
+    const data = await odoo.execute("product.template", "read", productIds, {fields:["name", "list_price", "l10n_ve_old_code", "default_code", "categ_id", "product_brand_id"]})
+    console.log("data of product", JSON.stringify(data))
+
+}

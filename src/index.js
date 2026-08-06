@@ -10,6 +10,7 @@ import ticketsRouter from "./modules/tickets/router.js"
 import ordersRouter from "./modules/orders/router.js"
 import quotationRouter from "./modules/quotation/router.js"
 import { initJobs } from "./remote/index.js"
+import apitest from "./odoo/apitest.js"
 
 
 async function init (){
@@ -29,9 +30,14 @@ async function init (){
     app.use("/orders", ordersRouter)
     app.use("/quotations", quotationRouter)
 
+    
+
     app.listen(process.env.PORT, ()=>{
         console.log(`Listening on:${process.env.PORT}`)
+        apitest()
     })
+
+
 
     setTimeout(()=>{
         initJobs()
