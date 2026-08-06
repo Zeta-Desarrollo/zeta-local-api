@@ -20,7 +20,7 @@ async function task(args){
     }
     console.log(result.recordset.length)
     }catch(error){
-        console.log("qui du la fuck?", error)
+        console.log("error?", error)
     }
 
     console.log("Permisos creados")

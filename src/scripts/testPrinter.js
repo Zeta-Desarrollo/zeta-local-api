@@ -264,9 +264,7 @@ async function task (){
     const sysconfig = await sqlPromise(db, "get", "select * from sysconfig where name ='CentsPerTicket'")
     const bottomMessage = await sqlPromise(db, "get", "select * from sysconfig where name ='BottomMessage'")
     const factura = await sqlPromise(db, "get", `select * from facturas where FullCode='${'C002-01-0009421600074145'}'`)
-    console.log("fact", factura)
     const tickets = await sqlPromise(db, "all", `select * from tickets where FactCode='${factura.FullCode}'`)
-    console.log("tick", tickets)
     const amount = Math.floor(factura.Total/ factura.TasaUSD / (parseInt(sysconfig.value)/100))
 
     let i =1
@@ -276,7 +274,6 @@ async function task (){
     }
     const pdfName = "printer-test"
     await merger.save(`./docs/${pdfName}.pdf`)
-    console.log("merge")
     // await new Promise((resolve, reject)=>{
     //         ptp.print("./docs/"+pdfName+".pdf", {
     //             printer:"POS-80C",

@@ -37,7 +37,6 @@ class ODOO_RPC{
         this.database=database
         this.username = user
         this.password = password
-        console.log(this.username+ " Authenticated!")
     }
 
     async execute(model, func, list, obj){
@@ -60,17 +59,41 @@ export default async function (){
     const odoo = new ODOO_RPC(odoourl)
 
     const versionData = await odoo.methodCall(odoo.Common, "version", [])
-    console.log("Version data", versionData)
     
     await odoo.authenticate("zetaca-staging-35995145", "api.zetainterno_1@gallerycomputer.local", "12349876*")
 
-
-    // const productIds = await odoo.execute("product.template", "search", [[["type", "=", "consu"]]], {offset:0, limit:6})
-    // console.log("product ids", productIds)
-
     const productIds = await odoo.execute("product.template", "search", [[["default_code", "=", "1009648"]]], {offset:0, limit:6})
     console.log("product ids", productIds)
+
     const data = await odoo.execute("product.template", "read", productIds, {fields:["name", "list_price", "l10n_ve_old_code", "default_code", "categ_id", "product_brand_id"]})
-    console.log("data of product", JSON.stringify(data))
+
+    const stockids = await odoo.execute("stock.quant", "search", [
+        [
+            ["product_tmpl_id", "=", productIds[0]],
+            ["location_id", "=", 38]
+        ]
+    ])
+    console.log("stock ids", stockids)
+
+    const stock = await odoo.execute("stock.quant", "read", stockids, {fields:["quantity"]})
+    console.log("STOCK", stock)
+
+    // const category = await odoo.execute("product.category", "read", [data[0].categ_id[0]])
+    // console.log("cat", category)
+
+}
+
+const DATA_MAP ={
+    //product.template
+    ItemCode: "default_code",
+    U_NIV_I: "l10n_ve_referencia_proveedor",
+    ItemName: "name",
+    SellItem: "sale_ok", //needs cast to Y/N
+
+    //stock.quant (Filter for location_id = 38)
+    onHand: "quantity",
+
+    //product.pricelist
+    Price: ""
 
 }

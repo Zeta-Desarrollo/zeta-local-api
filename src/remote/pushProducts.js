@@ -70,7 +70,7 @@ async function task() {
                     products: chunks[i]
                 }
             }).catch((err) => {
-                console.log("excuse moi", JSON.stringify(err, null, 2))
+                console.log("error", JSON.stringify(err, null, 2))
             })
 
             console.log("chunk" + i + "resulted in", result)

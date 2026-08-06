@@ -52,7 +52,7 @@ async function task(args){
         fs.writeFileSync("order-data.csv", text)
 
     }catch(error){
-        console.log("qui du la fuck?", error)
+        console.log("error", error)
     }
 
     console.log("Permisos creados")

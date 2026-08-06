@@ -7,7 +7,6 @@ async function task (){
     try{
 
         // const xd = await KLK_DB.query("select * from KLK_CAJA")
-        // console.log("SSS",xd)
         await new Promise((resolve,reject)=>{
             try{
      
@@ -73,7 +72,6 @@ async function task (){
        
 
 
-                    console.log("items", items.length)
                     const admin = db.prepare("INSERT INTO facturas VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
                     const admin2 = db.prepare("INSERT INTO factura_tickets_productos VALUES (?,?,?,?,?)")
                     for ( const item of items){

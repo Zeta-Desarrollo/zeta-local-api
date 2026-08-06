@@ -55,6 +55,7 @@ async function JSPDF (body, params){
 
         }
         const result = await sql.query(PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value))
+        console.log("res", result)
         if (result.recordset.length===0) throw "invalid-codes"
         if (body.products.length==1){
             product=result.recordset[0]
@@ -226,14 +227,14 @@ async function JSPDF (body, params){
         }
         await merger.save(`./docs/${pdfName}.pdf`)
 
-    await new Promise((resolve, reject)=>{
-        ptp.print("./docs/"+pdfName+".pdf", {
-            printer:"Etiquetas",
-            orientation:"landscape",
-            scale:"shrink",
+    // await new Promise((resolve, reject)=>{
+    //     ptp.print("./docs/"+pdfName+".pdf", {
+    //         printer:"Etiquetas",
+    //         orientation:"landscape",
+    //         scale:"shrink",
             
-        }).then(resolve).catch(reject);
-    })
+    //     }).then(resolve).catch(reject);
+    // })
     delete global.window;
     delete global.navigator;
     delete global.btoa;
@@ -633,7 +634,6 @@ const controller = {
             if (!params.code) throw  "code-required"
             const location = body.props.location? body.props.location: "TODOS"
             const query = PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
-            console.log("ASDASD", query)
             const result = await sql.query(query)
             if (result.recordset.length===0) throw "invalid-code"
             
@@ -705,7 +705,7 @@ const controller = {
         let x
         let e
         try {
-            console.log("body", body)
+
             const r1 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
             if (r1.length>0) throw "print-active"
             const r2 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion order by Impresion desc limit 1")

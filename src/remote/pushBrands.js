@@ -21,7 +21,6 @@ async function task (){
             }
         })
 
-        console.log("create brands result", result)
 
     }catch(error){
         console.log("failed:", error)
