@@ -53,19 +53,17 @@ class ODOO_RPC{
 
     }
 }
+export const odoo = new ODOO_RPC(odoourl)
+const versionData = await odoo.methodCall(odoo.Common, "version", []) 
+await odoo.authenticate("zetaca-staging-35995145", "api.zetainterno_1@gallerycomputer.local", "12349876*")
 
+ 
 export default async function (){
     
-    const odoo = new ODOO_RPC(odoourl)
-
-    const versionData = await odoo.methodCall(odoo.Common, "version", [])
-    
-    await odoo.authenticate("zetaca-staging-35995145", "api.zetainterno_1@gallerycomputer.local", "12349876*")
-
     const productIds = await odoo.execute("product.template", "search", [[["default_code", "=", "1009648"], ]], {offset:0, limit:6})
     console.log("product ids", productIds)
 
-    const data = await odoo.execute("product.template", "read", productIds, {fields:["name", "list_price","l10n_ve_is_agreement_product", "l10n_ve_old_code", "default_code", "categ_id", "product_brand_id", "supplier_taxes_id"]})
+    const data = await odoo.execute("product.template", "read", productIds, {fields:["name", "sale_ok","list_price","l10n_ve_is_agreement_product", "l10n_ve_old_code", "default_code", "categ_id", "product_brand_id", "supplier_taxes_id"]})
     console.log("data", data)
     const stockids = await odoo.execute("stock.quant", "search", [
         [
@@ -88,6 +86,9 @@ export default async function (){
     console.log("taxes", taxes)
 
 
+
+
+
 }
 
 const DATA_MAP ={
@@ -96,19 +97,67 @@ const DATA_MAP ={
     U_NIV_I: "l10n_ve_referencia_proveedor",
     ItemName: "name",
     SellItem: "sale_ok", //needs cast to Y/N
-
     //stock.quant (Filter for location_id = 38)
+        //product_tmpl_id
     onHand: "quantity",
-
     //product.template
     Price: "list_price",
     FirmName: "product_brand_id", //[1] 
     FirmCode: "product_brand_id", //[0]
-    
-    TaxCodeAR:"supplier_taxe_id", // Array vacio -> IVA_EXE / Id-> account.tax
+    TaxCodeAR:"supplier_taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
     FrozenFor:"sale_ok"
 
 
 }
 
 //l10n_ve_is_agreement_product always true?
+
+
+export async function PRODUCTS_BY_CODES(ItemCodes){
+        const productData = await odoo.execute("product.template", "search_read", [[["default_code", "in", ItemCodes]]], {
+        fields:[
+            "default_code",
+            "l10n_ve_referencia_proveedor",
+            "name",
+            "sale_ok", //needs cast to Y/N
+            "list_price",
+            "product_brand_id", //[1] 
+            "product_brand_id", //[0]
+            "supplier_taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
+            "sale_ok"
+        ]
+    })
+    // console.log("products", productData[0], productData.length)
+    const quantities = [...new Set(await odoo.execute("stock.quant", "search_read", [
+        [
+            ["quantity", ">", 0],
+            ["location_id", "=", 38],
+            ["product_tmpl_id", "in", ItemCodes]
+        ]
+    ], {fields:["product_tmpl_id", "quantity"]})
+    )].map((i=>i.product_tmpl_id[0]))
+    // console.log("quantities",quantities[0], quantities.length)
+
+
+    const products = {}
+    for (const i of quantities){
+        products[i.product_tmpl_id] = {onHand:i.quantity}
+    }
+    for (const i of productData){
+        products[i.id] = {...products[i.id],
+            ItemCode: i["default_code"],
+            U_NIV_I: i["l10n_ve_referencia_proveedor"],
+            ItemName: i["name"],
+            SellItem: i["sale_ok"], //needs cast to Y/N
+            Price: i["list_price"],
+            FirmName: i["product_brand_id"][1], //[1] 
+            FirmCode: i["product_brand_id"][0], //[0]
+            TaxCodeAR:i["supplier_taxes_id"].length==0?"IVA":"IVE_EXE", //CAMBIAR LUEGO
+            FrozenFor:i["sale_ok"]?"N":"Y"
+        }
+    }
+    console.log("pproducts", products)
+    return products
+}
+
+PRODUCTS_BY_CODES(["1002025", "1001002", "4001527", "4001530"])
