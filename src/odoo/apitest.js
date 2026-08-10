@@ -63,7 +63,7 @@ export default async function (){
     const productIds = await odoo.execute("product.template", "search", [[["default_code", "=", "1009648"], ]], {offset:0, limit:6})
     console.log("product ids", productIds)
 
-    const data = await odoo.execute("product.template", "read", productIds, {fields:["name", "sale_ok","list_price","l10n_ve_is_agreement_product", "l10n_ve_old_code", "default_code", "categ_id", "product_brand_id", "supplier_taxes_id"]})
+    const data = await odoo.execute("product.template", "read", productIds, {fields:["name", "active", "sale_ok","list_price","l10n_ve_is_agreement_product", "l10n_ve_old_code", "default_code", "categ_id", "product_brand_id", "supplier_taxes_id"]})
     console.log("data", data)
     const stockids = await odoo.execute("stock.quant", "search", [
         [
@@ -76,14 +76,14 @@ export default async function (){
     // console.log("cat", category)
 
     const pricelist = await odoo.execute("product.pricelist", "search", [[]], {})
-    console.log("pricelist ids", pricelist, )
+    // console.log("pricelist ids", pricelist, )
 
     const saleOrderIds = await odoo.execute("sale.order", "search", [[]],{})
-    console.log("sale orders ids", saleOrderIds)
+    // console.log("sale orders ids", saleOrderIds)
     // const saleOrders = await odoo.execute("sale.order", "read", [[4]], {})
 
     const taxes = await odoo.execute("account.tax", "read", [55], {})
-    console.log("taxes", taxes)
+    // console.log("taxes", taxes)
 
 
 
@@ -113,13 +113,30 @@ const DATA_MAP ={
 //l10n_ve_is_agreement_product always true?
 
 
-export async function PRODUCTS_BY_CODES(ItemCodes){
-        const productData = await odoo.execute("product.template", "search_read", [[["default_code", "in", ItemCodes]]], {
+export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5, sort="desc", includeNoSell=false){
+    /**
+     * MISSING FILTERS:
+     * LOCATION
+     * PRICElIST
+     * SORT
+     */
+    const TemplateDomain = [[["default_code", "in", ItemCodes]]]
+    if (!includeNoPrice){
+        TemplateDomain[0].push(["list_price", ">", 0])
+    }
+    if(!includeNoActive){
+        TemplateDomain[0].push(["active", "=", true])
+    }
+    if(!includeNoSell){
+        TemplateDomain[0].push(["sale_ok", "=", true])
+    }
+
+    const productData = await odoo.execute("product.template", "search_read", TemplateDomain, {
         fields:[
             "default_code",
             "l10n_ve_referencia_proveedor",
             "name",
-            "sale_ok", //needs cast to Y/N
+            "active", //needs cast to Y/N
             "list_price",
             "product_brand_id", //[1] 
             "product_brand_id", //[0]
@@ -127,37 +144,55 @@ export async function PRODUCTS_BY_CODES(ItemCodes){
             "sale_ok"
         ]
     })
-    // console.log("products", productData[0], productData.length)
-    const quantities = [...new Set(await odoo.execute("stock.quant", "search_read", [
+    console.log("products", productData[0], productData.length)
+    const stockIds = []
+    for (const product of productData){
+        stockIds.push(product.id)
+    }
+    const StockDomain =[
         [
-            ["quantity", ">", 0],
             ["location_id", "=", 38],
-            ["product_tmpl_id", "in", ItemCodes]
+            ["product_tmpl_id", "in", stockIds]
         ]
-    ], {fields:["product_tmpl_id", "quantity"]})
-    )].map((i=>i.product_tmpl_id[0]))
-    // console.log("quantities",quantities[0], quantities.length)
+    ]
+    const quantities = [...new Set(await odoo.execute("stock.quant", "search_read", StockDomain, {fields:["product_tmpl_id", "quantity"]})
+    )]
+    console.log("quantities",quantities[0], quantities.length)
 
 
     const products = {}
-    for (const i of quantities){
-        products[i.product_tmpl_id] = {onHand:i.quantity}
-    }
+
     for (const i of productData){
-        products[i.id] = {...products[i.id],
+        products[i.id] = {
             ItemCode: i["default_code"],
             U_NIV_I: i["l10n_ve_referencia_proveedor"],
             ItemName: i["name"],
-            SellItem: i["sale_ok"], //needs cast to Y/N
+            SellItem: i["sale_ok"]?"Y":"N", //needs cast to Y/N
             Price: i["list_price"],
             FirmName: i["product_brand_id"][1], //[1] 
             FirmCode: i["product_brand_id"][0], //[0]
             TaxCodeAR:i["supplier_taxes_id"].length==0?"IVA":"IVE_EXE", //CAMBIAR LUEGO
-            FrozenFor:i["sale_ok"]?"N":"Y"
+            FrozenFor:i["active"]?"N":"Y",
+            onHand:0
         }
     }
+
+    for (const i of quantities){
+        products[i.product_tmpl_id[0]] = {...products[i.product_tmpl_id[0]], onHand:i.quantity}
+    }
     console.log("pproducts", products)
-    return products
+
+    const final = []
+    for (const id in products){
+        if(!includeNoStock){
+            if (products[id].onHand == 0){
+                continue
+            }
+        }
+        final.push(products[id])
+    }
+    console.log("pproducts", final)
+    return final
 }
 
-PRODUCTS_BY_CODES(["1002025", "1001002", "4001527", "4001530"])
+PRODUCTS_BY_CODES(["1002025", "1009648", "4001530"], "NONE", false, false, true)
