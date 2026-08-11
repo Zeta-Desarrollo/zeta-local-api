@@ -8,7 +8,8 @@ import fs from "fs"
 // import PDFDocument from "pdfkit"
 import ptp from "pdf-to-printer";
 
-import { MARCAS, PRODUCT_BY_CODE, FIRM_AND_COUNT, PRODUCT_MULTI_PRICE, PRODUCTS_BY_MARCA, PRODUCTS_BY_SEARCH, PRODUCTS_BY_CODES, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR, FACT_AND_COUNT, PRODUCTS_BY_FACTURA } from "./queries.js"
+import { MARCAS, PRODUCT_BY_CODE, PRODUCT_MULTI_PRICE, PRODUCTS_BY_SEARCH, PRODUCTS_BY_CODES, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR, FACT_AND_COUNT, PRODUCTS_BY_FACTURA } from "./queries.js"
+import { FIRM_AND_COUNT, PRODUCTS_BY_MARCA } from "../../odoo/apitest.js";
 import PDFMerger from "pdf-merger-js";
 import { jsPDF } from "jspdf";
 
@@ -598,8 +599,8 @@ const controller = {
         let marcas = []
         try{
             const location = body.props.location? body.props.location: "TODOS"
-            const result = await sql.query(FIRM_AND_COUNT(location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
-            marcas = result.recordset
+            // const result = await sql.query(FIRM_AND_COUNT(location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+            marcas = await FIRM_AND_COUNT(location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
         }catch(err){
             error = err
         }
@@ -633,11 +634,12 @@ const controller = {
         try{
             if (!params.code) throw  "code-required"
             const location = body.props.location? body.props.location: "TODOS"
-            const query = PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
-            const result = await sql.query(query)
-            if (result.recordset.length===0) throw "invalid-code"
+            // const query = PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
+            products = await PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
+            // const result = await sql.query(query)
+            if (products.length===0) throw "invalid-code"
             
-            products = result.recordset
+            // products = result.recordset
         }catch(err){
             console.log("Err",err)
             error = err
