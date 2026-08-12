@@ -1,11 +1,10 @@
-import { SAP_DB, SAP_DB as sql} from "../../utils/mssql.js"
-import { PRODUCTS_BY_CODES } from "../products/queries.js";
+import {PRODUCTS_BY_CODES} from "../../odoo/apitest.js"
 
 const controller = {
     isOrderValid:async (body, params)=>{
         let isOrderValid = true
         const data = {}
-        const products = await SAP_DB.query(PRODUCTS_BY_CODES(body.products.map(i=>i.ItemCode), "TODOS", false, false, false, 3))
+        const products = await PRODUCTS_BY_CODES(body.products.map(i=>i.ItemCode), "TODOS", false, false, false, 3)
         for (const p of products.recordset){
             data[p.ItemCode] = p
         }

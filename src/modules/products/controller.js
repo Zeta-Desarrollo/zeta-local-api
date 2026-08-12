@@ -8,8 +8,8 @@ import fs from "fs"
 // import PDFDocument from "pdfkit"
 import ptp from "pdf-to-printer";
 
-import { MARCAS, PRODUCT_BY_CODE, PRODUCT_MULTI_PRICE, PRODUCTS_BY_SEARCH, PRODUCTS_BY_CODES, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR, FACT_AND_COUNT, PRODUCTS_BY_FACTURA } from "./queries.js"
-import { FIRM_AND_COUNT, PRODUCTS_BY_MARCA } from "../../odoo/apitest.js";
+import { MARCAS, PRODUCT_MULTI_PRICE, PRODUCTS_BY_SEARCH, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR, FACT_AND_COUNT, PRODUCTS_BY_FACTURA } from "./queries.js"
+import { FIRM_AND_COUNT, PRODUCTS_BY_MARCA, PRODUCT_BY_CODE, PRODUCTS_BY_CODES } from "../../odoo/apitest.js";
 import PDFMerger from "pdf-merger-js";
 import { jsPDF } from "jspdf";
 
@@ -55,8 +55,7 @@ async function JSPDF (body, params){
         const productData = {
 
         }
-        const result = await sql.query(PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value))
-        console.log("res", result)
+        const result = await PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value)
         if (result.recordset.length===0) throw "invalid-codes"
         if (body.products.length==1){
             product=result.recordset[0]
@@ -263,7 +262,7 @@ async function noPriceLabel (body, params){
         const productData = {
 
         }
-        const result = await sql.query(PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value))
+        const result = await PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value)
         if (result.recordset.length===0) throw "invalid-codes"
         if (body.products.length==1){
             product=result.recordset[0]
@@ -405,7 +404,7 @@ async function storageLabel (body, params){
         const productData = {
 
         }
-        const result = await sql.query(PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value))
+        const result = await PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value)
         if (result.recordset.length===0) throw "invalid-codes"
         if (body.products.length==1){
             product=result.recordset[0]
@@ -580,26 +579,11 @@ const controller = {
         }
         return {error, Default}
     },
-    getAllMarcas: async (body, params)=>{
-        let error
-        let marcas = []
-        try{
-            const result = await sql.query(MARCAS())
-            marcas = result.recordset
-        }catch(err){
-            error = err.message? err.message : err
-        }
-        return {
-            error,
-            marcas
-        }
-    },
     queryMarcas: async(body, params)=>{
         let error
         let marcas = []
         try{
             const location = body.props.location? body.props.location: "TODOS"
-            // const result = await sql.query(FIRM_AND_COUNT(location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
             marcas = await FIRM_AND_COUNT(location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
         }catch(err){
             error = err
@@ -614,7 +598,7 @@ const controller = {
         let product = {}
         try{
             if (!params.code) throw  "code-required"
-            const result = await sql.query(PRODUCT_BY_CODE(params.code, 'TODOS', true, true, true, body.priceList?body.priceList:3))
+            const result = await PRODUCT_BY_CODE(params.code, 'TODOS', true, true, true, body.priceList?body.priceList:3)
             if (result.recordset.length===0) throw "invalid-code"
             
             product = result.recordset[0]
@@ -634,12 +618,9 @@ const controller = {
         try{
             if (!params.code) throw  "code-required"
             const location = body.props.location? body.props.location: "TODOS"
-            // const query = PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
             products = await PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
-            // const result = await sql.query(query)
             if (products.length===0) throw "invalid-code"
             
-            // products = result.recordset
         }catch(err){
             console.log("Err",err)
             error = err
@@ -674,7 +655,7 @@ const controller = {
 
         try{
             if (!params.code) throw "code-required"
-            const result = await sql.query(PRODUCT_BY_CODE(params.code,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+            const result = await PRODUCT_BY_CODE(params.code,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
             if (result.recordset.length===0) throw "invalid-code-"+params.code
             product = result.recordset[0]
 
@@ -770,21 +751,21 @@ const controller = {
 
         switch (body.type){
             case "codes":
-                const result = await sql.query(PRODUCTS_BY_CODES(body.products,"TODOS", true, true, true, body.props.priceList.value, true))
+                const result = await PRODUCTS_BY_CODES(body.products,"TODOS", true, true, true, body.props.priceList.value, true)
                 uncheckedBulks.push({
                     code:"codes",
                     name:"codes",
-                    products:result.recordset
+                    products:result
                 })
                 break;
             default:
                 const search = body.type=="marcas"? PRODUCTS_BY_MARCA: (body.type=="facturas"?PRODUCTS_BY_FACTURA:PRODUCTS_BY_PROVEEDOR)
                 for (const bulk of body.bulks){
-                    const result = await sql.query(search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value, "asc", true))
+                    const result = await search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value, "asc", true)
                         uncheckedBulks.push({
                         code:bulk.code,
                         name:bulk.name,
-                        products:result.recordset
+                        products:result
                     })
                 }
                 
@@ -841,10 +822,10 @@ const controller = {
                 await sqlPromise(sqliteDB, "run", `insert into impresion_lote values (${impresionPrevia.Impresion+1}, ${index}, '${bulk.code}', '${bulk.name}', 0)`)
                 let sqlResult
                 if(body.type == "codes"){
-                    sqlResult = await sql.query(PRODUCTS_BY_CODES(body.products,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value))
+                    sqlResult = await PRODUCTS_BY_CODES(body.products,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
                 }else{
                     const search = body.type=="marcas"? PRODUCTS_BY_MARCA: (body.type=="facturas"?PRODUCTS_BY_FACTURA:PRODUCTS_BY_PROVEEDOR)
-                    sqlResult = await sql.query(search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value, "desc"))
+                    sqlResult = await search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value, "desc")
                 }
                 const r = sqlResult.recordset.filter((p)=>{
                     return body.exclude.indexOf(p.ItemCode)<0

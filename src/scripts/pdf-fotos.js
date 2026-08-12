@@ -2,71 +2,8 @@ import { config } from "dotenv"
 config()
 import fs from "fs"
 import { jsPDF } from "jspdf";
-// import { SAP_DB as sql} from "../../utils/mssql.js"
-import { SAP_DB as sql } from "../utils/mssql.js";
-const FIRM_AND_COUNT = function(location,includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5){
 
-    const query = `
-    select 
-        OMRC.FirmCode,
-        FirmName,
-        COUNT(OMRC.FirmCode) amountProducts
-        
-    from OMRC 
-    join OITM 
-        on OMRC.FirmCode = OITM.FirmCode
-    join ITM1
-        on OITM.ItemCode = ITM1.ItemCode
-    where
-        PriceList=${priceList}
-        and OITM.SellItem='Y'
-        ${ location=='TODOS'? '': `and OITM.U_CBM='${location}'`}
-
-        ${ includeNoStock ? '' :  `and OITM.OnHand > 0`}
-        ${ includeNoPrice ? '' :  `and ITM1.Price > 0`}
-        ${ true ? '' :  `and omrc.FirmCode in ( '199', '377', '601')`}
-        
-    group by
-        OMRC.FirmCode,
-        OMRC.FirmName 
-    order by amountProducts desc`
-    return query
-}
-
-const PRODUCTS_BY_MARCA = function(FirmCode, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5){
-    FirmCode = FirmCode.replace(/[\[\]\(\)\;\+\:]/g, "")
-    FirmCode = FirmCode.replace("'","''");
-    includeNoStock = includeNoStock ? true : false
-    const query = `
-    select 
-        OITM.ItemCode,
-        ItemName,
-        onHand,
-        U_NIV_I,
-        Price,
-        OMRC.FirmName,
-        OMRC.FirmCode,
-        OITM.ItmsGrpCod,
-        OITM.TaxCodeAR
-    from 
-        OITM 
-    join 
-        ITM1 
-            on OITM.ItemCode = ITM1.ItemCode 
-    join
-        OMRC
-            on OITM.FirmCode = OMRC.FirmCode
-    where 
-        PriceList=${priceList}
-        and OITM.SellItem='Y'
-        and OITM.FirmCode='${FirmCode}'
-        ${ location=='TODOS'? '': `and OITM.U_CBM='${location}'`}
-        ${ includeNoStock ? '' : 'and OITM.OnHand > 0'}
-        ${ includeNoPrice ? '' : 'and ITM1.Price > 0'}
-    order by OITM.ItemName asc
-        `
-    return query
-}
+import {FIRM_AND_COUNT, PRODUCTS_BY_MARCA} from "../../odoo/apitest.js"
 
 
 function task (){
@@ -92,7 +29,7 @@ async function generatePDF (){
     try{
         const location = "PATIO"
 
-        const result = await sql.query(FIRM_AND_COUNT(location))
+        const result = await FIRM_AND_COUNT(location)
         const marcas = result.recordset
         const productos = {}
         let y = 0.4
@@ -107,7 +44,7 @@ async function generatePDF (){
         let marcaIndex = 1
         for (const marca of marcas){
             n=1
-            const result = await sql.query(PRODUCTS_BY_MARCA(""+marca.FirmCode,location))
+            const result = await PRODUCTS_BY_MARCA(""+marca.FirmCode,location)
             
             //datos marca
             doc.setFont("Helvetica", "bold")

@@ -4,7 +4,8 @@ import { jsPDF } from "jspdf";
 
 import { sqliteDB, sqlPromise } from "../../utils/sqlite.js"
 import { SAP_DB as sql } from "../../utils/mssql.js"
-import { PRODUCTS_BY_CODES, PRICE_LISTS } from "../products/queries.js"
+import {  PRICE_LISTS } from "../products/queries.js"
+import { PRODUCTS_BY_CODES,} from "../../odoo/apitest.js"
 
 const formatter = new Intl.NumberFormat("es-ES", {
     minimumFractionDigits: 2,
@@ -22,10 +23,10 @@ const controller = {
       updated: 0,
       generated: 0
     }
-    const result = await sql.query(PRODUCTS_BY_CODES(products, 'TODOS', true, true, true, 3))
+    const result = await PRODUCTS_BY_CODES(products, 'TODOS', true, true, true, 3)
 
     const productData = {}
-    for (const product of result.recordset) {
+    for (const product of result) {
       productData[product.ItemCode] = product
     }
     await sqlPromise(sqliteDB, "run", `insert into quotation values (${quotation.Quotation}, '${quotation.note}', '${quotation.client}','${quotation.seller}', '${JSON.stringify(quotation.priceList)}', ${quotation.created}, ${quotation.updated}, ${quotation.generated})`)
@@ -48,10 +49,10 @@ const controller = {
       updated:  + new Date(),
       generated: 0
     }
-    const result = await sql.query(PRODUCTS_BY_CODES(products, 'TODOS', true, true, true, 3))
+    const result = await PRODUCTS_BY_CODES(products, 'TODOS', true, true, true, 3)
 
     const productData = {}
-    for (const product of result.recordset) {
+    for (const product of result) {
       productData[product.ItemCode] = product
     }
     const quotationsql =`update quotation 

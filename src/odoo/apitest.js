@@ -114,7 +114,82 @@ const DATA_MAP = {
 }
 
 //l10n_ve_is_agreement_product always true?
+export async function PRODUCT_BY_CODE(ItemCode, location, includeNoActive = false, includeNoPrice = false, includeNoStock = false, priceList = 5) {
+    /**
+     * MISSING FILTERS:
+     * LOCATION
+     * PRICElIST
+     * SORT
+     */
+    const TemplateDomain = [[["default_code", "=", ItemCode]]]
+    if (!includeNoPrice) {
+        TemplateDomain[0].push(["list_price", ">", 0])
+    }
+    if (!includeNoActive) {
+        TemplateDomain[0].push(["active", "=", true])
+    }
 
+    const productData = await odoo.execute("product.template", "search_read", TemplateDomain, {
+        fields: [
+            "default_code",
+            "l10n_ve_referencia_proveedor",
+            "name",
+            "active", //needs cast to Y/N
+            "list_price",
+            "product_brand_id", //[1] 
+            "categ_id", //[0]
+            "supplier_taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
+            "sale_ok"
+        ]
+    })
+
+    const StockDomain = [
+        [
+            ["location_id", "=", 38],
+            ["product_tmpl_id", "=", productData[0].id]
+        ]
+    ]
+    const quantities = [...new Set(await odoo.execute("stock.quant", "search_read", StockDomain, { fields: ["product_tmpl_id", "quantity"] })
+    )]
+    console.log("quantities", quantities[0], quantities.length)
+
+
+    const products = {}
+
+    for (const i of productData) {
+        products[i.id] = {
+            ItemCode: i["default_code"],
+            U_NIV_I: i["l10n_ve_referencia_proveedor"],
+            ItemName: i["name"],
+            SellItem: i["sale_ok"] ? "Y" : "N", //needs cast to Y/N
+            Price: i["list_price"],
+            FirmName: i["product_brand_id"][1], //[1] 
+            FirmCode: i["product_brand_id"][0], //[0]
+            TaxCodeAR: i["supplier_taxes_id"].length == 0 ? "IVA" : "IVE_EXE", //CAMBIAR LUEGO
+            FrozenFor: i["active"] ? "N" : "Y",
+            ItmsGrpCod: i["categ_id"][0],
+            ItmsGrpNam: i["categ_id"][1],
+            onHand: 0
+        }
+    }
+
+    for (const i of quantities) {
+        products[i.product_tmpl_id[0]] = { ...products[i.product_tmpl_id[0]], onHand: i.quantity }
+    }
+    console.log("pproducts", products)
+
+    const final = []
+    for (const id in products) {
+        if (!includeNoStock) {
+            if (products[id].onHand == 0) {
+                continue
+            }
+        }
+        final.push(products[id])
+    }
+    console.log("pproducts", final)
+    return final
+}
 
 export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = false, includeNoPrice = false, includeNoStock = false, priceList = 5, sort = "desc", includeNoSell = false) {
     /**
