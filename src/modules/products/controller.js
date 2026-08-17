@@ -8,8 +8,8 @@ import fs from "fs"
 // import PDFDocument from "pdfkit"
 import ptp from "pdf-to-printer";
 
-import { MARCAS, PRODUCT_MULTI_PRICE, PRODUCTS_BY_SEARCH, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR, FACT_AND_COUNT, PRODUCTS_BY_FACTURA } from "./queries.js"
-import { FIRM_AND_COUNT, PRODUCTS_BY_MARCA, PRODUCT_BY_CODE, PRODUCTS_BY_CODES } from "../../odoo/apitest.js";
+import { MARCAS, PRODUCT_MULTI_PRICE, PRODUCTS_BY_SEARCH, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR } from "./queries.js"
+import { FIRM_AND_COUNT, PRODUCTS_BY_MARCA, PRODUCT_BY_CODE, PRODUCTS_BY_CODES, FACT_AND_COUNT, PRODUCTS_BY_FACTURA } from "../../odoo/apitest.js";
 import PDFMerger from "pdf-merger-js";
 import { jsPDF } from "jspdf";
 
@@ -993,11 +993,12 @@ const controller = {
         let error
         let facturas = []
         try{
-            const location = body.props.location? body.props.location: "TODOS"
-            const result = await sql.query(FACT_AND_COUNT(body.props))
             
-            facturas = result.recordset
+            const location = body.props.location? body.props.location: "TODOS"
+            facturas = await FACT_AND_COUNT(body.props)
+            
         }catch(err){
+            console.log("???",err)
             error = err
         }
         return {
@@ -1011,10 +1012,9 @@ const controller = {
         try{
             if (!params.code) throw  "code-required"
 
-            const result = await sql.query(PRODUCTS_BY_FACTURA(params.code,"", null, null, null, body.props.priceList.value))
-            if (result.recordset.length===0) throw "invalid-code"
+            products = await PRODUCTS_BY_FACTURA(params.code,"", null, null, null, body.props.priceList.value)
+            if (products.length===0) throw "invalid-code"
             
-            products = result.recordset
         }catch(err){
             error = err
         }

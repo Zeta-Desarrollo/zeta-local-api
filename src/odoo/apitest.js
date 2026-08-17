@@ -1,3 +1,5 @@
+import { config } from "dotenv";
+config()
 import xmlrpc from "xmlrpc";
 
 const odoourl = "zetaca-staging-35995145.dev.odoo.com"
@@ -17,7 +19,6 @@ class ODOO_RPC {
         return new Promise((resolve, reject) => {
             client.methodCall(name, parameters, (error, value) => {
                 if (error) {
-                    console.log("Failure on", this.path, name, error)
                     reject(error)
                     return
                 }
@@ -53,18 +54,16 @@ class ODOO_RPC {
 
     }
 }
-export const odoo = new ODOO_RPC(odoourl)
+export const odoo = new ODOO_RPC(process.env.ODOO_API)
 const versionData = await odoo.methodCall(odoo.Common, "version", [])
-await odoo.authenticate("zetaca-staging-35995145", "api.zetainterno_1@gallerycomputer.local", "12349876*")
+await odoo.authenticate(process.env.ODOO_DB, process.env.ODOO_USER, process.env.ODOO_PASSWORD)
 
 
-export default async function () {
+async function TESTING() {
 
-    const productIds = await odoo.execute("product.template", "search", [[["default_code", "=", "1009648"],]], { offset: 0, limit: 6 })
-    console.log("product ids", productIds)
+    const productIds = await odoo.execute("product.template", "search", [[["default_code", "=", "1001002"],]], { offset: 0, limit: 6 })
 
-    const data = await odoo.execute("product.template", "read", productIds, { fields: ["name", "active", "sale_ok", "list_price", "l10n_ve_is_agreement_product", "l10n_ve_old_code", "default_code", "categ_id", "product_brand_id", "supplier_taxes_id"] })
-    console.log("data", data)
+    const data = await odoo.execute("product.template", "read", productIds, { fields: ["name", "active", "sale_ok", "list_price","l10n_ve_old_code", "default_code", "categ_id", "product_brand_id", "supplier_taxes_id"] })
     const stockids = await odoo.execute("stock.quant", "search", [
         [
             ["product_tmpl_id", "=", productIds[0]],
@@ -85,9 +84,10 @@ export default async function () {
     const taxes = await odoo.execute("account.tax", "read", [55], {})
     // console.log("taxes", taxes)
 
-
-
-
+    const order = await odoo.execute("purchase.order", "search_read", [[
+        ["create_date", "<", "2026-08-13"]
+    ]], {})
+    // console.log("order", order)
 
 }
 
@@ -109,6 +109,14 @@ const DATA_MAP = {
     
     ItmsGrpCod: "categ_id",
     ItmsGrpNam: "categ_id",
+
+    //purchase.order
+    DocNum:"name",
+    DocEntry:"id",
+    DocDate:"create_date",
+    CardName:"partner_id", 
+    NumAtCard:"partner_ref",
+	amountProducts:"order_line.length"
 
 
 }
@@ -151,7 +159,6 @@ export async function PRODUCT_BY_CODE(ItemCode, location, includeNoActive = fals
     ]
     const quantities = [...new Set(await odoo.execute("stock.quant", "search_read", StockDomain, { fields: ["product_tmpl_id", "quantity"] })
     )]
-    console.log("quantities", quantities[0], quantities.length)
 
 
     const products = {}
@@ -176,7 +183,6 @@ export async function PRODUCT_BY_CODE(ItemCode, location, includeNoActive = fals
     for (const i of quantities) {
         products[i.product_tmpl_id[0]] = { ...products[i.product_tmpl_id[0]], onHand: i.quantity }
     }
-    console.log("pproducts", products)
 
     const final = []
     for (const id in products) {
@@ -187,7 +193,6 @@ export async function PRODUCT_BY_CODE(ItemCode, location, includeNoActive = fals
         }
         final.push(products[id])
     }
-    console.log("pproducts", final)
     return final
 }
 
@@ -234,7 +239,6 @@ export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = f
     ]
     const quantities = [...new Set(await odoo.execute("stock.quant", "search_read", StockDomain, { fields: ["product_tmpl_id", "quantity"] })
     )]
-    console.log("quantities", quantities[0], quantities.length)
 
 
     const products = {}
@@ -259,7 +263,6 @@ export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = f
     for (const i of quantities) {
         products[i.product_tmpl_id[0]] = { ...products[i.product_tmpl_id[0]], onHand: i.quantity }
     }
-    console.log("pproducts", products)
 
     const final = []
     for (const id in products) {
@@ -270,18 +273,11 @@ export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = f
         }
         final.push(products[id])
     }
-    console.log("pproducts", final)
     return final
 }
 
 // PRODUCTS_BY_CODES(["1002025", "1009648", "4001530"], "NONE", false, false, true)
 
-export async function BRAND_AND_COUNT() {
-    const marcas = await odoo.execute("product.category", "read", [[55]], { fields: ["name", "complete_name", "product_count"] })
-    console.log("marcas", marcas)
-    const products = await odoo.execute("product.template", "read", [[[""]]], { fields: ["name", "complete_name", "product_count"] })
-
-}
 export async function FIRM_AND_COUNT(location, includeNoActive = false, includeNoPrice = false, includeNoStock = false, priceList = 5) {
     const StockDomain = [
         [
@@ -346,13 +342,11 @@ export async function FIRM_AND_COUNT(location, includeNoActive = false, includeN
     delete count[undefined]
 
     let final = []
-    // console.log("products", count)
     let total = 0
     for (const key in count) {
         final.push(count[key])
         total += count[key].amountProducts
     }
-    // console.log(JSON.stringify(final))
     final = final.sort((a, b) => a.FirmName.localeCompare(b.FirmName))
 
     return final
@@ -441,4 +435,78 @@ export async function PRODUCTS_BY_MARCA(FirmCode, location, includeNoActive=fals
     return final
 }
 
-// PRODUCTS_BY_MARCA("808","TODOS", false, false, true)
+export async function FACT_AND_COUNT(props){
+    const minDay = props.minDay.replace(/\//g, "-")
+    const maxDay = props.maxDay.replace(/\//g, "-")
+
+    const orders = await odoo.execute("purchase.order", "search_read", [[
+        ["create_date", "<=", maxDay],
+        ["create_date", ">=", minDay],
+        ["state", "=", "purchase"]
+    ]], {fields:["name", "id", "partner_id", "partner_ref", "create_date", "order_line"]})
+
+
+    const final = []
+    for (const o of orders){
+            final.push({
+                DocNum:o["name"],
+                DocEntry:o["id"],
+                DocDate:o["create_date"],
+                CardName:o["partner_id"][1], 
+                NumAtCard:o["partner_ref"]?o["partner_ref"]:'',
+                amountProducts:o["order_line"].length
+            })
+
+    }
+
+    return final
+}
+export async function PRODUCTS_BY_FACTURA(DocEntry, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5, sort = "asc", includeNoSell =false){
+    DocEntry = parseInt(DocEntry)
+
+    const lines = await odoo.execute("purchase.order.line", "search_read",[[
+        ["order_id", "=", DocEntry]
+    ]], {})
+
+    const ItemCodes = lines.map((i)=>i.product_id[0])
+    //using product_variant_ids feels somewhat janky.
+    //Perhaps making an or with the base id just to be safe?
+    const productData = await odoo.execute("product.template", "search_read", [[["product_variant_ids", "in", ItemCodes]]], {
+        fields: [
+            "default_code",
+            "l10n_ve_referencia_proveedor",
+            "name",
+            "active", //needs cast to Y/N
+            "list_price",
+            "product_brand_id", //[1] 
+            "categ_id", //[0]
+            "supplier_taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
+            "sale_ok"
+        ]
+    })
+    const products = []
+    for (const i of productData) {
+        products.push({
+            ItemCode: i["default_code"],
+            U_NIV_I: i["l10n_ve_referencia_proveedor"],
+            ItemName: i["name"],
+            SellItem: i["sale_ok"] ? "Y" : "N", //needs cast to Y/N
+            Price: i["list_price"],
+            FirmName: i["product_brand_id"][1], //[1] 
+            FirmCode: i["product_brand_id"][0], //[0]
+            TaxCodeAR: i["supplier_taxes_id"].length == 0 ? "IVA" : "IVE_EXE", //CAMBIAR LUEGO
+            FrozenFor: i["active"] ? "N" : "Y",
+            ItmsGrpCod: i["categ_id"][0],
+            ItmsGrpNam: i["categ_id"][1],
+        })
+    }
+    return products
+}
+
+
+// await TESTING()
+// await FACT_AND_COUNT({
+//     minDay: '2026-07-01',
+//     maxDay: '2026-09-01'
+// })
+// await PRODUCTS_BY_FACTURA(1,{})
