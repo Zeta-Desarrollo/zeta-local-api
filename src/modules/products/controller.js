@@ -584,8 +584,9 @@ const controller = {
         let marcas = []
         try{
             const location = body.props.location? body.props.location: "TODOS"
-            marcas = await FIRM_AND_COUNT(location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
+            marcas = await FIRM_AND_COUNT(0, location, body.props)
         }catch(err){
+            console.log("e",err)
             error = err
         }
         return {

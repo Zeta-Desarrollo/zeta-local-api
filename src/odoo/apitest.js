@@ -61,8 +61,23 @@ await odoo.authenticate(process.env.ODOO_DB, process.env.ODOO_USER, process.env.
 
 async function TESTING() {
 
-    const productIds = await odoo.execute("product.template", "search", [[["default_code", "=", "1001002"],]], { offset: 0, limit: 6 })
+    const productIds2 = await odoo.execute("product.template", "search_read", [
+        [
+                ["list_price", "<=", 0],["active", "=", true]
+        ]
+    ], {fields:["id","product_brand_id"]})
 
+    console.log("proprop", productIds2)
+    return
+
+
+    const productIds = await odoo.execute("product.template", "search_read", [[["default_code", "=", "1001002"],]], { offset: 0, limit: 6 })
+    console.log("product", productIds)
+
+    const marccas = await odoo.execute("product.brand", "search_read", [[]], { limit:2 })
+    console.log("marca", marccas)
+
+    return
     const data = await odoo.execute("product.template", "read", productIds, { fields: ["name", "active", "sale_ok", "list_price","l10n_ve_old_code", "default_code", "categ_id", "product_brand_id", "supplier_taxes_id"] })
     const stockids = await odoo.execute("stock.quant", "search", [
         [
@@ -105,7 +120,7 @@ const DATA_MAP = {
     FirmName: "product_brand_id", //[1] 
     FirmCode: "product_brand_id", //[0]
     TaxCodeAR: "supplier_taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
-    FrozenFor: "sale_ok",
+    FrozenFor: "active",
     
     ItmsGrpCod: "categ_id",
     ItmsGrpNam: "categ_id",
@@ -278,7 +293,7 @@ export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = f
 
 // PRODUCTS_BY_CODES(["1002025", "1009648", "4001530"], "NONE", false, false, true)
 
-export async function FIRM_AND_COUNT(location, includeNoActive = false, includeNoPrice = false, includeNoStock = false, priceList = 5) {
+export async function FIRM_AND_COUNT_ex(location, includeNoActive = false, includeNoPrice = false, includeNoStock = false, priceList = 5) {
     const StockDomain = [
         [
             ["location_id", "=", 38],
@@ -348,9 +363,82 @@ export async function FIRM_AND_COUNT(location, includeNoActive = false, includeN
         total += count[key].amountProducts
     }
     final = final.sort((a, b) => a.FirmName.localeCompare(b.FirmName))
+    return final    
 
+}
+export async function FIRM_AND_COUNT_fast(location, includeNoActive = false, includeNoPrice = false, includeNoStock = false, priceList = 5) {
+
+    const marcas = await odoo.execute("product.brand", "search_read", [[]], { })
+    const final = []
+    for (const marca of marcas){
+        final.push({
+            FirmName:marca.name,
+            FirmCode:marca.id,
+            amountProducts:marca.products_count
+        })
+    }
+    /**
+     * {
+    *   FirmCode
+    *   FirmName
+    *   amountProducts
+     * }
+     */
     return final
 
+}
+export async function FIRM_AND_COUNT(page,location, props) {
+    console.log("PROPR", props)
+        const marcas = {}
+        const TemplateDomain = [[]]
+        if (!props.includeNoPrice) {
+            TemplateDomain[0].push(["list_price", ">", 0])
+        }
+        if (!props.includeNoActive) {
+            TemplateDomain[0].push(["active", "=", true])
+        }
+        console.log("temp dom", TemplateDomain)
+
+        const productIds = await odoo.execute("product.template", "search_read", TemplateDomain, {fields:["id","product_brand_id"]})
+        console.log("ids", productIds)
+
+        const brandOfProduct ={}
+        for(const product of productIds){
+            if(!marcas[product.product_brand_id[0]]){
+                marcas[product.product_brand_id[0]] = {
+                    FirmCode:product.product_brand_id[0],
+                    FirmName:product.product_brand_id[1],
+                    amountProducts:0
+                }
+            }
+            brandOfProduct[product.id] = product.product_brand_id[0]
+
+        }
+        console.log("ids loop")
+
+        const StockDomain = [
+            [
+                ["location_id", "=", 38],
+                ["product_tmpl_id", "in", productIds.map(i=>i.id)]
+            ]
+        ]
+        if (!props.includeNoStock) {
+            StockDomain[0].push(["quantity", ">", "0"])
+        }
+        const quantities =  await odoo.execute("stock.quant", "search_read", StockDomain, { fields:["product_tmpl_id"] })
+        console.log("done", quantities.length)
+        for (const q of quantities){
+            marcas[brandOfProduct[q.product_tmpl_id[0]]].amountProducts+=1
+        }
+        console.log("q loop")
+
+    const final = []
+    for (const marca in marcas){
+
+        final.push(marcas[marca])
+    }
+    
+    return final
 }
 export async function PRODUCTS_BY_MARCA(FirmCode, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5, sort="asc", includeNoSell=false) {
     /**
@@ -360,6 +448,7 @@ export async function PRODUCTS_BY_MARCA(FirmCode, location, includeNoActive=fals
      * SORT
      */
     FirmCode = parseInt(FirmCode)
+    console.log("start")
 
     const TemplateDomain = [[["product_brand_id", "=", FirmCode]]]
     if (!includeNoPrice) {
@@ -385,6 +474,8 @@ export async function PRODUCTS_BY_MARCA(FirmCode, location, includeNoActive=fals
             "sale_ok"
         ]
     })
+    console.log("first odoo")
+
     const stockIds = []
     for (const product of productData) {
         stockIds.push(product.id)
@@ -397,6 +488,7 @@ export async function PRODUCTS_BY_MARCA(FirmCode, location, includeNoActive=fals
     ]
     const quantities = [...new Set(await odoo.execute("stock.quant", "search_read", StockDomain, { fields: ["product_tmpl_id", "quantity"] })
     )]
+    console.log("second odoo")
 
 
     const products = {}
@@ -417,10 +509,14 @@ export async function PRODUCTS_BY_MARCA(FirmCode, location, includeNoActive=fals
             onHand: 0
         }
     }
+    console.log("first loop")
+
 
     for (const i of quantities) {
         products[i.product_tmpl_id[0]] = { ...products[i.product_tmpl_id[0]], onHand: i.quantity }
     }
+    console.log("second loop")
+
 
     let final = []
     for (const id in products) {
@@ -431,6 +527,8 @@ export async function PRODUCTS_BY_MARCA(FirmCode, location, includeNoActive=fals
         }
         final.push(products[id])
     }
+    console.log("final loop")
+
     final = final.sort((a,b)=>a.ItemCode.localeCompare(b.ItemCode))
     return final
 }
@@ -504,7 +602,7 @@ export async function PRODUCTS_BY_FACTURA(DocEntry, location, includeNoActive=fa
 }
 
 
-// await TESTING()
+await TESTING()
 // await FACT_AND_COUNT({
 //     minDay: '2026-07-01',
 //     maxDay: '2026-09-01'
