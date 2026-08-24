@@ -113,7 +113,7 @@ async function JSPDF (body, params){
             
             const logoFile = fs.readFileSync("./public/zeta-blanco.png")
             const logo = new Uint8Array(logoFile);
-            doc.addImage(logo, "PNG", rightEdge-4 , 4.6, 4.14, 1.2)
+            doc.addImage(logo, "PNG", rightEdge-4 , 4.75, 4.14, 1.2)
             
             
             doc.setFont("Helvetica", "bold")
