@@ -94,7 +94,6 @@ const controller = {
       ids = ids.substring(0,ids.length-1)
 
       const data2 = await sqlPromise(sqliteDB, "all", "select * from quotation_product where Quotation in (" +ids+ ") order by Quotation desc")
-      console.log("data2",data2)
       for (const product of data2) {
         obj[product.Quotation].products.push(product)
       }
@@ -105,10 +104,8 @@ const controller = {
       }
 
     } catch (e) {
-      console.log("eee", e)
       error = e.message ? e.message : e
     }
-    console.log("quotations", quotations)
     return {
       quotations
     }
