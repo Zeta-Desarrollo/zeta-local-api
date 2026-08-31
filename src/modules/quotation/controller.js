@@ -85,13 +85,16 @@ const controller = {
       const order = []
       const listSql = `select * from quotation where created>${body.min} and created<${body.max} order by created desc`
       const data = await sqlPromise(sqliteDB, "all", listSql)
-
+      let ids = ""
       for (const quotation of data) {
+        ids+=quotation.Quotation.toString()+","
         obj[quotation.Quotation] = { ...quotation, products: [], priceList:JSON.parse(quotation.priceList) }
         order.push(quotation.Quotation)
       }
+      ids = ids.substring(0,ids.length-1)
 
-      const data2 = await sqlPromise(sqliteDB, "all", "select * from quotation_product order by Quotation desc")
+      const data2 = await sqlPromise(sqliteDB, "all", "select * from quotation_product where Quotation in (" +ids+ ") order by Quotation desc")
+      console.log("data2",data2)
       for (const product of data2) {
         obj[product.Quotation].products.push(product)
       }
@@ -102,8 +105,10 @@ const controller = {
       }
 
     } catch (e) {
+      console.log("eee", e)
       error = e.message ? e.message : e
     }
+    console.log("quotations", quotations)
     return {
       quotations
     }
