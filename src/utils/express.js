@@ -14,7 +14,7 @@ export function showData(isDev){
     return (req, res, next)=>{
         if (isDev){
             console.log("body", req.body)
-            console.log("params", req.params)
+            console.log("params", JSON.stringify(req.params))
         }
         next()
     }
@@ -32,7 +32,11 @@ export function isAuth(req,res,next){
     if (error){
         res.status(200).json({error})
     }else{
-        req.body.auth = auth
+        if (req.body){
+            req.body.auth = auth
+        }else{
+            req.body= {auth}
+        }
         next()
     }
 }
