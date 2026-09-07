@@ -4,9 +4,9 @@ import cron from "cron"
 // import pushBrands from "./pushBrands.js"
 // import pushGroups from "./pushGroups.js"
 // import checkRecipts from "./checkRecipts.js"
-import printPriceTickets from "./printPriceTickets.js"
+// import printPriceTickets from "./printPriceTickets.js"
 import cleanDocs from "./cleanDocs.js"
-import printProductTickets from "./printProductTickets.js"
+// import printProductTickets from "./printProductTickets.js"
 import printLabels from "./printLabels.js"
 // import pushImages from "./pushImages.js"
 
@@ -16,8 +16,8 @@ let jobs = [
     // pushGroups,
     // pushImages,
     // checkRecipts,
-    printPriceTickets,
-    printProductTickets,
+    // printPriceTickets,
+    // printProductTickets,
     cleanDocs,
     printLabels
 ]  

@@ -78,7 +78,6 @@ async function generatePDF (){
     let e
     let product = "lol"
     global.window = {document: {createElementNS: () => {return {}} }};
-    global.navigator = {};
     global.btoa = () => {};
     let FS  =7
     const doc = new jsPDF({
@@ -195,7 +194,6 @@ async function generatePDF (){
         // let size = doc.getTextWidth(marcaText)
         // let inLines = doc.splitTextToSize(marcaText, 3.3)
     delete global.window;
-    delete global.navigator;
     delete global.btoa;
     }catch(error){
         console.log("what happened?", error)

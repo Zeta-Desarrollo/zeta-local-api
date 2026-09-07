@@ -138,7 +138,6 @@ function generateTicket(bottomMessage, factura, ticket, amount, subNumber){
 async function task (){
     try{
         global.window = {document: {createElementNS: () => {return {}} }};
-        global.navigator = {};
         global.btoa = () => {};
         const merger = new PDFMerger()
         await new Promise((resolve,reject)=>{
@@ -213,7 +212,6 @@ async function task (){
                 //mark as procesed
                 await sqlPromise(db, "run", `update facturas set Checked=1 where FullCode='${data.FullCode}'`)
                 delete global.window;
-                delete global.navigator;
                 delete global.btoa;
                 resolve(true)
                 }catch(error){

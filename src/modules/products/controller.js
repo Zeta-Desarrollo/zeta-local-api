@@ -44,7 +44,6 @@ async function JSPDF (body, params){
     let e
     let product = "lol"
     global.window = {document: {createElementNS: () => {return {}} }};
-    global.navigator = {};
     global.btoa = () => {};
     let FS
     // Default export is a4 paper, portrait, using millimeters for units
@@ -243,7 +242,6 @@ async function JSPDF (body, params){
         }).then(resolve).catch(reject);
     })
     delete global.window;
-    delete global.navigator;
     delete global.btoa;
     }catch(error){
         console.log("what happened?", new Date(), error)
@@ -259,7 +257,6 @@ async function noPriceLabel (body, params){
     let e
     let product = "lol"
     global.window = {document: {createElementNS: () => {return {}} }};
-    global.navigator = {};
     global.btoa = () => {};
     let FS
     // Default export is a4 paper, portrait, using millimeters for units
@@ -385,7 +382,6 @@ async function noPriceLabel (body, params){
         }).then(resolve).catch(reject);
     })
     delete global.window;
-    delete global.navigator;
     delete global.btoa;
     }catch(error){
         console.log("what happened?", new Date(), error)
@@ -401,7 +397,6 @@ async function storageLabel (body, params){
     let e
     let product = "lol"
     global.window = {document: {createElementNS: () => {return {}} }};
-    global.navigator = {};
     global.btoa = () => {};
     let FS
     // Default export is a4 paper, portrait, using millimeters for units
@@ -520,7 +515,6 @@ async function storageLabel (body, params){
         }).then(resolve).catch(reject);
     })
     delete global.window;
-    delete global.navigator;
     delete global.btoa;
     }catch(error){
         console.log("what happened?", new Date(), error)
@@ -712,7 +706,6 @@ const controller = {
         let x
         let e
         try {
-            console.log("body", body)
             const r1 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
             if (r1.length>0) throw "print-active"
             const r2 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion order by Impresion desc limit 1")

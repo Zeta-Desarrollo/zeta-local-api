@@ -135,7 +135,6 @@ const controller = {
     let e
     let product = ""
     global.window = { document: { createElementNS: () => { return {} } } };
-    global.navigator = {};
     global.btoa = () => { };
     let FS
     // Default export is a4 paper, portrait, using millimeters for units
@@ -262,7 +261,6 @@ const controller = {
       await doc.save("./quotations/" + quotation.Quotation + ".pdf")
 
       delete global.window;
-      delete global.navigator;
       delete global.btoa;
     } catch (error) {
       console.log("what happened?", new Date(), error)
