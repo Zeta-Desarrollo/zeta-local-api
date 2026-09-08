@@ -6,13 +6,15 @@ function task (){
     db.serialize(() => {
         // db.run("CREATE TABLE permissions (name TEXT)");
     
-        // const stmt = db.prepare("INSERT INTO permissions VALUES (?)");
+        const stmt = db.prepare("INSERT INTO permissions VALUES (?)");
         // stmt.run("imprimir-etiquetas");
         // stmt.run("visor-de-precios");
         // stmt.run("cambiar-listado-precios");
         // stmt.run("editar-sorteo");
         // stmt.run("manipular-tickets");
         // stmt.run("cotizaciones");
+        stmt.run("ver-galeria");
+        stmt.run("editar-galeria");
         // stmt.finalize();
 
         // db.run("CREATE TABLE users (name TEXT, password TEXT, role TEXT, lastlogin DATE)")
@@ -120,10 +122,12 @@ function task (){
         // db.run("create unique index quoatation_index on quotation (Quotation)")
         // db.run("create unique index quotation_product_index on quotation_product (Quotation, ItemCode)")
         // db.run("INSERT INTO sysconfig VALUES ('DefaultPriceList', 5)");
-        db.run("INSERT INTO sysconfig VALUES ('DefaultQuotationPriceList', 3)");
-        db.run("INSERT INTO sysconfig VALUES ('QrModulePriceLists', '[]')");
-        db.run("INSERT INTO sysconfig VALUES ('QuotationModulePriceLists', '[2,3,4,7]')");
-
+        // db.run("INSERT INTO sysconfig VALUES ('DefaultQuotationPriceList', 3)");
+        // db.run("INSERT INTO sysconfig VALUES ('QrModulePriceLists', '[]')");
+        // db.run("INSERT INTO sysconfig VALUES ('QuotationModulePriceLists', '[2,3,4,7]')");
+        db.run("INSERT INTO sysconfig VALUES ('GalleryBehavior', '{}')");
+        db.run("create table gallery (Code INT, FirmName TEXT, FirmCode INT, Active INT)")
+        db.run("create table gallery_file (Gallery INT, Filename TEXT, Pages TEXT)")
 
 
     });
