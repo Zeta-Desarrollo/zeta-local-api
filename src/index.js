@@ -20,6 +20,7 @@ async function init (){
     app.use(bodyParser())
     app.use(cors())
     app.use(express.static("public"))
+    app.use(express.static("galleries"))
     app.use(express.static("front"))
 
     app.use("/quotationsweb", express.static("quotations"))

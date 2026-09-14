@@ -23,6 +23,7 @@
     "axios": "^1.20.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.3.0",
+    "canvas": "^3.2.3",
     "cors": "^2.8.6",
     "cron": "^4.4.0",
     "csv": "^6.6.3",
@@ -31,9 +32,11 @@
     "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.1",
     "mssql": "^12.7.0",
+    "multer": "^2.3.0",
     "node-windows": "^1.0.0-beta.8",
     "pdf-merger-js": "^5.1.2",
     "pdf-to-printer": "^5.8.1",
+    "pdfjs-dist": "^6.3.289",
     "qrcode": "^1.5.4",
     "sqlite3": "^6.0.1",
     "uniqid": "^5.4.0"
@@ -45,6 +48,7 @@
     "protobufjs@7.6.6": true,
     "bcrypt@6.0.0": true,
     "sqlite3@6.0.1": true,
-    "core-js@3.50.0": true
+    "core-js@3.50.0": true,
+    "canvas@3.2.3": true
   }
 }

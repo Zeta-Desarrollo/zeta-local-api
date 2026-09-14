@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken"
+import multer from "multer"
+
+export const Upload = multer({dest:"galleries/", preservePath:true})
+
 export function callController(controller){
     return (req,res)=>{
-        controller(req.body, req.params).then((result)=>{
+
+        controller(req.body, req.params, req.file|| req.files).then((result)=>{
             res.status(200).json(result)
         }).catch((error)=>{
             console.log("error",error)

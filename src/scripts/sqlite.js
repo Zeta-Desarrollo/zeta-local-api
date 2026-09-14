@@ -126,8 +126,9 @@ function task (){
         // db.run("INSERT INTO sysconfig VALUES ('QrModulePriceLists', '[]')");
         // db.run("INSERT INTO sysconfig VALUES ('QuotationModulePriceLists', '[2,3,4,7]')");
         db.run("INSERT INTO sysconfig VALUES ('GalleryBehavior', '{}')");
-        db.run("create table gallery (Code INT, FirmName TEXT, FirmCode INT, Active INT)")
-        db.run("create table gallery_file (Gallery INT, Filename TEXT, Pages TEXT)")
+        db.run("create table gallery (Code INTEGER, FirmName TEXT, FirmCode INTEGER, Active INTEGER)")
+        db.run("create table gallery_file (Gallery INTEGER, File INTEGER, Filename TEXT, type TEXT, Pages TEXT)")
+        db.run("create table gallery_image (Gallery INTEGER,File Integer, FileName TEXT, Sequence INTEGER)")
 
 
     });
