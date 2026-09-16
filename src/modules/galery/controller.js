@@ -18,7 +18,6 @@ const STANDARD_FONT_DATA_URL =
 global.window = {
     document: { createElementNS: () => { return {} } },
     requestAnimationFrame: (cb) => {
-        console.log("what the heeeeeeel")
         setTimeout(cb, 1)
     }
 };
@@ -34,25 +33,47 @@ const controller = {
 
         return {}
     },
-    updateGalleryImage: async (body, params) => {
+    updateGallerySequence: async (body, params) => {
+        let success = false
+        try {
+            const Images = body.GalleryImages
+            await sqlPromise(sqliteDB, 'run', `update gallery_image set Sequence=0 where Gallery=${body.Gallery}`)
+            for (const I of Images) {
+                await sqlPromise(sqliteDB, 'run', `update gallery_image set Sequence=${I.Sequence} where Gallery=${body.Gallery} and File=${I.File} and Page=${I.Page}`)
+            }
+            success = true
+        } catch (err) {
+            console.log("err", err)
+        }
 
+        return success
     },
     toggleGallery: async (body, params) => {
 
     },
     uploadFile: async (body, params, files) => {
+        const OriginalName = body.OriginalName.replace(/[^0-9a-zA-Z ]/g, "").slice(0, 50)
         let success = false
         try {
             const lastFile = await sqlPromise(sqliteDB, "get", "select File from gallery_file order by File desc limit 1")
-            const File = lastFile ? lastFile.File : 0
-            await sqlPromise(sqliteDB, "run", `insert into gallery_file values (${parseInt(body.gallery)}, '${File}', '${body.OriginalName}', 'img', '')`)
+            const File = lastFile ? lastFile.File + 1 : 0
+            try {
+                const sql = `insert into gallery_file values (${parseInt(body.gallery)}, '${File}', '${OriginalName}', 'img', '')`
+                await sqlPromise(sqliteDB, "run", sql)
+
+            } catch (e) {
+            }
             let page = 1
             for (const file of files) {
                 const rename = fs.readFileSync(file.path)
-                fs.writeFileSync(`galleries/${body.OriginalName}-${page}`, rename)
+                fs.writeFileSync(`galleries/${OriginalName}-${page}`, rename)
                 fs.unlinkSync(file.path)
+                try {
+                    const sql2 = `insert into gallery_image values (${parseInt(body.gallery)}, '${File}', '${page}', '${OriginalName}-${page}', 0)`
+                    await sqlPromise(sqliteDB, "run", sql2)
 
-                await sqlPromise(sqliteDB, "run", `insert into gallery_image values (${parseInt(body.gallery)}, '${File}', '${body.OriginalName}-${page}', 0)`)
+                } catch (er) {
+                }
                 page++
             }
             success = true
@@ -64,29 +85,28 @@ const controller = {
         return { success }
 
     },
-    setFilePages: async (body, params) => {
-
-    },
     getGallery: async (body, params) => {
-        const files = {}
+        const files = []
         try {
 
 
-            const Gallery = await sqlPromise(sqliteDB, "get", `select * from gallery where Code=${body.gallery}`)
-            const Files = await sqlPromise(sqliteDB, "all", `select * from gallery_file where Gallery=${body.gallery}`)
-            const Images = await sqlPromise(sqliteDB, "all", `select * from gallery_image where Gallery=${body.gallery}`)
+            const Gallery = await sqlPromise(sqliteDB, "get", `select * from gallery where Code=${params.gallery}`)
+            const Files = await sqlPromise(sqliteDB, "all", `select * from gallery_file where Gallery=${params.gallery}`)
+            const Images = await sqlPromise(sqliteDB, "all", `select * from gallery_image where Gallery=${params.gallery}`)
+            const filesData = {}
             for (const F of Files) {
-                files[F.File] = {
+                filesData[F.File] = {
                     ...F,
                     images: []
                 }
             }
-            console.log("files",files)
 
             for (const I of Images) {
-                files[I.File].images.push(I)
+                filesData[I.File].images.push(I)
             }
-            console.log("images",files)
+            for (const k in filesData) {
+                files.push(filesData[k])
+            }
         } catch (e) {
             console.log("error", e)
         }

@@ -128,7 +128,7 @@ function task (){
         db.run("INSERT INTO sysconfig VALUES ('GalleryBehavior', '{}')");
         db.run("create table gallery (Code INTEGER, FirmName TEXT, FirmCode INTEGER, Active INTEGER)")
         db.run("create table gallery_file (Gallery INTEGER, File INTEGER, Filename TEXT, type TEXT, Pages TEXT)")
-        db.run("create table gallery_image (Gallery INTEGER,File Integer, FileName TEXT, Sequence INTEGER)")
+        db.run("create table gallery_image (Gallery INTEGER,File Integer, Page Integer, FileName TEXT, Sequence INTEGER)")
 
 
     });
