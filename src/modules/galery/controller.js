@@ -57,23 +57,19 @@ const controller = {
         try {
             const lastFile = await sqlPromise(sqliteDB, "get", "select File from gallery_file order by File desc limit 1")
             const File = lastFile ? lastFile.File + 1 : 0
-            try {
                 const sql = `insert into gallery_file values (${parseInt(body.gallery)}, '${File}', '${OriginalName}', 'img', '')`
                 await sqlPromise(sqliteDB, "run", sql)
 
-            } catch (e) {
-            }
+    
             let page = 1
             for (const file of files) {
                 const rename = fs.readFileSync(file.path)
-                fs.writeFileSync(`galleries/${OriginalName}-${page}`, rename)
+                fs.writeFileSync(`galleries/${OriginalName}-${page}.png`, rename)
                 fs.unlinkSync(file.path)
-                try {
-                    const sql2 = `insert into gallery_image values (${parseInt(body.gallery)}, '${File}', '${page}', '${OriginalName}-${page}', 0)`
+                    const sql2 = `insert into gallery_image values (${parseInt(body.gallery)}, '${File}', '${page}', '${OriginalName}-${page}.png', 0)`
                     await sqlPromise(sqliteDB, "run", sql2)
 
-                } catch (er) {
-                }
+        
                 page++
             }
             success = true
@@ -128,6 +124,10 @@ const controller = {
         }
 
     },
+    getGalleryImages: async (body, params) => {
+        const Images = await sqlPromise(sqliteDB, "all", `select * from gallery_image where Gallery=${params.gallery} and Sequence>0 order by Sequence`)   
+        return Images
+    }
 
 }
 
