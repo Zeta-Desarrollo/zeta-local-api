@@ -22,11 +22,18 @@ global.window = {
     }
 };
 const controller = {
-    newGallery: async (body, params) => {
+    newGallery: async (body, params, file) => {
+        
         try {
+            const rename = fs.readFileSync(file.path)
+            const split = file.originalname.split(".")
+            const ext = split[split.length-1]
+            fs.writeFileSync(`galleries/${body.FirmName}.${ext}`, rename)
+            fs.unlinkSync(file.path)
+
             const lastCode = await sqlPromise(sqliteDB, "get", "select Code from gallery order by Code desc limit 1")
             const Code = lastCode ? lastCode.Code : 0
-            await sqlPromise(sqliteDB, "run", `insert into gallery values (${Code + 1}, '${body.FirmName}', '${body.FirmCode}', 1)`)
+            await sqlPromise(sqliteDB, "run", `insert into gallery values (${Code + 1}, '${body.FirmName}', '${body.FirmCode}', 1, '${`/${body.FirmName}.${ext}`}')`)
         } catch (error) {
             console.log(error)
         }
@@ -83,10 +90,11 @@ const controller = {
     },
     getGallery: async (body, params) => {
         const files = []
+        let Gallery = {}
         try {
 
 
-            const Gallery = await sqlPromise(sqliteDB, "get", `select * from gallery where Code=${params.gallery}`)
+            Gallery = await sqlPromise(sqliteDB, "get", `select * from gallery where Code=${params.gallery}`)
             const Files = await sqlPromise(sqliteDB, "all", `select * from gallery_file where Gallery=${params.gallery}`)
             const Images = await sqlPromise(sqliteDB, "all", `select * from gallery_image where Gallery=${params.gallery}`)
             const filesData = {}
@@ -107,7 +115,8 @@ const controller = {
             console.log("error", e)
         }
         return {
-            files
+            files,
+            Gallery
         }
 
 
