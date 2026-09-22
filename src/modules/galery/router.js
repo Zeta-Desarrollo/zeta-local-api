@@ -11,6 +11,7 @@ galleriesRouter.post("/newGallery", devFunction, isAuth, checkPermissions(["edit
 galleriesRouter.post("/updateGallerySequence", devFunction, isAuth, checkPermissions(["editar-galeria"]), callController(controller.updateGallerySequence))
 galleriesRouter.post("/toggleGallery", devFunction, isAuth, checkPermissions(["editar-galeria"]), callController(controller.toggleGallery))
 galleriesRouter.post("/uploadFile", devFunction, isAuth, checkPermissions(["editar-galeria"]), Upload.array("images"), callController(controller.uploadFile))
+galleriesRouter.post("/deleteGallery", devFunction, isAuth, checkPermissions(["editar-galeria"]), callController(controller.deleteGallery))
 galleriesRouter.get("/listGalleries", devFunction, isAuth, checkPermissions(["ver-galeria"]), callController(controller.listGalleries))
 galleriesRouter.get("/getGallery/:gallery", devFunction, isAuth, checkPermissions(["ver-galeria"]), callController(controller.getGallery))
 galleriesRouter.get("/getGalleryImages/:gallery", devFunction, isAuth, checkPermissions(["ver-galeria"]), callController(controller.getGalleryImages))

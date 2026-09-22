@@ -15,6 +15,7 @@ function task (){
         // stmt.run("cotizaciones");
         stmt.run("ver-galeria");
         stmt.run("editar-galeria");
+        stmt.run("ver-datos-productos");
         stmt.finalize();
 
         // db.run("CREATE TABLE users (name TEXT, password TEXT, role TEXT, lastlogin DATE)")

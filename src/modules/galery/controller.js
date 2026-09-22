@@ -104,7 +104,6 @@ const controller = {
                     images: []
                 }
             }
-
             for (const I of Images) {
                 filesData[I.File].images.push(I)
             }
@@ -136,7 +135,26 @@ const controller = {
     getGalleryImages: async (body, params) => {
         const Images = await sqlPromise(sqliteDB, "all", `select * from gallery_image where Gallery=${params.gallery} and Sequence>0 order by Sequence`)   
         return Images
-    }
+    },
+    deleteGallery: async (body, params) => {
+        try {
+            await sqlPromise(sqliteDB, "run", `delete from gallery where Code=${body.gallery}`)
+            await sqlPromise(sqliteDB, "run", `delete from gallery_file where Gallery=${body.gallery}`)
+            const images = await sqlPromise(sqliteDB, "all", `select * from gallery_image where Gallery=${body.gallery}`)
+
+            for (const image of images){
+                fs.unlinkSync(`galleries/${image.FileName}`)
+            }
+
+            await sqlPromise(sqliteDB, "run", `delete from gallery_image where Gallery=${body.gallery}`)
+        } catch (err) {
+            console.log("Error", err)
+        }
+        return {
+            success:true
+        }
+
+    },
 
 }
 

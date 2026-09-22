@@ -603,6 +603,7 @@ const controller = {
             marcas = result.recordset
         }catch(err){
             error = err
+            console.log("Eee", err)
         }
         return {
             error,
