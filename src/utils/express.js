@@ -18,6 +18,7 @@ export function callController(controller){
 export function showData(isDev){
     return (req, res, next)=>{
         if (isDev){
+            console.log("path", req.route.path)
             console.log("body", req.body)
             console.log("params", JSON.stringify(req.params))
         }
