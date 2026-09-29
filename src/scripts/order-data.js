@@ -5,11 +5,9 @@ import { SAP_DB } from "../utils/mssql.js"
 async function task(args){
     try{
         while(!SAP_DB){
-            console.log("waiting")
             await new Promise((resolve,reject)=>{setTimeout(resolve,1000)})
         }
         const ordr = (await SAP_DB.query("select * from ordr where DocEntry='2'")).recordset[0]
-        console.log("order",ordr)
         let rdr
         let text ="ORDR\n"
         let header =""

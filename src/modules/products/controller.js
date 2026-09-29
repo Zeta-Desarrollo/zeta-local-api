@@ -655,7 +655,7 @@ const controller = {
         let products = {}
         try{
             if (!params.search) throw  "search-required"
-            const result = await sql.query(PRODUCTS_BY_SEARCH(params.brand=="none"?false:params.brand,params.search))
+            const result = await sql.query(PRODUCTS_BY_SEARCH(params.brand=="none"?false:params.brand,params.search, body.priceList))
             products = result.recordset
         }catch(err){
             error = err

@@ -206,7 +206,6 @@ async function task (){
                             reject(err)
                         });
                     })
-                    console.log("printed", pdfName)
                 }
  
                 //mark as procesed

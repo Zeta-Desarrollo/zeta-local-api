@@ -152,7 +152,6 @@ const controller = {
               console.log("catched", err)
               throw err
             })
-            console.log("created", created)
             if (created){
               await new Promise((resolve,reject)=>{
                 sqlite.get(`select rowid from users where name ='${body.userName}'`, (err,user)=>{

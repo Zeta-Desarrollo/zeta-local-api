@@ -232,7 +232,7 @@ export const ITEM_GROUPS = function(){
     return query
 }
 
-export const PRODUCTS_BY_SEARCH = function(brandCode,search){
+export const PRODUCTS_BY_SEARCH = function(brandCode,search, priceList){
     search = search.replace(/[\[\]\(\)\;\+\:]/g, "")
     search = search.replace("'","''");
 
@@ -276,7 +276,7 @@ export const PRODUCTS_BY_SEARCH = function(brandCode,search){
         and OITM.SellItem='Y'
         and onHand >0 
         and Price > 0
-        and PriceList='3' 
+        and PriceList='${priceList}' 
         and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
         and ${filter}
     group by

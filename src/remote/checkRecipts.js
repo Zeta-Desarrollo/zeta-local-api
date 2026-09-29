@@ -6,8 +6,6 @@ import { sqliteDB as db } from "../utils/sqlite.js"
 async function task (){
     try{
 
-        // const xd = await KLK_DB.query("select * from KLK_CAJA")
-        // console.log("SSS",xd)
         await new Promise((resolve,reject)=>{
             try{
      

@@ -11,7 +11,7 @@ productsRouter.get("/info2/:code", devFunction, callController(controller.produc
 productsRouter.post("/qr/:code", devFunction, isAuth, checkPermissions(["imprimir-etiquetas"]), callController(controller.generateQR))
 productsRouter.post("/marcas", devFunction, isAuth, checkPermissions([],["ver-datos-productos"]),  callController(controller.queryMarcas))
 productsRouter.post("/byMarca/:code", devFunction, isAuth, checkPermissions([],["imprimir-etiquetas", "visor-de-precios"]), callController(controller.productsByMarca))
-productsRouter.get("/bySearch/:brand/:search",devFunction,  isAuth, checkPermissions(["visor-de-precios"]), callController(controller.productsBySearch))
+productsRouter.post("/bySearch/:brand/:search",devFunction,  isAuth, checkPermissions(["visor-de-precios"]), callController(controller.productsBySearch))
 productsRouter.post("/singleCode",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.singleCode))
 productsRouter.post("/bulkPrint",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.backendBulkPrint))
 productsRouter.get("/getBulkPrintStatus",  devFunction, isAuth, checkPermissions(["imprimir-etiquetas"],[]), callController(controller.bulkPrintStatus))
