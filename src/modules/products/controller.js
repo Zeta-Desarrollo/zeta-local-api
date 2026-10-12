@@ -81,7 +81,7 @@ async function JSPDF (body, params){
             doc.setFontSize(16)
             
             //generate qr
-            const url = `http://${process.env.FRONT_IP}/#/consulta/${product.ItemCode}`
+            const url = `https://${process.env.FRONT_IP}/#/consulta/${product.ItemCode}`
             const filePath = `./public/${product.ItemCode}.png`
 
             if(!fs.existsSync(filePath)){
@@ -294,7 +294,7 @@ async function noPriceLabel (body, params){
             doc.setFontSize(16)
             
             //generate qr
-            const url = `http://${process.env.FRONT_IP}/#/consulta/${product.ItemCode}`
+            const url = `https://${process.env.FRONT_IP}/#/consulta/${product.ItemCode}`
             const filePath = `./public/${product.ItemCode}.png`
 
             if(!fs.existsSync(filePath)){
@@ -679,7 +679,7 @@ const controller = {
             product = result.recordset[0]
 
 
-            const url = `http://${process.env.FRONT_IP}/#/consulta/${params.code}`
+            const url = `https://${process.env.FRONT_IP}/#/consulta/${params.code}`
             const filePath = `./public/${params.code}.png`
              image = `${params.code}.png`
 
