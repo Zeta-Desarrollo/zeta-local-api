@@ -1,7 +1,7 @@
 import {config} from "dotenv"
 config()
 import express from "express"
-import bodyParser from "body-parser"
+import bodyParser from "body-parser/json"
 import cors from "cors"
 
 import userRouter from "./modules/user/router.js"
@@ -10,19 +10,21 @@ import ticketsRouter from "./modules/tickets/router.js"
 import ordersRouter from "./modules/orders/router.js"
 import quotationRouter from "./modules/quotation/router.js"
 import { initJobs } from "./remote/index.js"
+import galleriesRouter from "./modules/galery/router.js"
 
 
 async function init (){
     // await initMongo()
 
     const app = express()
+    app.use(bodyParser())
     app.use(cors())
     app.use(express.static("public"))
+    app.use(express.static("galleries"))
     app.use(express.static("front"))
 
     app.use("/quotationsweb", express.static("quotations"))
     // app.use("/precios",express.static("visor"))
-    app.use(bodyParser.json())
     app.use("/user", userRouter)
     app.use("/products", productsRouter)
     app.use("/tickets", ticketsRouter)
@@ -31,6 +33,7 @@ async function init (){
 
     
 
+    app.use("/galleries", galleriesRouter)
     app.listen(process.env.PORT, ()=>{
         console.log(`Listening on:${process.env.PORT}`)
     })

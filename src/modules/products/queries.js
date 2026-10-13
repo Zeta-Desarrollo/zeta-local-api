@@ -46,11 +46,13 @@ export const PRICE_LISTS = function(codes=[]){
 export const PRODUCT_BY_CODE = function(ItemCode, location, includeNoActive=false, includeNoPrice=false, includeNoStock=false, priceList = 5){
     ItemCode = ItemCode.replace(/[\[\]\(\)\;\+\:]/g, "")
     ItemCode = ItemCode.replace("'","''");
-    return `
+    const sql = `
     select 
         OITM.ItemCode,
         ItemName,
         onHand,
+        U_NIV_I,
+
         Price,
         OMRC.FirmName,
         OMRC.FirmCode,
@@ -73,6 +75,7 @@ export const PRODUCT_BY_CODE = function(ItemCode, location, includeNoActive=fals
         ${ includeNoStock ? '' : 'and OITM.OnHand > 0'}
         ${ includeNoPrice ? '' : 'and ITM1.Price > 0'}
         and OITM.ItemCode='${ItemCode}'`
+    return sql
 }
 
 export const PRODUCTS_BY_CODES = function(ItemCodes, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5, sort="desc", includeNoSell=false){
@@ -229,7 +232,7 @@ export const ITEM_GROUPS = function(){
     return query
 }
 
-export const PRODUCTS_BY_SEARCH = function(brandCode,search){
+export const PRODUCTS_BY_SEARCH = function(brandCode,search, priceList){
     search = search.replace(/[\[\]\(\)\;\+\:]/g, "")
     search = search.replace("'","''");
 
@@ -273,7 +276,7 @@ export const PRODUCTS_BY_SEARCH = function(brandCode,search){
         and OITM.SellItem='Y'
         and onHand >0 
         and Price > 0
-        and PriceList='3' 
+        and PriceList='${priceList}' 
         and OITM.ItemCode not in ('FLETE', 'FLETES', 'FLETE (E)', 'DUPLICADO', 'ELIMINADO')
         and ${filter}
     group by

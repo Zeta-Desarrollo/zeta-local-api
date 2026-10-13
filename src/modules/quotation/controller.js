@@ -86,13 +86,15 @@ const controller = {
       const order = []
       const listSql = `select * from quotation where created>${body.min} and created<${body.max} order by created desc`
       const data = await sqlPromise(sqliteDB, "all", listSql)
-
+      let ids = ""
       for (const quotation of data) {
+        ids+=quotation.Quotation.toString()+","
         obj[quotation.Quotation] = { ...quotation, products: [], priceList:JSON.parse(quotation.priceList) }
         order.push(quotation.Quotation)
       }
+      ids = ids.substring(0,ids.length-1)
 
-      const data2 = await sqlPromise(sqliteDB, "all", "select * from quotation_product order by Quotation desc")
+      const data2 = await sqlPromise(sqliteDB, "all", "select * from quotation_product where Quotation in (" +ids+ ") order by Quotation desc")
       for (const product of data2) {
         obj[product.Quotation].products.push(product)
       }
@@ -134,7 +136,6 @@ const controller = {
     let e
     let product = ""
     global.window = { document: { createElementNS: () => { return {} } } };
-    global.navigator = {};
     global.btoa = () => { };
     let FS
     // Default export is a4 paper, portrait, using millimeters for units
@@ -261,7 +262,6 @@ const controller = {
       await doc.save("./quotations/" + quotation.Quotation + ".pdf")
 
       delete global.window;
-      delete global.navigator;
       delete global.btoa;
     } catch (error) {
       console.log("what happened?", new Date(), error)

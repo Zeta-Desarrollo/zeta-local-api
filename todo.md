@@ -1,1 +1,0 @@
-anular con comentario

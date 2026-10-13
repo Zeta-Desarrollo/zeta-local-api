@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken"
+import multer from "multer"
+
+export const Upload = multer({dest:"galleries/", preservePath:true})
+
 export function callController(controller){
     return (req,res)=>{
-        controller(req.body, req.params).then((result)=>{
+
+        controller(req.body, req.params, req.file|| req.files).then((result)=>{
             res.status(200).json(result)
         }).catch((error)=>{
             console.log("error",error)
@@ -13,8 +18,9 @@ export function callController(controller){
 export function showData(isDev){
     return (req, res, next)=>{
         if (isDev){
+            console.log("path", req.route.path)
             console.log("body", req.body)
-            console.log("params", req.params)
+            console.log("params", JSON.stringify(req.params))
         }
         next()
     }
@@ -32,7 +38,11 @@ export function isAuth(req,res,next){
     if (error){
         res.status(200).json({error})
     }else{
-        req.body.auth = auth
+        if (req.body){
+            req.body.auth = auth
+        }else{
+            req.body= {auth}
+        }
         next()
     }
 }

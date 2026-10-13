@@ -11,7 +11,10 @@ const controller = {
         let sysconfig = {}
         try{
             const data = await sqlPromise(sqlite, "all", "select * from sysconfig where name in ('"+ body.configs.join("','") +"')")
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
             for (const config of data){
                 sysconfig[config.name] = config.value
             }
@@ -179,7 +182,6 @@ const controller = {
             })
 
         }catch(e){
-            console.log("out of ",e)
             error = e
         }
         return {

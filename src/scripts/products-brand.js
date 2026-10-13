@@ -16,7 +16,10 @@ async function task(args){
     }
     console.log(result.length)
     }catch(error){
+<<<<<<< HEAD
         console.log("error?", error)
+=======
+>>>>>>> main
     }
 
     console.log("Permisos creados")
