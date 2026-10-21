@@ -622,14 +622,8 @@ const controller = {
         try{
             if (!params.code) throw  "code-required"
             const location = body.props.location? body.props.location: "TODOS"
-<<<<<<< HEAD
             products = await PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
             if (products.length===0) throw "invalid-code"
-=======
-            const query = PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
-            const result = await sql.query(query)
-            if (result.recordset.length===0) throw "invalid-code"
->>>>>>> main
             
         }catch(err){
             console.log("Err",err)
@@ -698,10 +692,7 @@ const controller = {
         let x
         let e
         try {
-<<<<<<< HEAD
 
-=======
->>>>>>> main
             const r1 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
             if (r1.length>0) throw "print-active"
             const r2 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion order by Impresion desc limit 1")

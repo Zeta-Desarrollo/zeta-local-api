@@ -2,7 +2,6 @@ import { config } from "dotenv";
 config()
 import xmlrpc from "xmlrpc";
 
-const odoourl = "zetaca-staging-35995145.dev.odoo.com"
 class ODOO_RPC {
     database
     username
@@ -67,8 +66,6 @@ async function TESTING() {
         ]
     ], {fields:["id","product_brand_id"]})
 
-    console.log("proprop", productIds2)
-    return
 
 
     const productIds = await odoo.execute("product.template", "search_read", [[["default_code", "=", "1001002"],]], { offset: 0, limit: 6 })
@@ -77,7 +74,6 @@ async function TESTING() {
     const marccas = await odoo.execute("product.brand", "search_read", [[]], { limit:2 })
     console.log("marca", marccas)
 
-    return
     const data = await odoo.execute("product.template", "read", productIds, { fields: ["name", "active", "sale_ok", "list_price","l10n_ve_old_code", "default_code", "categ_id", "product_brand_id", "supplier_taxes_id"] })
     const stockids = await odoo.execute("stock.quant", "search", [
         [
@@ -602,7 +598,7 @@ export async function PRODUCTS_BY_FACTURA(DocEntry, location, includeNoActive=fa
 }
 
 
-await TESTING()
+// await TESTING()
 // await FACT_AND_COUNT({
 //     minDay: '2026-07-01',
 //     maxDay: '2026-09-01'

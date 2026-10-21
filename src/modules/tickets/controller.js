@@ -11,10 +11,6 @@ const controller = {
         let sysconfig = {}
         try{
             const data = await sqlPromise(sqlite, "all", "select * from sysconfig where name in ('"+ body.configs.join("','") +"')")
-<<<<<<< HEAD
-
-=======
->>>>>>> main
             for (const config of data){
                 sysconfig[config.name] = config.value
             }
