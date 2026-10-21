@@ -6,7 +6,7 @@ import ptp from "pdf-to-printer";
 import { sqlPromise } from "../../utils/sqlite.js"
 
 const controller = {
-    ticketsConfig: async(body, params)=>{
+    ticketsConfig: async(body,)=>{
         let error
         let sysconfig = {}
         try{
@@ -22,9 +22,8 @@ const controller = {
             sysconfig
         }
     },
-    updateConfig:async(body, params)=>{
+    updateConfig:async(body)=>{
         let error
-        let price
         try{
             for (const sysconfig in body.values){
                 await sqlPromise(sqlite, "run", "update sysconfig set value='"+body.values[sysconfig]+"' where name='"+sysconfig+"'")
@@ -37,7 +36,7 @@ const controller = {
             
         }
     },
-    getFacturas:async (body,params)=>{
+    getFacturas:async ()=>{
         let error
         let facturas = []
         let tickets = {}
@@ -118,7 +117,7 @@ const controller = {
             tickets
         }  
     },
-    cancelFacturas: async(body,params)=>{
+    cancelFacturas: async(body)=>{
         let error
         let success=false
         try{
@@ -155,7 +154,7 @@ const controller = {
             success
         }
     },
-    manualPrint: async(body, params)=>{
+    manualPrint: async(body,)=>{
         let error
         try{
             const pdfName = "Tickets - "+ body.FullCode
@@ -184,7 +183,7 @@ const controller = {
             error
         }
     },
-    getFacturasProductos:async (body,params)=>{
+    getFacturasProductos:async ()=>{
         let error
         let facturas = []
         let tickets = {}
@@ -269,7 +268,7 @@ const controller = {
             tickets
         }  
     },
-    cancelFacturasProductos: async(body,params)=>{
+    cancelFacturasProductos: async(body)=>{
         let error
         let success=false
         try{
@@ -306,7 +305,7 @@ const controller = {
             success
         }
     },
-    manualPrintProductos: async(body, params)=>{
+    manualPrintProductos: async(body)=>{
         let error
         try{
             const pdfName = "ProductTickets - "+ body.FullCode
