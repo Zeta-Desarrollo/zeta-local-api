@@ -71,15 +71,14 @@ async function TESTING() {
     // console.log("lmao", lmaooooo) 
     // console.log("lmao", lmaooooo.length) 
 
-    const search = "com"
+    const search = "9007066"
 
-    const prods = await odoo.execute("product.template", "search_read", [
+    const prods = await odoo.execute("product.template", "read", [
         [
-                '|', ["name", "ilike", search], ["default_code", "ilike", search]
+            642617
         ]
-    ], {fields:["id", "name", "default_code"]})
+    ], {fields:["id", "name"], 'context': {'lang': 'es_VE'}})
 
-    console.log("prods", prods)
     return
 
 
@@ -176,7 +175,7 @@ export async function PRODUCT_BY_CODE(ItemCode, location, includeNoActive = fals
             "taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
             "sale_ok",
             "qty_available"
-        ]
+        ],'context': {'lang': 'es_VE'}
     })
     const final = []
     for (const i of productData) {
@@ -205,7 +204,7 @@ export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = f
      * PRICElIST
      * SORT
      */
-    const TemplateDomain = [[["default_code", "in", ItemCodes]]]
+    const TemplateDomain = [[["default_code","!=", false],["default_code", "in", ItemCodes]]]
     if (!includeNoPrice) {
         TemplateDomain[0].push(["list_price", ">", 0])
     }
@@ -231,7 +230,7 @@ export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = f
             "taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
             "sale_ok",
             "qty_available"
-        ]
+        ],'context': {'lang': 'es_VE'}
     })
     const final =[]
 
@@ -260,7 +259,7 @@ export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = f
 // PRODUCTS_BY_CODES(["1002025", "1009648", "4001530"], "NONE", false, false, true)
 
 export async function FIRM_AND_COUNT( includeNoPrice=false, includeNoActive=false, includeNoStock=false ) {
-        const TemplateDomain = [[]]
+        const TemplateDomain = [[["default_code","!=", false]]]
         if (!includeNoPrice) {
             TemplateDomain[0].push(["list_price", ">", 0])
         }
@@ -271,7 +270,7 @@ export async function FIRM_AND_COUNT( includeNoPrice=false, includeNoActive=fals
             TemplateDomain[0].push(["qty_available", ">", 0])
         }
 
-        const productIds = await odoo.execute("product.template", "read_group", TemplateDomain, { fields:["id","product_brand_id"], groupby:["product_brand_id"]})
+        const productIds = await odoo.execute("product.template", "read_group", TemplateDomain, { fields:["id","product_brand_id"], groupby:["product_brand_id"],'context': {'lang': 'es_VE'}})
         const final = []
  
         for (const brand of productIds){
@@ -293,7 +292,7 @@ export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, include
      * SORT
      */
     FirmCode = parseInt(FirmCode)
-    const TemplateDomain = [[["product_brand_id", "=", FirmCode]]]
+    const TemplateDomain = [[["default_code","!=", false],["product_brand_id", "=", FirmCode]]]
     if (!includeNoPrice) {
         TemplateDomain[0].push(["list_price", ">", 0])
     }
@@ -321,7 +320,8 @@ export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, include
             "sale_ok",
             "qty_available"
         ],
-        order:`default_code ${order}`
+        order:`default_code ${order}`,
+        'context': {'lang': 'es_VE'}
     })
 
 
@@ -360,6 +360,7 @@ export async function FACT_AND_COUNT(minDay = new Date(), maxDay = new Date()){
         ["state", "=", "purchase"]
     ]], {
         fields:["name", "id", "partner_id", "partner_ref", "create_date", "order_line"],
+        'context': {'lang': 'es_VE'}
     })
 
 
@@ -388,7 +389,7 @@ export async function PRODUCTS_BY_FACTURA(DocEntry, includeNoActive=false, inclu
     const ItemCodes = lines.map((i)=>i.product_id[0])
     //using product_variant_ids feels somewhat janky.
     //Perhaps making an or with the base id just to be safe?
-    const productData = await odoo.execute("product.template", "search_read", [[["product_variant_ids", "in", ItemCodes]]], {
+    const productData = await odoo.execute("product.template", "search_read", [[["default_code","!=", false],["product_variant_ids", "in", ItemCodes]]], {
         fields: [
             "default_code",
             "l10n_ve_referencia_proveedor",
@@ -400,7 +401,8 @@ export async function PRODUCTS_BY_FACTURA(DocEntry, includeNoActive=false, inclu
             "taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
             "sale_ok",
             "qty_available"
-        ]
+        ],
+        'context': {'lang': 'es_VE'}
     })
     const products = []
     for (const i of productData) {
