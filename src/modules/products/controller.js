@@ -618,8 +618,7 @@ const controller = {
         let products = {}
         try{
             if (!params.code) throw  "code-required"
-            const location = body.props.location? body.props.location: "TODOS"
-            products = await PRODUCTS_BY_MARCA(params.code, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock)
+            products = await PRODUCTS_BY_MARCA(params.code, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, true, "asc")
             if (products.length===0) throw "invalid-code"
             
         }catch(err){
@@ -763,7 +762,7 @@ const controller = {
             default:
                 const search = body.type=="marcas"? PRODUCTS_BY_MARCA: (body.type=="facturas"?PRODUCTS_BY_FACTURA:PRODUCTS_BY_PROVEEDOR)
                 for (const bulk of body.bulks){
-                    const result = await search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value, "asc", true)
+                    const result = await search(bulk.code.toString(), body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, true, "desc")
                         uncheckedBulks.push({
                         code:bulk.code,
                         name:bulk.name,
@@ -825,9 +824,12 @@ const controller = {
                 let sqlResult
                 if(body.type == "codes"){
                     sqlResult = await PRODUCTS_BY_CODES(body.products,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
+                    sqlResult = sqlResult.sort((a,b)=>body.products.indexOf(a.ItemCode)-body.products.indexOf(b.ItemCode))
+                    sqlResult = sqlResult.reverse()
                 }else{
                     const search = body.type=="marcas"? PRODUCTS_BY_MARCA: (body.type=="facturas"?PRODUCTS_BY_FACTURA:PRODUCTS_BY_PROVEEDOR)
-                    sqlResult = await search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value, "desc")
+                    sqlResult = await search(bulk.code.toString(), body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock,true, "desc")
+                    console.log("marcadas", sqlResult)
                 }
                 const r = sqlResult.filter((p)=>{
                     return body.exclude.indexOf(p.ItemCode)<0
@@ -1014,7 +1016,7 @@ const controller = {
         try{
             if (!params.code) throw  "code-required"
 
-            products = await PRODUCTS_BY_FACTURA(params.code,"", null, null, null, body.props.priceList.value)
+            products = await PRODUCTS_BY_FACTURA(params.code, true, true, true, true, "asc")
             if (products.length===0) throw "invalid-code"
             
         }catch(err){

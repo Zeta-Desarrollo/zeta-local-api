@@ -285,7 +285,7 @@ export async function FIRM_AND_COUNT( includeNoPrice=false, includeNoActive=fals
     
     return final
 }
-export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, includeNoSell=false) {
+export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, includeNoSell=false, order="default_code asc") {
     /**
      * MISSING FILTERS:
      * LOCATION
@@ -293,7 +293,6 @@ export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, include
      * SORT
      */
     FirmCode = parseInt(FirmCode)
-
     const TemplateDomain = [[["product_brand_id", "=", FirmCode]]]
     if (!includeNoPrice) {
         TemplateDomain[0].push(["list_price", ">", 0])
@@ -321,7 +320,8 @@ export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, include
             "taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
             "sale_ok",
             "qty_available"
-        ]
+        ],
+        order:`default_code ${order}`
     })
 
 
@@ -346,7 +346,7 @@ export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, include
         })
     }
 
-    final = final.sort((a,b)=>a.ItemCode.toString().localeCompare(b.ItemCode))
+    // final = final.sort((a,b)=>a.ItemCode.toString().localeCompare(b.ItemCode))
     return final
 }
 
@@ -378,7 +378,7 @@ export async function FACT_AND_COUNT(minDay = new Date(), maxDay = new Date()){
 
     return final
 }
-export async function PRODUCTS_BY_FACTURA(DocEntry, location, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5, sort = "asc", includeNoSell =false){
+export async function PRODUCTS_BY_FACTURA(DocEntry, includeNoActive=false, includeNoPrice=false,  includeNoStock = false, includeNoSell =false, order="asc"){
     DocEntry = parseInt(DocEntry)
 
     const lines = await odoo.execute("purchase.order.line", "search_read",[[
@@ -420,7 +420,8 @@ export async function PRODUCTS_BY_FACTURA(DocEntry, location, includeNoActive=fa
             onHand: i["qty_available"]
         })
     }
-    return products
+    const final = order=="asc"? products: products.reverse()
+    return final
 }
 
 export async function PROVIDER_AND_COUNT  (location,includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5){

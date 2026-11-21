@@ -43,7 +43,7 @@ async function generatePDF (){
         let marcaIndex = 1
         for (const marca of marcas){
             n=1
-            const result = await PRODUCTS_BY_MARCA(""+marca.FirmCode,location)
+            const result = await PRODUCTS_BY_MARCA(""+marca.FirmCode)
             
             //datos marca
             doc.setFont("Helvetica", "bold")
