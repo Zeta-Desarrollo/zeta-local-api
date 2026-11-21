@@ -101,8 +101,8 @@ async function conSAP(config){
     
     console.log("sap connected on the "+attempts+"th attempt to SQLServer on:", `${process.env.DB_HOST}:${process.env.DB_PORT}/${config.database}`)
   }catch(error){
-    console.log("sap SQL connection failed on "+attempts+"th attempt", error.message)
-    console.log("waiting to retry")
+    // console.log("sap SQL connection failed on "+attempts+"th attempt", error.message)
+    // console.log("waiting to retry")
     attempts++
     setTimeout(()=>{conSAP(config)}, 2000)
   }
@@ -112,8 +112,8 @@ async function conKLK(config){
     KLK_DB = await poolManager.get("klk", config)
     console.log("klk connected on the "+attempts+"th attempt to SQLServer on:", `${process.env.DB_HOST}:${process.env.DB_PORT}/${config.database}`)
   }catch(error){
-    console.log("klk SQL connection failed on "+attempts+"th attempt", error.message)
-    console.log("waiting to retry")
+    // console.log("klk SQL connection failed on "+attempts+"th attempt", error.message)
+    // console.log("waiting to retry")
     attempts++
     setTimeout(()=>{conKLK(config)}, 2000)
   }
