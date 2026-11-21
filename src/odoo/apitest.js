@@ -65,15 +65,22 @@ async function TESTING() {
     // const lmaooooo = await odoo.execute("product.template", "products_by_codes", [[[["price", ">", 0]]]], {"potato":"tomato"})
     // const lmaooooo = await odoo.execute("product.template", "firm_and_count", [[]], {"includeNoStock":false})
     // const lmaooooo = await odoo.execute("product.template", "products_by_marca", [[]], {marca:false, includeNoStock:true})
+    // const lmaooooo = await odoo.execute("product.supplierinfo", "provider_and_count", [[]], {includeNoActive:false, includeNoStock:false})
+    // const lmaooooo = await odoo.execute("product.supplierinfo", "products_by_proveedor", [[]], {marca:false, partner_id:9})
+    
     // console.log("lmao", lmaooooo) 
     // console.log("lmao", lmaooooo.length) 
 
-    const productIds2 = await odoo.execute("product.template", "search_read", [
-        [
-                ["list_price", "<=", 0],["active", "=", true]
-        ]
-    ], {fields:["id","product_brand_id"]})
+    const search = "com"
 
+    const prods = await odoo.execute("product.template", "search_read", [
+        [
+                '|', ["name", "ilike", search], ["default_code", "ilike", search]
+        ]
+    ], {fields:["id", "name", "default_code"]})
+
+    console.log("prods", prods)
+    return
 
 
     const productIds = await odoo.execute("product.template", "search_read", [[["default_code", "=", "1001002"],]], { offset: 0, limit: 6 })
@@ -124,7 +131,7 @@ const DATA_MAP = {
     FirmName: "product_brand_id", //[1] 
     FirmCode: "product_brand_id", //[0]
     TaxCodeAR: "taxes_id", // Array vacio -> IVA_EXE / Id-> account.tax
-    FrozenFor: "active",
+    frozenFor: "active",
     
     ItmsGrpCod: "categ_id",
     ItmsGrpNam: "categ_id",
@@ -136,8 +143,6 @@ const DATA_MAP = {
     CardName:"partner_id", 
     NumAtCard:"partner_ref",
 	amountProducts:"order_line.length"
-
-
 }
 
 //l10n_ve_is_agreement_product always true?
@@ -184,7 +189,7 @@ export async function PRODUCT_BY_CODE(ItemCode, location, includeNoActive = fals
             FirmName: i["product_brand_id"][1], //[1] 
             FirmCode: i["product_brand_id"][0], //[0]
             TaxCodeAR: i["taxes_id"].length == 0 ? "IVA" : "IVE_EXE", //CAMBIAR LUEGO
-            FrozenFor: i["active"] ? "N" : "Y",
+            frozenFor: i["active"] ? "N" : "Y",
             ItmsGrpCod: i["categ_id"][0],
             ItmsGrpNam: i["categ_id"][1],
             onHand: i["qty_available"]
@@ -217,7 +222,7 @@ export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = f
     const productData = await odoo.execute("product.template", "search_read", TemplateDomain, {
         fields: [
             "default_code",
-            // "l10n_ve_referencia_proveedor",
+            "l10n_ve_referencia_proveedor",
             "name",
             "active", //needs cast to Y/N
             "list_price",
@@ -240,7 +245,7 @@ export async function PRODUCTS_BY_CODES(ItemCodes, location, includeNoActive = f
             FirmName: i["product_brand_id"][1], //[1] 
             FirmCode: i["product_brand_id"][0], //[0]
             TaxCodeAR: i["taxes_id"].length == 0 ? "IVA" : "IVE_EXE", //CAMBIAR LUEGO
-            FrozenFor: i["active"] ? "N" : "Y",
+            frozenFor: i["active"] ? "N" : "Y",
             ItmsGrpCod: i["categ_id"][0],
             ItmsGrpNam: i["categ_id"][1],
             onHand:i["qty_available"]
@@ -289,7 +294,7 @@ export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, include
      */
     FirmCode = parseInt(FirmCode)
 
-    const TemplateDomain = [[["product_brand_id", "=", false]]]
+    const TemplateDomain = [[["product_brand_id", "=", FirmCode]]]
     if (!includeNoPrice) {
         TemplateDomain[0].push(["list_price", ">", 0])
     }
@@ -307,7 +312,7 @@ export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, include
     const productData = await odoo.execute("product.template", "search_read", TemplateDomain, {
         fields: [
             "default_code",
-            // "l10n_ve_referencia_proveedor",
+            "l10n_ve_referencia_proveedor",
             "name",
             "active", //needs cast to Y/N
             "list_price",
@@ -334,27 +339,28 @@ export async function PRODUCTS_BY_MARCA(FirmCode, includeNoActive=false, include
             FirmName: hasBrand? i["product_brand_id"][1]:false, //[1] 
             FirmCode: hasBrand? i["product_brand_id"][0]:false, //[0]
             TaxCodeAR: i["taxes_id"].length == 0 ? "IVA" : "IVE_EXE", //CAMBIAR LUEGO
-            FrozenFor: i["active"] ? "N" : "Y",
+            frozenFor: i["active"] ? "N" : "Y",
             ItmsGrpCod: i["categ_id"][0],
             ItmsGrpNam: i["categ_id"][1],
-            onHand: 0
+            onHand: i["qty_available"]
         })
     }
 
-    console.log("final")
     final = final.sort((a,b)=>a.ItemCode.toString().localeCompare(b.ItemCode))
     return final
 }
 
-export async function FACT_AND_COUNT(props){
-    const minDay = props.minDay.replace(/\//g, "-")
-    const maxDay = props.maxDay.replace(/\//g, "-")
+export async function FACT_AND_COUNT(minDay = new Date(), maxDay = new Date()){
+    minDay = minDay.replace(/\//g, "-")
+    maxDay = maxDay.replace(/\//g, "-")
 
-    const orders = await odoo.execute("purchase.order", "read_group", [[
+    const orders = await odoo.execute("purchase.order", "search_read", [[
         ["create_date", "<=", maxDay],
         ["create_date", ">=", minDay],
         ["state", "=", "purchase"]
-    ]], {fields:["name", "id", "partner_id", "partner_ref", "create_date", "order_line"]})
+    ]], {
+        fields:["name", "id", "partner_id", "partner_ref", "create_date", "order_line"],
+    })
 
 
     const final = []
@@ -408,16 +414,50 @@ export async function PRODUCTS_BY_FACTURA(DocEntry, location, includeNoActive=fa
             FirmName: hasBrand? i["product_brand_id"][1]:false, //[1] 
             FirmCode: hasBrand? i["product_brand_id"][0]:false, //[0]
             TaxCodeAR: i["taxes_id"].length == 0 ? "IVA" : "IVE_EXE", //CAMBIAR LUEGO
-            FrozenFor: i["active"] ? "N" : "Y",
+            frozenFor: i["active"] ? "N" : "Y",
             ItmsGrpCod: i["categ_id"][0],
             ItmsGrpNam: i["categ_id"][1],
+            onHand: i["qty_available"]
         })
     }
     return products
 }
 
+export async function PROVIDER_AND_COUNT  (location,includeNoActive=false, includeNoPrice=false,  includeNoStock = false, priceList=5){
+        const TemplateDomain = [[]]
+        if (!includeNoPrice) {
+            // TemplateDomain[0].push(["list_price", ">", 0])
+        }
+        if (!includeNoActive) {
+            // TemplateDomain[0].push(["active", "=", true])
+        }
+        if (!includeNoStock){
+            // TemplateDomain[0].push(["qty_available", ">", 0])
+        }
+
+        // const productIds = await odoo.execute("product.template", "read_group", TemplateDomain, { fields:["seller_ids"], groupby:["seller_ids"]})
+        const productIds = await odoo.execute("product.supplierinfo", "read_group", TemplateDomain, { fields:[ "partner_id"], groupby:["partner_id"]})
+        console.log("Equisde quisde", productIds)
+        console.log("Equisde quisde", productIds.length)
+        console.log("Equisde quisde", productIds[0].__domain)
+        return
+        const final = []
+ 
+        for (const brand of productIds){
+            const exists = brand.product_brand_id != false
+              final.push({ 
+                CardCode: exists? brand.product_brand_id[0] : false, 
+                CardName: exists? brand.product_brand_id[1] : false, 
+                amountProducts: brand.product_brand_id_count
+            })  
+        }
+    
+    return final
+}
+
 
 // await TESTING()
-console.log("equis",await FIRM_AND_COUNT(false, false, true))
-console.log("prod",await PRODUCTS_BY_MARCA(false, false, false, true, null))
+// console.log("equis",await FIRM_AND_COUNT(false, false, true))
+// console.log("prod",await PRODUCTS_BY_MARCA(false, false, false, true, null))
+// console.log("prod",await PROVIDER_AND_COUNT(null, false, false, false, null))
 // aait PRODUCTS_BY_FACTURA(1,{})

@@ -8,7 +8,7 @@ import fs from "fs"
 // import PDFDocument from "pdfkit"
 import ptp from "pdf-to-printer";
 
-import { MARCAS, PRODUCT_MULTI_PRICE, PRODUCTS_BY_SEARCH, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR } from "./queries.js"
+// import { PRODUCT_MULTI_PRICE, PRODUCTS_BY_SEARCH, PRICE_LISTS, PROVIDER_AND_COUNT, PRODUCTS_BY_PROVEEDOR } from "./queries.js"
 import { FIRM_AND_COUNT, PRODUCTS_BY_MARCA, PRODUCT_BY_CODE, PRODUCTS_BY_CODES, FACT_AND_COUNT, PRODUCTS_BY_FACTURA } from "../../odoo/apitest.js";
 import PDFMerger from "pdf-merger-js";
 import { jsPDF } from "jspdf";
@@ -55,12 +55,11 @@ async function JSPDF (body, params){
 
         }
         const result = await PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value)
-        if (result.recordset.length===0) throw "invalid-codes"
+        if (result.length===0) throw "invalid-codes"
         if (body.products.length==1){
-            product=result.recordset[0]
+            product=result[0]
         }
-        const allProducts = result.recordset
-        for (const product of allProducts){
+        for (const product of result){
             productData[product.ItemCode] = product
         }
 
@@ -268,12 +267,11 @@ async function noPriceLabel (body, params){
 
         }
         const result = await PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value)
-        if (result.recordset.length===0) throw "invalid-codes"
+        if (result.length===0) throw "invalid-codes"
         if (body.products.length==1){
-            product=result.recordset[0]
+            product=result[0]
         }
-        const allProducts = result.recordset
-        for (const product of allProducts){
+        for (const product of result){
             productData[product.ItemCode] = product
         }
 
@@ -408,12 +406,11 @@ async function storageLabel (body, params){
 
         }
         const result = await PRODUCTS_BY_CODES(body.products, body.props.location, true, true, true, body.props.priceList.value)
-        if (result.recordset.length===0) throw "invalid-codes"
+        if (result.length===0) throw "invalid-codes"
         if (body.products.length==1){
-            product=result.recordset[0]
+            product=result[0]
         }
-        const allProducts = result.recordset
-        for (const product of allProducts){
+        for (const product of result){
             productData[product.ItemCode] = product
         }
 
@@ -585,8 +582,8 @@ const controller = {
         let error
         let marcas = []
         try{
-            const location = body.props.location? body.props.location: "TODOS"
-            marcas = await FIRM_AND_COUNT(0, location, body.props)
+            // const location = body.props.location? body.props.location: "TODOS"
+            marcas = await FIRM_AND_COUNT(body.props.includeNoPrice, body.props.includeNoActive, body.props.includeNoStock)
         }catch(err){
             console.log("e",err)
             error = err
@@ -603,9 +600,9 @@ const controller = {
         try{
             if (!params.code) throw  "code-required"
             const result = await PRODUCT_BY_CODE(params.code, 'TODOS', true, true, true, body.priceList?body.priceList:3)
-            if (result.recordset.length===0) throw "invalid-code"
+            if (result.length===0) throw "invalid-code"
             
-            product = result.recordset[0]
+            product = result[0]
         }catch(err){
             error = err
             console.log("error", err)
@@ -622,7 +619,7 @@ const controller = {
         try{
             if (!params.code) throw  "code-required"
             const location = body.props.location? body.props.location: "TODOS"
-            products = await PRODUCTS_BY_MARCA(params.code, location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
+            products = await PRODUCTS_BY_MARCA(params.code, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock)
             if (products.length===0) throw "invalid-code"
             
         }catch(err){
@@ -660,8 +657,8 @@ const controller = {
         try{
             if (!params.code) throw "code-required"
             const result = await PRODUCT_BY_CODE(params.code,body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value)
-            if (result.recordset.length===0) throw "invalid-code-"+params.code
-            product = result.recordset[0]
+            if (result.length===0) throw "invalid-code-"+params.code
+            product = result[0]
 
 
             const url = `https://${process.env.FRONT_IP}/#/consulta/${params.code}`
@@ -692,8 +689,9 @@ const controller = {
         let x
         let e
         try {
-
+            console.log("lmao")
             const r1 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion where finished != 1")
+            
             if (r1.length>0) throw "print-active"
             const r2 = await sqlPromise(sqliteDB, "all", "select Impresion from impresion order by Impresion desc limit 1")
             const sqlString =  `insert into impresion values (${r2[0].Impresion+1}, '${+(new Date())}', '${body.type}','${JSON.stringify(body.props)}',  1, 'finished')`
@@ -831,7 +829,7 @@ const controller = {
                     const search = body.type=="marcas"? PRODUCTS_BY_MARCA: (body.type=="facturas"?PRODUCTS_BY_FACTURA:PRODUCTS_BY_PROVEEDOR)
                     sqlResult = await search(bulk.code.toString(), body.props.location, body.props.includeNoActive, body.props.includeNoPrice, body.props.includeNoStock, body.props.priceList.value, "desc")
                 }
-                const r = sqlResult.recordset.filter((p)=>{
+                const r = sqlResult.filter((p)=>{
                     return body.exclude.indexOf(p.ItemCode)<0
                 })
                 for (let index2 = 0; index2 < r.length; index2++){
@@ -999,7 +997,7 @@ const controller = {
         try{
             
             const location = body.props.location? body.props.location: "TODOS"
-            facturas = await FACT_AND_COUNT(body.props)
+            facturas = await FACT_AND_COUNT(body.props.minDay, body.props.maxDay)
             
         }catch(err){
             console.log("???",err)
